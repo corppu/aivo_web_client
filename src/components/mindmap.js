@@ -1,5 +1,7 @@
 import React, { createClass } from "react"
 
+import MindMapRender from "./mindmap-render"
+
 const MindMap = createClass({
     componentDidMount: function() {
         const ctx = this.refs.canvas.getContext("2d")
@@ -12,8 +14,8 @@ const MindMap = createClass({
             }
             const props = this.props
 
-            renderMindMap(ctx, props)
-            requestAnimationFrame(renderLoop)    
+            MindMapRender(ctx, props)
+            requestAnimationFrame(renderLoop)
         }
         requestAnimationFrame(renderLoop)   
     },
@@ -38,11 +40,5 @@ const MindMap = createClass({
         )
     }
 })
-
-function renderMindMap(ctx, props) {
-    props.nodes.forEach((node) => {
-        ctx.fillRect(node.x, node.y, 10, 10)
-    })
-}
 
 export default MindMap
