@@ -1,7 +1,7 @@
 import React from "react"
 import { render } from "react-dom"
 
-import MindMap from "./components/mind-map"
+import MindMap from "./components/mindmap"
 
 const mockProps = {
     nodes: [
