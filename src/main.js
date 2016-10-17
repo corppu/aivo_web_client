@@ -14,6 +14,11 @@ const mockProps = {
             title: "huttu",
             x: 200,
             y: 400
+        },
+        {
+            title: "foo",
+            x: 500,
+            y: 150
         }
     ]
 }

@@ -1,6 +1,7 @@
+import { drawRect, drawCircle } from "../utils/canvas-utils"
 
 export default function(ctx, props) {
     props.nodes.forEach((node) => {
-        ctx.fillRect(node.x, node.y, 10, 10)
+       drawCircle(ctx, {x: node.x, y: node.y, r: 20})
     })
 }
