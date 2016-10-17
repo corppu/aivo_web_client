@@ -1,10 +1,13 @@
 import React, { createClass } from "react"
 
-import MindMapRender from "./mindmap-render"
+import init from "./mindmap-init"
+import update from "./mindmap-update"
+import render from "./mindmap-render"
 
 const MindMap = createClass({
     componentDidMount: function() {
         const ctx = this.refs.canvas.getContext("2d")
+        var state = init()
 
         this.__running = true
 
@@ -14,7 +17,9 @@ const MindMap = createClass({
             }
             const props = this.props
 
-            MindMapRender(ctx, props)
+            state = update(props, state)
+            render(ctx, state)
+
             requestAnimationFrame(renderLoop)
         }
         requestAnimationFrame(renderLoop)   
