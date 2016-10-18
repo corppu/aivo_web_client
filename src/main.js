@@ -25,4 +25,4 @@ render(
 store.dispatch(debugAddRandomNode(5))
 setInterval(() => {
     store.dispatch(debugMoveRandomNode(2))
-}, 500)
+}, 1000)
