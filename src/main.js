@@ -7,7 +7,7 @@ import { Provider } from "react-redux";
 import mindmapReducer from "./reducers/mindmap"
 import MindMap from "./containers/mindmap"
 
-import { debugAddRandomNode } from "./actions/debug"
+import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug"
 
 const store = createStore(
 	combineReducers({
@@ -23,3 +23,6 @@ render(
 
 // add some test data
 store.dispatch(debugAddRandomNode(5))
+setInterval(() => {
+    store.dispatch(debugMoveRandomNode(2))
+}, 500)

@@ -5,11 +5,17 @@ export default function(props, state) {
 
     // update existing nodes
     let nodes = state.nodes.map(node => {
-        if (!propsNodes.delete(node.id)) {
+        const propsNode = propsNodes.get(node.id)
+        if (!propsNode) {
             console.log(`removed node ${id}`)
             return null
         }
-        return node
+        propsNodes.delete(node.id)
+        
+        return Object.assign(node, {
+            x: propsNode.get("x"),
+            y: propsNode.get("y")
+        })
     })
 
     // remove null nodes (were removed from props)
