@@ -1,10 +1,10 @@
 import { Engine, World } from "matter-js"
 
 export default function(props, state) {
-    var propsNodes = new Map(props.nodes)
+    let propsNodes = new Map(props.nodes)
 
     // update existing nodes
-    var nodes = state.nodes.map(node => {
+    let nodes = state.nodes.map(node => {
         if (!propsNodes.delete(node.id)) {
             console.log(`removed node ${id}`)
             return null
@@ -19,9 +19,9 @@ export default function(props, state) {
     propsNodes.forEach((propNode, id) => {
         nodes.push({
             id,
-            titie: propNode.title,
-            x: propNode.x,
-            y: propNode.y,
+            titie: propNode.get("title"),
+            x: propNode.get("x"),
+            y: propNode.get("y"),
         })
         console.log(`added node ${id}`)
     })

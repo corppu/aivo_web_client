@@ -1,26 +1,25 @@
-import React from "react"
+import { combineReducers, createStore } from "redux"
+
+import React, { createClass } from "react"
 import { render } from "react-dom"
+import { Provider } from "react-redux";
 
-import MindMap from "./components/mindmap"
+import mindmapReducer from "./reducers/mindmap"
+import MindMap from "./containers/mindmap"
 
-const mockProps = {
-    nodes: new Map([
-        [0, {
-            title: "juttu",
-            x: 100,
-            y: 100
-        }],
-        [1, {
-            title: "foo",
-            x: 200,
-            y: 400
-        }],
-        [2, {
-            title: "bar",
-            x: 500,
-            y: 150
-        }],
-    ])
-}
+import { debugAddRandomNode } from "./actions/debug"
 
-render(<MindMap {...mockProps}/>, document.getElementById("app-root"))
+const store = createStore(
+	combineReducers({
+        mindmap: mindmapReducer
+    })
+);
+
+render(
+    <Provider store={store}>
+        <MindMap/>
+    </Provider>
+, document.getElementById("app-root"))
+
+// add some test data
+store.dispatch(debugAddRandomNode(5))
