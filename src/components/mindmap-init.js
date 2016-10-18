@@ -1,6 +1,8 @@
+//import { Engine } from "matter-js"
 
 export default function() {
     return {
-        nodes: new Map()
+        //engine: Engine.create(),
+        nodes: []
     }
 }
