@@ -1,4 +1,5 @@
-import { combineReducers, createStore } from "redux"
+import { createStore, combineReducers, applyMiddleware } from "redux"
+import thunk from "redux-thunk"
 
 import React, { createClass } from "react"
 import { render } from "react-dom"
@@ -12,7 +13,10 @@ import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug"
 const store = createStore(
 	combineReducers({
         mindmap: mindmapReducer
-    })
+    }),
+    applyMiddleware(
+        thunk
+    )
 );
 
 render(
@@ -22,7 +26,7 @@ render(
 , document.getElementById("app-root"))
 
 // add some test data
-store.dispatch(debugAddRandomNode(300))
+store.dispatch(debugAddRandomNode(1000))
 setInterval(() => {
-    store.dispatch(debugMoveRandomNode(10))
+    store.dispatch(debugMoveRandomNode(20))
 }, 3000)
