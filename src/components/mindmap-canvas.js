@@ -55,12 +55,15 @@ export default function() {
     function update() {
         for (let i = 0; i < _nodes.length; ++i) {
             const node = _nodes[i]
-            const { anchor, body } = node
+            const { radius, anchor, body } = node
 
             const diff = Vector.sub(anchor, body.position)
-            const vel = Vector.mult(diff, 1/1000)
 
-            Body.applyForce(body, Vector.create(0, 0), vel)
+            if (Vector.magnitude(diff) > radius * 1.5) {
+                const vel = Vector.mult(diff, 1/1000)
+
+                Body.applyForce(body, Vector.create(0, 0), vel)
+            }
         }
 
         // update physics
