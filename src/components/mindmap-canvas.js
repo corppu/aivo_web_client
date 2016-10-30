@@ -30,13 +30,15 @@ export default function() {
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
-            const radius = 40
+            const radius = 20
             const anchor = {
                 x: propsNode.get("x"),
                 y: propsNode.get("y")
             }        
-            let body = Bodies.circle(anchor.x, anchor.y, radius)
-            body.frictionAir = 0.5
+            let body = Bodies.circle(anchor.x, anchor.y, radius, {
+                frictionAir: 1,
+                mass: 5
+            })
             
             World.add(_engine.world, body)
             _nodes.push({
@@ -56,7 +58,7 @@ export default function() {
             const { anchor, body } = node
 
             const diff = Vector.sub(anchor, body.position)
-            const vel = Vector.mult(diff, 0.001)
+            const vel = Vector.mult(diff, 1/1000)
 
             Body.applyForce(body, Vector.create(0, 0), vel)
         }

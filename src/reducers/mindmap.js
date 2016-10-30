@@ -21,8 +21,8 @@ export default function(state = initialState, action) {
             
             state = state.updateIn(["nodes", id], node =>
                 node
-                    .set("x", randomPosition())
-                    .set("y", randomPosition())
+                    .set("x", randomPosition(100, 1000))
+                    .set("y", randomPosition(100, 1500))
             )
         }
         return state
@@ -31,8 +31,8 @@ export default function(state = initialState, action) {
         for (let i = 0; i < action.count; ++i) {
             state = state.setIn(["nodes", generateID()], fromJS({
                 title: "foo",
-                x: randomPosition(),
-                y: randomPosition()
+                x: randomPosition(100, 1000),
+                y: randomPosition(100, 1500)
             }))
         }
         return state
@@ -56,6 +56,6 @@ function generateID() {
     return Math.round(Math.random() * 1000 * 1000 * 1000)
 }
 
-function randomPosition() {
-    return 100 + Math.random() * 800
+function randomPosition(min = 100, max = 900) {
+    return min + Math.random() * (max - min)
 }

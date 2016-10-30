@@ -41,8 +41,8 @@ const MindMap = createClass({
 
                 <canvas
                     ref="canvas"
-                    width={1000}
-                    height={1000}/>
+                    width={1100}
+                    height={1600}/>
             </div>
         )
     }
