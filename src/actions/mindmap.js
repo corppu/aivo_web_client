@@ -4,7 +4,7 @@ import {
     REMOVE_NODE
 } from "../constants/action-types"
 
-export function modeNode(id, x, y) {
+export function moveNode(id, x, y) {
     return { type: MOVE_NODE, id, x, y }
 }
 
