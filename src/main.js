@@ -32,7 +32,9 @@ const adapter = createStoreAdapter;
 
 
 // add some test data
+/*
 store.dispatch(debugAddRandomNode(100))
 setInterval(() => {
     store.dispatch(debugMoveRandomNode(20))
 }, 3000)
+*/
