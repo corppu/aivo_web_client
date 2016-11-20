@@ -4,7 +4,7 @@ var firebase = require("firebase");
 
 export default function(storeAdapter, config = null) {
 
-	function init {
+	function init() {
 		var config = {
 			apiKey: "AIzaSyBbKd7Hy_x2niFQ6LQz6S1KnTFXOuDeq4k",
 			authDomain: "aivotest-9df12.firebaseapp.com",
@@ -38,12 +38,7 @@ export default function(storeAdapter, config = null) {
 	}
 	
 	function signOut() {
-		firebase.auth().signOut().then(function() {
-			// Sign-out successful.
-		}, function(error) {
-			// An error happened.
-			console.warn(error.message);
-		});
+		firebase.auth().signOut();
 	}
 	
     function moveNode(id, x, y) {
