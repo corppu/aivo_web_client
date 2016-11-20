@@ -27,7 +27,7 @@ render(
     </Provider>
 , document.getElementById("app-root"))
 
-const adapter = createStoreAdapter;
+const adapter = createStoreAdapter(store);
 
 
 
