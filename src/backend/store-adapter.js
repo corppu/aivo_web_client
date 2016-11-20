@@ -1,4 +1,4 @@
-import { moveNode, addNode, removeNode } from "./mindmap"
+import { moveNode, addNode, removeNode } from "../actions/mindmap"
 
 export default function(store) {
 
@@ -7,6 +7,8 @@ export default function(store) {
     }
 
     function addNode(id, x, y) {
+        //console.log("B")
+
         store.dispatch(addNode(id, x, y))
     }
 
@@ -15,7 +17,7 @@ export default function(store) {
     }
 
     return {
-        modeNode,
+        moveNode,
         addNode,
         removeNode
     }

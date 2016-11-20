@@ -8,28 +8,37 @@ import {
 
 let staticBackendAdapter = null;
 
-export function backendMiddleware(store, action) {
-    switch (action.type) {
-        case MOVE_NODE:
-        {
-            const { id, x, y } = action
-            backendAdapter.moveNode(id, x, y)
+export function createBackendMiddleware({ dispatch }) {
+    console.log("C")
+
+    return next => {
+        return action => {
+            console.log(action)
+
+            if (staticBackendAdapter) {
+                switch (action.type) {
+                    case MOVE_NODE:
+                    {
+                        const { id, x, y } = action
+                        staticBackendAdapter.moveNode(id, x, y)
+                    }
+                    case REMOVE_NODE:
+                    {
+                        const { id } = action
+                        staticBackendAdapter.removeNode(id)
+                    }
+                    case REQUEST_ADD_NODE:
+                    {
+                        const { x, y, id } = action
+                        staticBackendAdapter.addNode(x, y, id)
+                    }
+                }
+            }
+            return next(action)
         }
-        case REMOVE_NODE:
-        {
-            const { id } = action
-            backendAdapter.removeNode(id)
-        }
-        case REQUEST_ADD_NODE:
-        {
-            const { x, y, id } = action
-            backendAdapter.addNode(x, y, id)
-        }
-        default:
-            store.dispatch(action)
     }
 }
 
-export default function setBackendAdapter(backendAdapter) {
+export function setBackendAdapter(backendAdapter) {
     staticBackendAdapter = backendAdapter;
 }

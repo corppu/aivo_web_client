@@ -11,7 +11,7 @@ import MindMap from "./containers/mindmap"
 import createStoreAdapter from "./backend/store-adapter"
 import createBackendAdapter from "./backend/backend-adapter"
 
-import { backendMiddleware, setBackendAdapter } from "./middleware/backend-adapter"
+import { createBackendMiddleware, setBackendAdapter } from "./middleware/backend-adapter"
 
 import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug"
 
@@ -21,7 +21,7 @@ const store = createStore(
     }),
     applyMiddleware(
         thunk,
-        backendMiddleware
+        createBackendMiddleware
     )
 );
 
@@ -37,9 +37,7 @@ const backendAdapter = createBackendAdapter(storeAdapter, null)
 setBackendAdapter(backendAdapter)
 
 // add some test data
-/*
-store.dispatch(debugAddRandomNode(100))
+store.dispatch(debugAddRandomNode(10))
 setInterval(() => {
-    store.dispatch(debugMoveRandomNode(20))
+    store.dispatch(debugMoveRandomNode(2))
 }, 3000)
-*/
