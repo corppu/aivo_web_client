@@ -23,6 +23,7 @@ export function debugAddRandomNode(count = 1) {
     return function (dispatch) {
         for (let i = 0; i < count; ++i) {
             dispatch(addNode(
+                generateID(),
                 tempRandomPosition(100, 900),
                 tempRandomPosition(100, 900)
             ))
@@ -53,3 +54,8 @@ function findRandomMapKey(map) {
 function tempRandomPosition(min = 100, max = 900) {
     return min + Math.random() * (max - min)
 }
+
+function generateID() {
+    return Math.round(Math.random() * 1000 * 1000 * 1000) // TODO: proper implementation
+}
+

@@ -26,9 +26,7 @@ export default function(state = initialState, action) {
     {   
         const { id, x, y } = action
 
-        // id ignored for now
-
-        return state = state.setIn(["nodes", generateID()], fromJS({
+        return state = state.setIn(["nodes", id], fromJS({
             title: "test", x, y
         }))
     }
@@ -41,8 +39,4 @@ export default function(state = initialState, action) {
     default:
         return state
     }
-}
-
-function generateID() {
-    return Math.round(Math.random() * 1000 * 1000 * 1000) // TODO: proper implementation
 }
