@@ -81,13 +81,3 @@ export function removeNode(id) {
 
     firebase.database().ref('/nodes/' + id).remove();
 }
-
-export default {
-    init,
-    createUser,
-    signIn,
-    signOut,
-    moveNode,
-    addNode,
-    removeNode
-}

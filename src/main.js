@@ -32,7 +32,9 @@ render(
 , document.getElementById("app-root"))
 
 // add some test data
+/*
 store.dispatch(debugAddRandomNode(10))
 setInterval(() => {
     store.dispatch(debugMoveRandomNode(2))
 }, 3000)
+*/

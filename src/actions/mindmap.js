@@ -4,7 +4,7 @@ import {
     REMOVE_NODE
 } from "../constants/action-types"
 
-import backendAdapter from "../backend/backend-adapter"
+import * as backendAdapter from "../backend/backend-adapter"
 
 export function moveNode(id, x, y) {
     return { type: MOVE_NODE, id, x, y }
