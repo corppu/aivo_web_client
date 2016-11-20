@@ -1,5 +1,4 @@
 
-export const BACKEND_INIT = "BACKEND_INIT"
 export const BACKEND_LOGIN = "BACKEND_LOGIN"
 export const BACKEND_LOGOUT = "BACKEND_LOGOUT"
 export const BACKEND_ERROR = "BACKEND_ERROR"

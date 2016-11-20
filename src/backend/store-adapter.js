@@ -4,10 +4,6 @@ import * as mindmapActions from "../actions/mindmap"
 export default function(store) {
 
     // backend actions
-    function init(state) {
-        store.dispatch(backendActions.init(state))
-    }
-
     function login() {
         store.dispatch(backendActions.login())
     }
@@ -34,7 +30,6 @@ export default function(store) {
     }
 
     return {
-        init,
         login,
         logout,
         error,

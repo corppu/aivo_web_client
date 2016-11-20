@@ -1,4 +1,4 @@
-import { moveNode, tryAddNode, removeNode } from "./mindmap"
+import { moveNode, addNode, removeNode } from "../backend/backend-adapter"
 
 export function debugMoveRandomNode(count = 1) {
     return function (dispatch, getState) {
@@ -10,11 +10,11 @@ export function debugMoveRandomNode(count = 1) {
         for (let i = 0; i < count; ++i) {
             const id = findRandomMapKey(mindmap.get("nodes"))
 
-            dispatch(moveNode(
+            moveNode(
                 id,
                 tempRandomPosition(100, 900),
                 tempRandomPosition(100, 900)
-            ))
+            )
         }
     }
 }
@@ -22,10 +22,10 @@ export function debugMoveRandomNode(count = 1) {
 export function debugAddRandomNode(count = 1) {
     return function (dispatch) {
         for (let i = 0; i < count; ++i) {
-            dispatch(tryAddNode(
+            addNode(
                 tempRandomPosition(100, 900),
                 tempRandomPosition(100, 900)
-            ))
+            )
         }
     }
 }
@@ -39,7 +39,7 @@ export function debugRemoveRandomNode() {
         }
         const id = findRandomMapKey(mindmap.get("nodes"))
 
-        dispatch(removeNode(id))
+        removeNode(id)
     }
 }
 

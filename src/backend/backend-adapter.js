@@ -12,6 +12,8 @@ export function init(storeAdapter) {
     };
     firebase.initializeApp(config);
 
+    setNodeListeners(); // temp
+
     _storeAdapter = storeAdapter;
 }
 
@@ -82,20 +84,20 @@ export function removeNode(id) {
 }
 
 export function setNodeListeners() {
-	nodesRef = firebase.database().ref('nodes/');
+	var nodesRef = firebase.database().ref('nodes/');
 	nodesRef.on('child_added', function(data) {
-		storeAdapter.addNode(data.key, data.val().x, data.val().y);
+		_storeAdapter.addNode(data.key, data.val().x, data.val().y);
 	});
 	
 	nodesRef.on('child_changed', function(data) {
-		storeAdapter.moveNode(data.key, data.val().x, data.val().y);
-	}
+		_storeAdapter.moveNode(data.key, data.val().x, data.val().y);
+	});
 	
 	nodesRef.on('child_removed', function(data) {
-		storeAdapter.removeNode(data.key, data.val().x, data.val().y);
-	}
+		_storeAdapter.removeNode(data.key, data.val().x, data.val().y);
+	});
 }
 
 export function removeNodeListeners() {
-	nodesRef = firebase.database().ref('nodes/').off();
+	firebase.database().ref('nodes/').off();
 }

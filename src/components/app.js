@@ -9,7 +9,7 @@ const App = createClass({
         return (
             <div>
                 <h1>Aivo v0.0.1</h1>
-                {authed ? children : <Login/>}
+                {/*authed*/true ? children : <Login/>}
             </div>
         )
     }
