@@ -1,4 +1,3 @@
-
 import firebase from "firebase";
 
 let _storeAdapter = null;
@@ -53,7 +52,8 @@ export function moveNode(id, x, y) {
     var updates = {}
 
     updates['/nodes/' + id] = postData;
-    updates['/user-nodes/' + firebase.User.uid + '/' + id] = postData;
+    //updates['/user-nodes/' + firebase.User.uid + '/' + id] = postData;
+	return firebase.database().ref().update(updates);
 }
 
 export function addNode(x, y, id = null) {
@@ -78,6 +78,24 @@ export function addNode(x, y, id = null) {
 
 export function removeNode(id) {
     _storeAdapter.removeNode(id);
-
     firebase.database().ref('/nodes/' + id).remove();
+}
+
+export function setNodeListeners() {
+	nodesRef = firebase.database().ref('nodes/');
+	nodesRef.on('child_added', function(data) {
+		storeAdapter.addNode(data.key, data.val().x, data.val().y);
+	});
+	
+	nodesRef.on('child_changed', function(data) {
+		storeAdapter.moveNode(data.key, data.val().x, data.val().y);
+	}
+	
+	nodesRef.on('child_removed', function(data) {
+		storeAdapter.removeNode(data.key, data.val().x, data.val().y);
+	}
+}
+
+export function removeNodeListeners() {
+	nodesRef = firebase.database().ref('nodes/').off();
 }
