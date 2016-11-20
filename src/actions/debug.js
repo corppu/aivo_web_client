@@ -5,15 +5,15 @@ export function debugMoveRandomNode(count = 1) {
         const { mindmap } = getState()
 
         if (mindmap.get("nodes").size === 0) {
-            return state
+            return
         }
         for (let i = 0; i < count; ++i) {
             const id = findRandomMapKey(mindmap.get("nodes"))
 
             dispatch(moveNode(
                 id,
-                tempRandomPosition(100, 3000),
-                tempRandomPosition(100, 1500)
+                tempRandomPosition(100, 900),
+                tempRandomPosition(100, 900)
             ))
         }
     }
@@ -23,8 +23,8 @@ export function debugAddRandomNode(count = 1) {
     return function (dispatch) {
         for (let i = 0; i < count; ++i) {
             dispatch(addNode(
-                tempRandomPosition(100, 3000),
-                tempRandomPosition(100, 1500)
+                tempRandomPosition(100, 900),
+                tempRandomPosition(100, 900)
             ))
         }
     }
@@ -35,7 +35,7 @@ export function debugRemoveRandomNode() {
         const { mindmap } = getState()
        
         if (mindmap.get("nodes").size === 0) {
-            return state
+            return
         }
         const id = findRandomMapKey(mindmap.get("nodes"))
 

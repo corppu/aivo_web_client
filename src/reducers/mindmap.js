@@ -24,7 +24,9 @@ export default function(state = initialState, action) {
     }
     case ADD_NODE:
     {   
-        const { x, y } = action
+        const { id, x, y } = action
+
+        // id ignored for now
 
         return state = state.setIn(["nodes", generateID()], fromJS({
             title: "test", x, y

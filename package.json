@@ -2,7 +2,8 @@
     "name": "aivo-app",
     "version": "0.0.0",
     "scripts": {
-        "start": "kotatsu serve --es2015 --jsx --public ./assets/ --index index.html ./src/main.js"
+        "start": "kotatsu serve --es2015 --jsx --public ./assets/ --index index.html ./src/main.js",
+        "build": "kotatsu build server --es2015 --jsx -s ./src/main.js -o ./build/bundle.js"
     },
     "dependencies": {
         "immutable": "^3.8.1",

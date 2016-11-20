@@ -8,8 +8,8 @@ export function moveNode(id, x, y) {
     return { type: MOVE_NODE, id, x, y }
 }
 
-export function addNode(x, y) {
-    return { type: ADD_NODE, x, y }
+export function addNode(id, x, y) {
+    return { type: ADD_NODE, id, x, y }
 }
 
 export function removeNode(id) {
