@@ -21,7 +21,7 @@ export default function(storeAdapter, config = null) {
 			var errorCode = error.code;
 			var errorMessage = error.message;
 			// ...
-			
+			// asdadsa
 			console.warn(errorMessage);
 		});
 	}
