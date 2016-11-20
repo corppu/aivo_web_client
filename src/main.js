@@ -4,8 +4,13 @@ import thunk from "redux-thunk"
 import React, { createClass } from "react"
 import { render } from "react-dom"
 import { Provider } from "react-redux"
+import { Router, Route, IndexRoute, browserHistory } from "react-router"
+import { syncHistoryWithStore, routerReducer } from "react-router-redux"
 
+import authReducer from "./reducers/auth"
 import mindmapReducer from "./reducers/mindmap"
+
+import App from "./containers/app"
 import MindMap from "./containers/mindmap"
 
 import createStoreAdapter from "./backend/store-adapter"
@@ -15,7 +20,9 @@ import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug"
 
 const store = createStore(
 	combineReducers({
-        mindmap: mindmapReducer
+        auth: authReducer,
+        mindmap: mindmapReducer,
+        routing: routerReducer
     }),
     applyMiddleware(
         thunk
@@ -25,9 +32,15 @@ const store = createStore(
 const storeAdapter = createStoreAdapter(store)
 init(storeAdapter)
 
+const history = syncHistoryWithStore(browserHistory, store)
+
 render(
     <Provider store={store}>
-        <MindMap/>
+        <Router history={history}>
+            <Route path="/" component={App}>
+                <IndexRoute component={MindMap}/>
+            </Route>
+        </Router>
     </Provider>
 , document.getElementById("app-root"))
 
