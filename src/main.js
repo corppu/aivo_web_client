@@ -9,9 +9,7 @@ import mindmapReducer from "./reducers/mindmap"
 import MindMap from "./containers/mindmap"
 
 import createStoreAdapter from "./backend/store-adapter"
-import createBackendAdapter from "./backend/backend-adapter"
-
-import { createBackendMiddleware, setBackendAdapter } from "./middleware/backend-adapter"
+import { init } from "./backend/backend-adapter"
 
 import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug"
 
@@ -20,21 +18,18 @@ const store = createStore(
         mindmap: mindmapReducer
     }),
     applyMiddleware(
-        thunk,
-        createBackendMiddleware
+        thunk
     )
 );
+
+const storeAdapter = createStoreAdapter(store)
+init(storeAdapter)
 
 render(
     <Provider store={store}>
         <MindMap/>
     </Provider>
 , document.getElementById("app-root"))
-
-const storeAdapter = createStoreAdapter(store)
-const backendAdapter = createBackendAdapter(storeAdapter, null)
-
-setBackendAdapter(backendAdapter)
 
 // add some test data
 store.dispatch(debugAddRandomNode(10))

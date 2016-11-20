@@ -17,6 +17,8 @@
 		"react-router": "^2.3.0",
 		"react-router-redux": "^4.0.5",
 
-		"matter-js": "^0.10.0"
+		"matter-js": "^0.10.0",
+
+        "firebase": "^3.6.1"
     }
 }

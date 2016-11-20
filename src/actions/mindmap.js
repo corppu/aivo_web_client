@@ -1,17 +1,19 @@
 import {
     MOVE_NODE,
     ADD_NODE,
-    REMOVE_NODE,
-    
-    REQUEST_ADD_NODE,
+    REMOVE_NODE
 } from "../constants/action-types"
+
+import backendAdapter from "../backend/backend-adapter"
 
 export function moveNode(id, x, y) {
     return { type: MOVE_NODE, id, x, y }
 }
 
 export function tryAddNode(x, y) {
-    return { type: REQUEST_ADD_NODE, x, y }
+    return () => {
+        backendAdapter.addNode(x, y)
+    }
 }
 
 export function addNode(id, x, y) {

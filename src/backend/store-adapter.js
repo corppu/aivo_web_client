@@ -7,8 +7,6 @@ export default function(store) {
     }
 
     function addNode(id, x, y) {
-        //console.log("B")
-
         store.dispatch(addNode(id, x, y))
     }
 
