@@ -46,6 +46,7 @@ const MindMap = createClass({
 
                     onMouseDown={this.handleInputDown}
                     onMouseUp={this.handleInputUp}
+                    onMouseLeave={this.handleInputUp}
                     onMouseMove={this.handleInputMove}/>
             </div>
         )

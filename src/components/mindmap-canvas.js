@@ -70,12 +70,19 @@ export default function() {
             World.add(_engine.world, body)
             _nodes.push(node)
 
-            console.log(`added node ${id}`)
+            //console.log(`added node ${id}`)
         })
     }
 
     function onInputStart(e) {
-        _inputAction = createAction(e.position);
+        let node = null
+
+        const hits = Query.point(_engine.world.bodies, e.position)
+
+        if (hits.length > 0) {
+            node = _bodyToNodeMapping[hits[0].id]
+        }
+        _inputAction = createAction(e.position, node)
     }
 
     function onInputEnd(e) {
@@ -84,7 +91,8 @@ export default function() {
         }
         const result = actionResult(_inputAction, e.position) // does nothing atm
 
-        const hits =  Query.point(_engine.world.bodies, e.position)
+        /*
+        const hits = Query.point(_engine.world.bodies, e.position)
 
         if (hits.length > 0) {
            hits.forEach(body => {
@@ -103,6 +111,7 @@ export default function() {
                 })
             }
         }
+        */
 
         _inputAction = null
     }
@@ -111,9 +120,15 @@ export default function() {
         if (!_inputAction) {
             return;
         }
+        if (_inputAction.data && _actions.updateNode) {
+            const { id, title } = _inputAction.data
 
-        // ...
-
+            _actions.updateNode(id, {
+                title,
+                x: e.position.x,
+                y: e.position.y,
+            })
+        }
     }
 
     function update() {
