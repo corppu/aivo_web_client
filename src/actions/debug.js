@@ -1,7 +1,6 @@
-import { moveNode, addNode, removeNode } from "../backend/backend-adapter"
+import { addNode, updateNode, removeNode } from "../backend/backend-adapter"
 
-/*
-export function debugMoveRandomNode(count = 1) {
+export function debugMoveRandomNode(boardID, count = 1) {
     return function (dispatch, getState) {
         const { mindmap } = getState()
 
@@ -10,29 +9,29 @@ export function debugMoveRandomNode(count = 1) {
         }
         for (let i = 0; i < count; ++i) {
             const id = findRandomMapKey(mindmap.get("nodes"))
+            const node = mindmap.getIn(["nodes", id])
 
-            moveNode(
-                id,
-                tempRandomPosition(100, 900),
-                tempRandomPosition(100, 900)
-            )
+            updateNode(boardID, id, {
+                title: node.get("title"),
+                x: tempRandomPosition(100, 900),
+                y: tempRandomPosition(100, 900)
+            })
         }
     }
 }
-*/
 
-export function debugAddRandomNode(count = 1) {
+export function debugAddRandomNode(boardID, count = 1) {
     return function (dispatch) {
         for (let i = 0; i < count; ++i) {
-            addNode(
-                tempRandomPosition(100, 900),
-                tempRandomPosition(100, 900)
-            )
+            addNode(boardID, {
+                x: tempRandomPosition(100, 900),
+                y: tempRandomPosition(100, 900)
+            })
         }
     }
 }
 
-export function debugRemoveRandomNode() {
+export function debugRemoveRandomNode(boardID) {
     return function (dispatch, getState) {
         const { mindmap } = getState()
        

@@ -28,26 +28,6 @@ export default function(state = initialState, action) {
             return node ? node.merge(immutableData) : immutableData
         })
     }
-    /*
-    case MOVE_NODE:
-    {
-        const { id, x, y } = action
-
-        return state.updateIn(["nodes", id], node =>
-            node
-                .set("x", x)
-                .set("y", y)
-        )
-    }
-    case ADD_NODE:
-    {   
-        const { id, x, y } = action
-
-        return state = state.setIn(["nodes", id], fromJS({
-            title: "test", x, y
-        }))
-    }
-    */
     case REMOVE_NODE:
     {
         const { id } = action

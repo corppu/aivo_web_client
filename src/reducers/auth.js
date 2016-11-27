@@ -11,7 +11,7 @@ const initialState = fromJS({
 
 export default function(state = initialState, action) {
     
-    console.log(action); // remove this
+    //console.log(action); // remove this
 
     switch (action.type) {
     case BACKEND_LOGIN:

@@ -218,7 +218,7 @@ function attachBoardListeners(boardId) {
 	});
 	
 	nodesRef.on("child_changed", function(data) {
-		_storeAdapter.changeNode(data.key, data.val());
+		_storeAdapter.updateNode(data.key, data.val());
 	});
 	
 	nodesRef.on("child_removed", function(data) {
