@@ -54,27 +54,41 @@ function loadDefaultBoard() {
 			var key = keySnapshot.key();
 			console.log("boards/default/"+key);
 			if(key === "meta") {
-				keySnapshot.forEach(function(metaSnapshot) {
-					key = metaSnapshot.key();
-					var data = nodeSnapshot.val();
-					console.log(key + "/"+ data);
-					if(key == "title") {
-						_storeAdapter.changeBoardTitle(data.title);
-					}
-				})
+				//_storeAdapter.updateBoard("default", keySnapshot.data().val();
 			}
 			else if(key == "nodes") {
-				keySnapshot.forEach(function(nodeSnapshot) {
-					key = nodeSnapshot.key();
-					var data = nodeSnapshot.val();
-					console.log(key + "/" + data);
-					_storeAdapter.addNode(key, data.x, data.y, data.title, data.imgURL);
-				})
+				// TODO: Loop keys and their content
+				//_storeAdapter.updateNode(nodeId, nodeData);
 			}
 		});
 	});
 }
 
+function createUserData(sessionId, user) {
+	return {
+			sessionId: sessionId,
+			userId: user.uid,
+			displayName: user.displayName,
+			email: user.email,
+			emailVerified: user.emailVerified,
+			photoURL: user.photoURL,
+	}
+}
+
+
+function attachAuthChangedListener() {
+	firebase.auth().onAuthStateChanged(function(user) {
+	if (user) {
+		// User is signed in.
+		logUserData(user);
+		_storeAdapter.userSignedIn(createUserData("default", user));
+	} else {
+		// No user is signed in.
+		console.log("Currently no user is signed in.");
+		_storeAdapter.userSignedOut();
+	}
+	});
+}
 
 /** Uuden käyttäjätilin luominen ja kirjautuminen sisään **/
 /** Parametreina välitetään sähköposti-osoite ja salasana **/
@@ -82,16 +96,16 @@ function loadDefaultBoard() {
 /** Jälkiehto: Puskee virheen sattuessa tunnisteen käyttöliittymälle kutsumalla sovittimen kautta tarvittavaa funktiota. **/
 /** 		   Virheettömässä tilanteessa puskee muokatun vakiotaulun sisällön käyttöliittymälle kutsumalla sovittimen kautta tarvittavia funktioita. **/
 export function createUserWithEmailAndSignIn(email, password) {
-    firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-        console.warn(errorMessage);
-    });
+    firebase.auth().createUserWithEmailAndPassword(email, password).then(
+	function(user) {
+		var sessionId = "default"; // temp
+		_storeAdapter.userSignedIn(createUserData(sessionId, user));
+	},
+	function(error) {
+		console.warn(error.message);
+		_storeAdapter.error(error);
+	});
 }
-
-
 
 /** Kirjautuminen sisään **/
 /** Parametreina välitetään sähköposti-osoite ja salasana, sekä ladattavan taulun id ja mahdollinen dialogissa auki oleva node... **/
@@ -99,22 +113,13 @@ export function createUserWithEmailAndSignIn(email, password) {
 /** Jälkiehto: Puskee viimeisimmän taulun sisällön käyttäjälle **/
 /**            tai tulevaisuudessa voidaan istuntotunnuksen perusteella palauttaa edellinen istunto... **/
 /**            Virhetilanteessa palauttaa virhetunnisteen käyttöliittymälle kutsumalla sovittimen kautta sopivaa funktiota **/
-export function signInWithEmail(email, password, boardId = null, nodeId = null) {
-    firebase.auth().onAuthStateChanged(function(user) {
-	if (user) {
-		// User is signed in.
-		logUserData(user);
-		// TODO: nimeä uudellee ja lisää parametri
-		_storeAdapter.login();
-	} else {
-		// No user is signed in.
-		console.log("Currently no user is signed in.");
-		// TODO: nimeä uudellee ja lisää parametri
-		_storeAdapter.logout();
-	}
-	});
-	
-	firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+export function signInWithEmail(email, password) {	
+	firebase.auth().signInWithEmailAndPassword(email, password).then(
+	function(user) {
+		var sessionId = "default"; // temp
+		_storeAdapter.userSignedIn(createUserData(sessionId, user));
+	},
+	function(error) {
         // Handle Errors here.
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -151,7 +156,16 @@ function presenceMachine() {
 }
 
 
+/**
+	Esishto: Kirjautuminen suoritettu
+	Jälkiehto: Avaa uuden taulun tai kutsuu virhefunktioo.
+**/
 export function createBoard(boardData, nodes = null) {
+	var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
 	
 	var boardId = firebase.database().ref().child("boards").push().key;
 	firebase.database().ref("boards/"+boardId+"/meta").update(boardData, function(error) {
@@ -159,31 +173,28 @@ export function createBoard(boardData, nodes = null) {
 			console.warn(error.message);
 			_storeAdapter.error(error.code);
 		} else {
-			openBoard(boardId);
+			openBoard(boardId, "default");
 		}
 	});
 }
 
 
-export function openBoard(boardId, sessionId = null) {
+export function openBoard(boardId, sessionId) {
 	var user = firebase.auth().currentUser;
-	var userRef = firebase.database().ref("users/"+user.uid);
-	var updates = {}
-
-	if(!sessionId) {
-        sessionId = firebase.database().ref().child("sessions").push().key;	
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
 	}
+	var userRef = firebase.database().ref("users/"+user.uid);
 	updates["users/"+user.uid+"/sessions/"+sessionId] = {
 		board: boardId
 	};
-	
 	return firebase.database().ref().update(updates, function(error){
 		if(error) {
 			console.warn(error.message);
 			_storeAdapter.error(error.code);
 		}
 		else {
-			//_storeAdapter.session(sessionId);
 			attachBoardListeners(boardId);
 		}
 	});
@@ -191,6 +202,11 @@ export function openBoard(boardId, sessionId = null) {
 
 
 function attachBoardListeners(boardId) {
+	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+	metaRef.on("child_changed", function(data) {
+		_storeAdapter.updateBoard(boardId, data.val());
+	});
+
 	var nodesRef = firebase.database().ref("boards/" + boardId + "/nodes");
 	nodesRef.on("child_added", function(data) {
 		_storeAdapter.addNode(data.key, data.val().x, data.val().y);
@@ -202,13 +218,6 @@ function attachBoardListeners(boardId) {
 	
 	nodesRef.on("child_removed", function(data) {
 		_storeAdapter.removeNode(data.key, data.val().x, data.val().y);
-	});
-	
-	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
-	metaRef.on("child_changed", function(data) {
-		if(data.key() == "title") {
-			_storeAdapter.changeBoardTitle(data.val());
-		}
 	});
 }
 
@@ -232,7 +241,7 @@ export function updateNode(boardId, nodeId, nodeData) {
 	updates["/boards/" + boardId + "/nodes/" + nodeId] = nodeData;
 	
     updates["/nodes/" + nodeId] = {
-		title: title
+		title: nodeData.title
 	};
 	
 	return firebase.database().ref().update(updates, function(error) {
