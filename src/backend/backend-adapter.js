@@ -7,10 +7,10 @@ function logUserData(user) {
 		
 	//Get a user"s profile
 	console.log("Printing all user information below:");
-	console.log("	Firebase project-specific UID: "+user.uid;
-	console.log("	Name: "+user.displayName
-	console.log("	Email: "+user.email)
-	console.log("	Photo URL: "+user.photoURL;
+	console.log("	Firebase project-specific UID: "+user.uid);
+	console.log("	Name: "+user.displayName);
+	console.log("	Email: "+user.email);
+	console.log("	Photo URL: "+user.photoURL);
 
     //Get a user"s provider-specific profile information
 	user.providerData.forEach(function (profile) {
@@ -55,21 +55,21 @@ function loadDefaultBoard() {
 			console.log("boards/default/"+key);
 			if(key === "meta") {
 				keySnapshot.forEach(function(metaSnapshot) {
-						key = metaSnapshot.key();
-						var data = nodeSnapshot.val();
-						console.log(key + "/"+ data);
-						if(key == "title") {
-							_storeAdapter.changeBoardTitle(data.title);
-						}
+					key = metaSnapshot.key();
+					var data = nodeSnapshot.val();
+					console.log(key + "/"+ data);
+					if(key == "title") {
+						_storeAdapter.changeBoardTitle(data.title);
 					}
+				})
 			}
 			else if(key == "nodes") {
-					keySnapshot.forEach(function(nodeSnapshot) {
-						key = nodeSnapshot.key();
-						var data = nodeSnapshot.val();
-						console.log(key + "/" + data);
-						_storeAdapter.addNode(key, data.x, data.y, data.title, data.imgURL);
-					}
+				keySnapshot.forEach(function(nodeSnapshot) {
+					key = nodeSnapshot.key();
+					var data = nodeSnapshot.val();
+					console.log(key + "/" + data);
+					_storeAdapter.addNode(key, data.x, data.y, data.title, data.imgURL);
+				})
 			}
 		});
 	});
@@ -209,7 +209,7 @@ function attachBoardListeners(boardId) {
 		if(data.key() == "title") {
 			_storeAdapter.changeBoardTitle(data.val());
 		}
-	}
+	});
 }
 
 function detachBoardListeners(boardId) {
