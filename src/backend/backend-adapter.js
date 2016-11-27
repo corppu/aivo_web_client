@@ -189,6 +189,8 @@ export function openBoard(boardId, sessionId) {
 		return;
 	}
 	var userRef = firebase.database().ref("users/"+user.uid);
+
+	var updates = {};
 	updates["users/"+user.uid+"/sessions/"+sessionId] = {
 		board: boardId
 	};
@@ -206,7 +208,7 @@ export function openBoard(boardId, sessionId) {
 
 function attachBoardListeners(boardId) {
 	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
-	metaRef.on("child_changed", function(data) {
+	metaRef.on("value", function(data) {
 		_storeAdapter.updateBoard(boardId, data.val());
 	});
 
@@ -264,7 +266,7 @@ export function addNode(boardId, nodeData) {
 		console.warn("User is not authenticated!");
 		return;
 	}
-	nodeId = firebase.database().ref().child("nodes").push().key;
+	const nodeId = firebase.database().ref().child("nodes").push().key;
 	updateNode(boardId, nodeId, nodeData);
 }
 

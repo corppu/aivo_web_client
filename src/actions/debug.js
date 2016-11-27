@@ -1,5 +1,6 @@
 import { moveNode, addNode, removeNode } from "../backend/backend-adapter"
 
+/*
 export function debugMoveRandomNode(count = 1) {
     return function (dispatch, getState) {
         const { mindmap } = getState()
@@ -18,6 +19,7 @@ export function debugMoveRandomNode(count = 1) {
         }
     }
 }
+*/
 
 export function debugAddRandomNode(count = 1) {
     return function (dispatch) {

@@ -1,17 +1,17 @@
 import {
-    MOVE_NODE,
-    ADD_NODE,
+    UPDATE_BOARD,
+    UPDATE_NODE,
     REMOVE_NODE
 } from "../constants/action-types"
 
 import * as backendAdapter from "../backend/backend-adapter"
 
-export function moveNode(id, x, y) {
-    return { type: MOVE_NODE, id, x, y }
+export function updateBoard(id, data) {
+    return { type: UPDATE_BOARD, id, data }
 }
 
-export function addNode(id, x, y) {
-    return { type: ADD_NODE, id, x, y }
+export function updateNode(id, data) {
+    return { type: UPDATE_NODE, id, data }
 }
 
 export function removeNode(id) {

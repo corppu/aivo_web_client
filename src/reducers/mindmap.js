@@ -1,8 +1,8 @@
 import { fromJS } from "immutable"
 
 import {
-    MOVE_NODE,
-    ADD_NODE,
+    UPDATE_BOARD,
+    UPDATE_NODE,
     REMOVE_NODE
 } from "../constants/action-types"
 
@@ -12,6 +12,23 @@ const initialState = fromJS({
 
 export default function(state = initialState, action) {
     switch (action.type) {
+    case UPDATE_BOARD:
+    {
+        const { id, data } = action;
+
+        console.log(id, data);        
+    }
+    case UPDATE_NODE:
+    {
+        const { id, data } = action;
+
+        return state.updateIn(["nodes", id], node => {
+            const immutableData = fromJS(data)
+
+            return node ? node.merge(immutableData) : immutableData
+        })
+    }
+    /*
     case MOVE_NODE:
     {
         const { id, x, y } = action
@@ -30,6 +47,7 @@ export default function(state = initialState, action) {
             title: "test", x, y
         }))
     }
+    */
     case REMOVE_NODE:
     {
         const { id } = action

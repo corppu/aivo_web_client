@@ -18,7 +18,7 @@ export default function(store) {
 
     // mindmap actions
     function updateBoard(id, data) {
-		
+		store.dispatch(mindmapActions.updateBoard(id, data))
 	}
 	
 	function updateNode(id, data) {
