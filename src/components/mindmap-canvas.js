@@ -52,15 +52,15 @@ export default function() {
         })
     }
 
-    function onTouchStart(e) {
+    function onInputStart(e) {
         console.log(e)
     }
 
-    function onTouchEnd(e) {
+    function onInputEnd(e) {
         console.log(e)
     }
 
-    function onTouchMove(e) {
+    function onInputMove(e) {
         //console.log(e)
     }
 
@@ -99,9 +99,9 @@ export default function() {
 
     return {
         updateProps,
-        onTouchStart,
-        onTouchEnd,
-        onTouchMove,
+        onInputStart,
+        onInputEnd,
+        onInputMove,
         update,
         render
     }
