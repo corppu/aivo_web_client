@@ -1,4 +1,4 @@
-import { Engine, World, Body, Bodies, Vector } from "matter-js"
+import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js"
 
 import { clear, createRenderer } from "../utils/canvas-utils" 
 import { createAction, actionResult } from "../utils/input-utils" 
@@ -6,16 +6,19 @@ import { createAction, actionResult } from "../utils/input-utils"
 export default function() {
     let _engine = Engine.create()
     let _nodes = []
+    let _bodyToNodeMapping = new Map()
     let _inputAction = null;
 
     let _actions = {
         addNode: null,
-        updateNode: null
+        updateNode: null,
+        removeNode: null
     };
 
     function updateProps(props) {
         _actions.addNode = props.tryAddNode;
         _actions.updateNode = props.tryUpdateNode;
+        _actions.removeNode = props.tryRemoveNode;
         
         let propsNodes = new Map(props.nodes)
 
@@ -23,7 +26,12 @@ export default function() {
         _nodes = _nodes.map(node => {
             const propsNode = propsNodes.get(node.id)
             if (!propsNode) {
-                console.log(`removed node ${id}`)
+                 const { body } = node
+
+                _bodyToNodeMapping.delete(body.id)
+                World.remove(_engine.world, body)
+
+                console.log(`removed node ${node.id}`)
                 return null
             }
             propsNodes.delete(node.id)
@@ -46,19 +54,22 @@ export default function() {
                 x: propsNode.get("x"),
                 y: propsNode.get("y")
             }        
-            let body = Bodies.circle(anchor.x, anchor.y, radius, {
+            const body = Bodies.circle(anchor.x, anchor.y, radius, {
                 frictionAir: 1,
                 mass: 5
             })
-            
-            World.add(_engine.world, body)
-            _nodes.push({
+            const node = {
                 id,
                 title: propsNode.get("title"),
                 radius,
                 anchor,
                 body
-            })
+            }
+            _bodyToNodeMapping[body.id] = node
+            
+            World.add(_engine.world, body)
+            _nodes.push(node)
+
             console.log(`added node ${id}`)
         })
     }
@@ -82,6 +93,14 @@ export default function() {
             })
         }
         */
+
+        Query.point(_engine.world.bodies, e.position).forEach(body => {
+            const node = _bodyToNodeMapping[body.id];
+
+            if (_actions.removeNode) {
+                _actions.removeNode(node.id)
+            }
+        })
 
         _inputAction = null
     }

@@ -277,7 +277,7 @@ export function removeNode(boardId, nodeId) {
 		return;
 	}
     _storeAdapter.removeNode(nodeId);
-    firebase.database().ref("/nodes/" + id).remove();
+    firebase.database().ref("/nodes/" + nodeId).remove();
 	firebase.database().ref("/boards/" + boardId + "/nodes/" + nodeId).remove();
 }
 

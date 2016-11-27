@@ -30,6 +30,18 @@ export function tryUpdateNode(id, data) {
     }
 }
 
+export function tryRemoveNode(id) {
+    return function (dispatch, getState) {
+        const { mindmap } = getState()
+
+        const boardID = mindmap.get("boardID")
+        if (!boardID) {
+            return
+        }
+        backendAdapter.removeNode(boardID, id)
+    }
+}
+
 export function updateBoard(id, data) {
     return { type: UPDATE_BOARD, id, data }
 }
@@ -39,5 +51,5 @@ export function updateNode(id, data) {
 }
 
 export function removeNode(id) {
-    return { type: REMOVE_NODE }
+    return { type: REMOVE_NODE, id }
 }
