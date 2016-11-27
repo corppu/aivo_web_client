@@ -1,9 +1,12 @@
 import { Engine, World, Body, Bodies, Vector } from "matter-js"
+
 import { clear, drawCircle } from "../utils/canvas-utils" 
+import { createAction, actionResult } from "../utils/input-utils" 
 
 export default function() {
     let _engine = Engine.create()
     let _nodes = []
+    let _inputAction = null;
 
     function updateProps(props) {
         let propsNodes = new Map(props.nodes)
@@ -52,16 +55,23 @@ export default function() {
         })
     }
 
-    function onTouchStart(e) {
-        console.log(e)
+    function onInputStart(e) {
+        _inputAction = createAction(e.position);
     }
 
-    function onTouchEnd(e) {
-        console.log(e)
+    function onInputEnd(e) {
+        if (!_inputAction) {
+            return
+        }
+        const result = actionResult(_inputAction, e.position)
+        
+        console.log(result)
+
+        _inputAction = null
     }
 
-    function onTouchMove(e) {
-        //console.log(e)
+    function onInputMove(e) {
+        // ...
     }
 
     function update() {
@@ -99,9 +109,9 @@ export default function() {
 
     return {
         updateProps,
-        onTouchStart,
-        onTouchEnd,
-        onTouchMove,
+        onInputStart,
+        onInputEnd,
+        onInputMove,
         update,
         render
     }

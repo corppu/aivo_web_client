@@ -44,32 +44,32 @@ const MindMap = createClass({
                     width={1000}
                     height={1000}
 
-                    onMouseDown={this.handleMouseDown}
-                    onMouseUp={this.handleMouseUp}
-                    onMouseMove={this.handleMouseMove}/>
+                    onMouseDown={this.handleInputDown}
+                    onMouseUp={this.handleInputUp}
+                    onMouseMove={this.handleInputMove}/>
             </div>
         )
     },
 
-    handleMouseDown: function(e) {
+    handleInputDown: function(e) {
         if (this.mindmap) {
-            this.mindmap.onTouchStart({
+            this.mindmap.onInputStart({
                 position: calculatePosition(this.canvas, e)
             })
         }
     },
 
-    handleMouseUp: function(e) {
+    handleInputUp: function(e) {
         if (this.mindmap) {
-            this.mindmap.onTouchEnd({
+            this.mindmap.onInputEnd({
                 position: calculatePosition(this.canvas, e)
             })
         }
     },
 
-    handleMouseMove: function(e) {
+    handleInputMove: function(e) {
         if (this.mindmap) {
-            this.mindmap.onTouchMove({
+            this.mindmap.onInputMove({
                 position: calculatePosition(this.canvas, e)
             })
         }
