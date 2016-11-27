@@ -86,6 +86,7 @@ function attachAuthChangedListener() {
 		// No user is signed in.
 		console.log("Currently no user is signed in.");
 		_storeAdapter.userSignedOut();
+		//detachBoardListeners();
 	}
 	});
 }
@@ -100,6 +101,7 @@ export function createUserWithEmailAndSignIn(email, password) {
 	function(user) {
 		var sessionId = "default"; // temp
 		_storeAdapter.userSignedIn(createUserData(sessionId, user));
+		attachAuthChangedListener();
 	},
 	function(error) {
 		console.warn(error.message);
@@ -118,6 +120,7 @@ export function signInWithEmail(email, password) {
 	function(user) {
 		var sessionId = "default"; // temp
 		_storeAdapter.userSignedIn(createUserData(sessionId, user));
+		attachAuthChangedListener();
 	},
 	function(error) {
         // Handle Errors here.
@@ -209,15 +212,15 @@ function attachBoardListeners(boardId) {
 
 	var nodesRef = firebase.database().ref("boards/" + boardId + "/nodes");
 	nodesRef.on("child_added", function(data) {
-		_storeAdapter.addNode(data.key, data.val().x, data.val().y);
+		_storeAdapter.updateNode(data.key, data.val());
 	});
 	
 	nodesRef.on("child_changed", function(data) {
-		_storeAdapter.changeNode(data.key, data.val().x, data.val().y);
+		_storeAdapter.changeNode(data.key, data.val());
 	});
 	
 	nodesRef.on("child_removed", function(data) {
-		_storeAdapter.removeNode(data.key, data.val().x, data.val().y);
+		_storeAdapter.removeNode(data.key, data.val());
 	});
 }
 
@@ -231,12 +234,14 @@ export function signOut() {
 }
 
 export function updateNode(boardId, nodeId, nodeData) {
+	
     var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
 		return;
 	}
-	
+	_storeAdapter.updateNode(nodeId, nodeData);
+
 	var updates = {}
 	updates["/boards/" + boardId + "/nodes/" + nodeId] = nodeData;
 	
@@ -246,6 +251,7 @@ export function updateNode(boardId, nodeId, nodeData) {
 	
 	return firebase.database().ref().update(updates, function(error) {
 		if(error) {
+			console.warn(error.message);
 			_storeAdapter.error(error.code);
 		}
 	});
@@ -270,6 +276,6 @@ export function removeNode(boardId, nodeId) {
 	}
     _storeAdapter.removeNode(nodeId);
     firebase.database().ref("/nodes/" + id).remove();
-	firebase.database().ref("/boards/" + boardId + "/" + nodeId).remove();
+	firebase.database().ref("/boards/" + boardId + "/nodes/" + nodeId).remove();
 }
 
