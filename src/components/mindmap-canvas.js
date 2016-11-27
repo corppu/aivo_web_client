@@ -52,6 +52,18 @@ export default function() {
         })
     }
 
+    function onTouchStart(e) {
+        console.log(e)
+    }
+
+    function onTouchEnd(e) {
+        console.log(e)
+    }
+
+    function onTouchMove(e) {
+        //console.log(e)
+    }
+
     function update() {
         for (let i = 0; i < _nodes.length; ++i) {
             const node = _nodes[i]
@@ -87,6 +99,9 @@ export default function() {
 
     return {
         updateProps,
+        onTouchStart,
+        onTouchEnd,
+        onTouchMove,
         update,
         render
     }
