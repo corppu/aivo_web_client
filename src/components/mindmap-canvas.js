@@ -1,6 +1,6 @@
 import { Engine, World, Body, Bodies, Vector } from "matter-js"
 
-import { clear, drawCircle } from "../utils/canvas-utils" 
+import { clear, createRenderer } from "../utils/canvas-utils" 
 import { createAction, actionResult } from "../utils/input-utils" 
 
 export default function() {
@@ -71,7 +71,12 @@ export default function() {
     }
 
     function onInputMove(e) {
+        if (!_inputAction) {
+            return;
+        }
+
         // ...
+
     }
 
     function update() {
@@ -98,8 +103,10 @@ export default function() {
     function render(ctx) {
         clear(ctx)
 
+        const render = createRenderer(ctx);
+
         _nodes.forEach((node) => {
-            drawCircle(ctx, {
+            render.circle({
                 x: node.body.position.x,
                 y: node.body.position.y,
                 r: node.radius
