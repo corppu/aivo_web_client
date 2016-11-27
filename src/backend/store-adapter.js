@@ -4,11 +4,11 @@ import * as mindmapActions from "../actions/mindmap"
 export default function(store) {
 
     // backend actions
-    function login() {
+    function userSignedIn(data) {
         store.dispatch(backendActions.login())
     }
 
-    function logout() {
+    function userSignedOut() {
         store.dispatch(backendActions.logout())
     }
 
@@ -17,19 +17,27 @@ export default function(store) {
     }
 
     // mindmap actions
-    function updateNode(id, data) {
+    function updateBoard(id, data) {
+		
+	}
+	
+	function updateNode(id, data) {
         store.dispatch(mindmapActions.updateNode(id, data))
     }
 
     function removeNode(id) {
         store.dispatch(mindmapActions.removeNode(id))
     }
+	
 
     return {
-        login,
-        logout,
+        userSignedIn,
+        userSignedOut,
         error,
 
+		updateBoard,
+		removeBoard,
+		
         updateNode,
         removeNode
     }
