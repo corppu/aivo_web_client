@@ -1,5 +1,7 @@
 import { connect } from "react-redux"
 
+import { tryAddNode, tryUpdateNode } from "../actions/mindmap"
+
 import MindMap from "../components/mindmap"
 
 function mapStateToProps(state) {
@@ -10,4 +12,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(MindMap)
+export default connect(mapStateToProps, { tryAddNode, tryUpdateNode })(MindMap)

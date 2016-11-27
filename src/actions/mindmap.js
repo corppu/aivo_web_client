@@ -6,6 +6,30 @@ import {
 
 import * as backendAdapter from "../backend/backend-adapter"
 
+export function tryAddNode(data) {
+    return function (dispatch, getState) {
+        const { mindmap } = getState()
+
+        const boardID = mindmap.get("boardID")
+        if (!boardID) {
+            return
+        }
+        backendAdapter.addNode(boardID, data)
+    }
+}
+
+export function tryUpdateNode(id, data) {
+    return function (dispatch, getState) {
+        const { mindmap } = getState()
+
+        const boardID = mindmap.get("boardID")
+        if (!boardID) {
+            return
+        }
+        backendAdapter.updateNode(boardID, id, data)
+    }
+}
+
 export function updateBoard(id, data) {
     return { type: UPDATE_BOARD, id, data }
 }

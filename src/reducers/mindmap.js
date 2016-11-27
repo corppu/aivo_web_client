@@ -7,6 +7,7 @@ import {
 } from "../constants/action-types"
 
 const initialState = fromJS({
+    boardID: null,
     nodes: {}
 })
 
@@ -16,7 +17,9 @@ export default function(state = initialState, action) {
     {
         const { id, data } = action;
 
-        console.log(id, data);        
+        // TODO: handle board data and ID change
+
+        return state.set("boardID", id)
     }
     case UPDATE_NODE:
     {

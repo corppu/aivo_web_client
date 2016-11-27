@@ -46,7 +46,8 @@ render(
 
 // add some test data
 //store.dispatch(debugAddRandomNode(10))
-
+/*
 setInterval(() => {
     store.dispatch(debugMoveRandomNode("-KX_x5LAZaLLVFp1drzg", 2))
 }, 1000)
+*/

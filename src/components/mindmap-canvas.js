@@ -8,7 +8,15 @@ export default function() {
     let _nodes = []
     let _inputAction = null;
 
+    let _actions = {
+        addNode: null,
+        updateNode: null
+    };
+
     function updateProps(props) {
+        _actions.addNode = props.tryAddNode;
+        _actions.updateNode = props.tryUpdateNode;
+        
         let propsNodes = new Map(props.nodes)
 
         // match existing nodes to props
@@ -65,7 +73,15 @@ export default function() {
         }
         const result = actionResult(_inputAction, e.position)
         
-        console.log(result)
+        /*
+        if (_actions.addNode) {
+            _actions.addNode({
+                title: "asd",
+                x: e.position.x,
+                y: e.position.y,
+            })
+        }
+        */
 
         _inputAction = null
     }
