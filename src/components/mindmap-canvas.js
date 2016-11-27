@@ -82,25 +82,27 @@ export default function() {
         if (!_inputAction) {
             return
         }
-        const result = actionResult(_inputAction, e.position)
-        
-        /*
-        if (_actions.addNode) {
-            _actions.addNode({
-                title: "asd",
-                x: e.position.x,
-                y: e.position.y,
+        const result = actionResult(_inputAction, e.position) // does nothing atm
+
+        const hits =  Query.point(_engine.world.bodies, e.position)
+
+        if (hits.length > 0) {
+           hits.forEach(body => {
+                const node = _bodyToNodeMapping[body.id];
+
+                if (_actions.removeNode) {
+                    _actions.removeNode(node.id)
+                }
             })
-        }
-        */
-
-        Query.point(_engine.world.bodies, e.position).forEach(body => {
-            const node = _bodyToNodeMapping[body.id];
-
-            if (_actions.removeNode) {
-                _actions.removeNode(node.id)
+        } else {
+            if (_actions.addNode) {
+                _actions.addNode({
+                    title: "asd",
+                    x: e.position.x,
+                    y: e.position.y,
+                })
             }
-        })
+        }
 
         _inputAction = null
     }
