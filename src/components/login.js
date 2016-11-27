@@ -60,11 +60,14 @@ const Login = createClass({
     },
 
     handleSubmit: function(e) {
-        const { username, password } = this.state;
+        e.preventDefault()
 
-        console.log(username, password)
+        //const { tryCreateUser } = this.props
+        const { tryLogin } = this.props
+        const { username, password } = this.state
 
-        e.preventDefault();
+        //tryCreateUser(username, password)
+        tryLogin(username, password)
     }
 })
 

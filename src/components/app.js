@@ -1,6 +1,6 @@
 import React, { createClass } from "react"
 
-import Login from "./login"
+import Login from "../containers/login"
 
 const App = createClass({
     render: function() {
@@ -9,7 +9,7 @@ const App = createClass({
         return (
             <div>
                 <h1>Aivo v0.0.1</h1>
-                {/*authed*/true ? children : <Login/>}
+                {authed ? children : <Login/>}
             </div>
         )
     }

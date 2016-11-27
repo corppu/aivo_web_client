@@ -10,6 +10,8 @@ const initialState = fromJS({
 })
 
 export default function(state = initialState, action) {
+    console.log(action);
+
     switch (action.type) {
     case BACKEND_LOGIN:
         return state.set("authed", true)

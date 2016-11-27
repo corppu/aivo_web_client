@@ -5,7 +5,7 @@ export default function(store) {
 
     // backend actions
     function userSignedIn(data) {
-        store.dispatch(backendActions.login())
+        store.dispatch(backendActions.login(data))
     }
 
     function userSignedOut() {
@@ -36,7 +36,6 @@ export default function(store) {
         error,
 
 		updateBoard,
-		removeBoard,
 		
         updateNode,
         removeNode
