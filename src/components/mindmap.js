@@ -43,24 +43,47 @@ const MindMap = createClass({
                     ref={(canvas) => { this.canvas = canvas; }}
                     width={1000}
                     height={1000}
-                    onClick={this.handleClick}/>
+
+                    onMouseDown={this.handleMouseDown}
+                    onMouseUp={this.handleMouseUp}
+                    onMouseMove={this.handleMouseMove}/>
             </div>
         )
     },
 
-    handleClick: function(e) {
-        console.log(calculatePosition(this.canvas, e));
+    handleMouseDown: function(e) {
+        if (this.mindmap) {
+            this.mindmap.onTouchStart({
+                position: calculatePosition(this.canvas, e)
+            })
+        }
+    },
+
+    handleMouseUp: function(e) {
+        if (this.mindmap) {
+            this.mindmap.onTouchEnd({
+                position: calculatePosition(this.canvas, e)
+            })
+        }
+    },
+
+    handleMouseMove: function(e) {
+        if (this.mindmap) {
+            this.mindmap.onTouchMove({
+                position: calculatePosition(this.canvas, e)
+            })
+        }
     }
 })
 
 function calculatePosition(canvas, e) {
-    const { clientX, clientY } = e;
-    const bounds = canvas.getBoundingClientRect();
+    const { clientX, clientY } = e
+    const bounds = canvas.getBoundingClientRect()
 
     return {
         x: clientX - bounds.left,
         y: clientY - bounds.top
-    };
+    }
 }
 
 export default MindMap
