@@ -106,7 +106,7 @@ export default function() {
         const render = createRenderer(ctx);
 
         _nodes.forEach((node) => {
-            render.circle(ctx, {
+            render.circle({
                 x: node.body.position.x,
                 y: node.body.position.y,
                 r: node.radius
