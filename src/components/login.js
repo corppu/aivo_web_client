@@ -18,18 +18,24 @@ const Login = createClass({
                         Auth required!
                     </div>
                     <div>
-                        <input
-                            type="text"
-                            name="username"
-                            value={username}
-                            onChange={this.handleUsernameChange}/>
+                        <label>
+                            Username:
+                            <input
+                                type="text"
+                                name="username"
+                                value={username}
+                                onChange={this.handleUsernameChange}/>
+                        </label>
                     </div>
                     <div>
-                        <input
-                            type="password"
-                            name="password"
-                            value={password}
-                            onChange={this.handlePasswordChange}/>
+                        <label>
+                            Password:
+                            <input
+                                type="password"
+                                name="password"
+                                value={password}
+                                onChange={this.handlePasswordChange}/>
+                        </label>
                     </div>
                     <div>
                         <input
