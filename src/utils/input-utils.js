@@ -2,10 +2,11 @@ import { Vector } from "matter-js"
 
 import { getTimestamp } from "../utils/time-utils"
 
-export function createAction(position) {
+export function createAction(position, data = null) {
     return {
         startPosition: position,
-        startTime: getTimestamp()
+        startTime: getTimestamp(),
+        data
     }
 }
 
