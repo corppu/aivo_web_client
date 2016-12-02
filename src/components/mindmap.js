@@ -43,7 +43,10 @@ const MindMap = createClass({
                     ref={(canvas) => { this.canvas = canvas; }}
                     width={1000}
                     height={1000}
-
+					onTouchStart={this.handleTouchStart}
+					onTouchEnd={this.handleTouchEnd}
+					onTouchCancel={this.handleTouchCancel}
+					onTouchMove={this.handleTouchMove}
                     onMouseDown={this.handleInputDown}
                     onMouseUp={this.handleInputUp}
                     onMouseLeave={this.handleInputUp}
@@ -52,33 +55,71 @@ const MindMap = createClass({
         )
     },
 
-    handleInputDown: function(e) {
+	handleTouchStart: function(e) {
+		const { clientX, clientY } = e.touches[0]
         if (this.mindmap) {
             this.mindmap.onInputStart({
-                position: calculatePosition(this.canvas, e)
+                position: calculatePosition(this.canvas, clientX, clientY)
+            })
+        }		
+	},
+	
+	handleTouchEnd: function(e) {
+		const { clientX, clientY } = e.touches[0]
+        if (this.mindmap) {
+            this.mindmap.onInputEnd({
+                position: calculatePosition(this.canvas, clientX, clientY)
+            })
+        }
+	},
+	
+	handleTouchCancel: function(e) {
+		const { clientX, clientY } = e.touches[0]
+        if (this.mindmap) {
+            this.mindmap.onInputEnd({
+                position: calculatePosition(this.canvas, clientX, clientY)
+            })
+        }
+	},
+	
+	handleTouchMove: function(e) {
+		const { clientX, clientY } = e.touches[0]
+        if (this.mindmap) {
+            this.mindmap.onInputMove({
+                position: calculatePosition(this.canvas, clientX, clientY)
+            })
+        }	
+	},
+	
+    handleInputDown: function(e) {
+		const { clientX, clientY } = e
+        if (this.mindmap) {
+            this.mindmap.onInputStart({
+                position: calculatePosition(this.canvas, clientX, clientY)
             })
         }
     },
 
     handleInputUp: function(e) {
+		const { clientX, clientY } = e
         if (this.mindmap) {
             this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, e)
+                position: calculatePosition(this.canvas, clientX, clientY)
             })
         }
     },
 
     handleInputMove: function(e) {
+		const { clientX, clientY } = e
         if (this.mindmap) {
             this.mindmap.onInputMove({
-                position: calculatePosition(this.canvas, e)
+                position: calculatePosition(this.canvas, clientX, clientY)
             })
         }
     }
 })
 
-function calculatePosition(canvas, e) {
-    const { clientX, clientY } = e
+function calculatePosition(canvas, clientX, clientY) {
     const bounds = canvas.getBoundingClientRect()
 
     return {
