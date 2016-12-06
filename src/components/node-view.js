@@ -12,10 +12,14 @@ const NodeView = createClass({
                     left: 0,
                     width: "100vw",
                     height: "100vh",
-                    backgroundColor: "white",
-                    opacity: 0.95,
+                    backgroundColor: "rgba(255,255,255,0.95)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center"
                 }}>
-                TESTING! { id }
+                <div>
+                    TESTING! { id }
+                </div>
             </div>
         );
     }
