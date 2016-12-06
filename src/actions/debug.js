@@ -20,12 +20,33 @@ export function debugMoveRandomNode(boardID, count = 1) {
     }
 }
 
+const imgURLs = ["default",
+ "http://68.media.tumblr.com/d2e06250e2e9c965e3d77c4a169dba28/tumblr_inline_moeijfyPG81qz4rgp.png",
+ "http://worldartsme.com/images/mustache-tennis-ball-clipart-1.jpg",
+ "http://shushi168.com/data/out/19/37103947-ball.png",
+ "http://shushi168.com/data/out/190/37371806-profile-pictures.png",
+ "default"
+ ];
+
+ function makeTitle()
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 15; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+		if(0 === (Math.floor(Math.random() * 6))) return text;
+    return text;
+}
+
 export function debugAddRandomNode(boardID, count = 1) {
     return function (dispatch) {
         for (let i = 0; i < count; ++i) {
             addNode(boardID, {
+				title: makeTitle(),
                 x: tempRandomPosition(100, 900),
-                y: tempRandomPosition(100, 900)
+                y: tempRandomPosition(100, 900),
+				imgURL: imgURLs[Math.floor(Math.random() * 6)]
             })
         }
     }
