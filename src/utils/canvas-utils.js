@@ -41,8 +41,28 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         ctx.store()
     }
 
+    function text({
+            text = "",
+            x = 0,
+            y = 0,
+            align = "start",
+            baseline = "hanging",
+            color = "#000",
+            font = "24px Verdana"})        
+    {
+        ctx.font = font
+        ctx.fillStyle = color
+
+        ctx.textAlign = align
+        ctx.textBaseline = baseline
+
+        ctx.fillText(text.toString(), x, y)
+    }
+
     return {
         rect,
-        circle
+        circle,
+        line,
+        text
     }
 }
