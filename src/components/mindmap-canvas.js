@@ -26,34 +26,6 @@ export default function() {
 	  const delta = (Date.now() - _lastDate)/1000;
 	  _lastDate = Date.now();
 	  _fps = Math.round(1/delta);
-	} 
-
-	// The logic for drawing the node...
-	function drawNode(ctx, title = "Preview", x = 0, y = 0, r = 5, color = "blue") {
-			// Draw the circle
-			ctx.beginPath();
-			ctx.arc(x, y, r, 0, 2 * Math.PI);
-			ctx.fillStyle = color;
-			ctx.fill();
-			ctx.lineWidth = 1;
-			ctx.strokeStyle = "black";
-			ctx.stroke();
-
-			// Draw the first title letter inside the circle
-			ctx.fillStyle = "white"; 
-			ctx.font = "30px Verdana";
-			let msr = ctx.measureText(title.charAt(0).toUpperCase());
-			ctx.fillText(title.charAt(0).toUpperCase(), x - msr.width/2, y+r/2);
-		
-			// Draw the image once it is loaded instead of general drawing with the canvas context
-			//if(_imgLoaded)ctx.drawImage(_img, 0, 0, 240, 240, x-r, y-r, 2*r, 2*r);
-
-			// Draw the title
-			ctx.fillStyle = "black";
-			ctx.font="30px Verdana";
-			if(title.length > 10) title = title.substring(0, 10);
-			msr = ctx.measureText(title);
-			ctx.fillText(title, x-msr.width/2, y+3*r);
 	}
 
 	// Below some testing stuff for image drawing...
@@ -63,7 +35,6 @@ export default function() {
 	 _imgLoaded = true;
 	};
 	_img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/DU30_small_triambic_icosahedron.png/240px-DU30_small_triambic_icosahedron.png";
-	//
 
     function updateProps(props) {
         _actions.addNode = props.tryAddNode;
@@ -182,6 +153,8 @@ export default function() {
     }
 
     function update() {
+        updateFps(); // Just testing...
+
         for (let i = 0; i < _nodes.length; ++i) {
             const node = _nodes[i]
             const { radius, anchor, body } = node
@@ -202,33 +175,19 @@ export default function() {
         Engine.update(_engine)
     }
     
-	
-	// Just testing...
-	function drawFps(ctx) {
-		ctx.font="30px Verdana";
-		// Create gradient
-		var gradient=ctx.createLinearGradient(0,0,1000,0);
-		gradient.addColorStop("0","magenta");
-		gradient.addColorStop("0.5","blue");
-		gradient.addColorStop("1.0","red");
-		// Fill with gradient
-		ctx.fillStyle=gradient;
-		ctx.fillText(_fps.toString(),10,90);
-	}
-	
-	
     function render(ctx) {
-		updateFps(); // Just testing...
-		
-		// Clear old canvas context
 		clear(ctx);	
+
+        const draw = createRenderer(ctx)
 
 		// Draw the nodes
         _nodes.forEach((node) => {
-			if(_imgLoaded)drawNode(ctx, node.title, node.body.position.x, node.body.position.y, node.radius);	
+			if (_imgLoaded) {
+                drawNode(draw, node.title, node.body.position.x, node.body.position.y, node.radius);	
+            }
         });
 		
-		drawFps(ctx); // Just testing...
+		drawFps(draw, _fps);
     }
 
     return {
@@ -240,3 +199,46 @@ export default function() {
         render
     }
 }
+
+function drawFps(draw, fps) {
+    draw.text({
+        text: fps,
+        x: 5,
+        y: 5,
+        baseline: "hanging"
+    })
+}
+
+function drawNode(draw, title = "Preview", x = 0, y = 0, r = 5) {
+
+    draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
+
+    // draw the first title letter inside the circle
+    const content = title.charAt(0).toUpperCase()
+    draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"})
+
+    // Draw the image once it is loaded instead of general drawing with the canvas context
+    //if(_imgLoaded)ctx.drawImage(_img, 0, 0, 240, 240, x-r, y-r, 2*r, 2*r);
+
+    // draw the title
+    if (title.length > 10) {
+        title = title.substring(0, 10);
+    }
+    draw.text({text: title, x, y: y + r * 2,
+            baseline: "middle", align: "center"})
+}
+
+ /*
+    ctx.font="30px Verdana";
+    
+    // Create gradient
+    var gradient=ctx.createLinearGradient(0,0,1000,0);
+    gradient.addColorStop("0","magenta");
+    gradient.addColorStop("0.5","blue");
+    gradient.addColorStop("1.0","red");
+
+    // Fill with gradient
+    ctx.fillStyle=gradient;
+    ctx.fillText(_fps.toString(),10,90);
+*/
+
