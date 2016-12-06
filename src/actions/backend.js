@@ -2,30 +2,31 @@ import {
     BACKEND_LOGIN,
     BACKEND_LOGOUT,
     BACKEND_ERROR
-} from "../constants/action-types"
+} from "../constants/action-types";
 
 import {
     createUserWithEmailAndSignIn,
     signInWithEmail,
     createBoard,
     openBoard,
+    closeBoard,
     addNode
-} from "../backend/backend-adapter"
+} from "../backend/backend-adapter";
 
 export function tryCreateUser(email, password) {
     return function() {
-        createUserWithEmailAndSignIn(email, password)
-    }
+        createUserWithEmailAndSignIn(email, password);
+    };
 }
 
 export function tryLogin(email, password) {
     return function() {
-        signInWithEmail(email, password)
+        signInWithEmail(email, password);
 
         // dirty hack for board creation/opening
-        setTimeout(function() {
+        //setTimeout(function() {
             //createBoard({title:"stuff"})
-            openBoard("-KX_x5LAZaLLVFp1drzg", "default")
+            //openBoard("-KX_x5LAZaLLVFp1drzg", "default")
 
             /*
             setTimeout(function() {
@@ -36,18 +37,33 @@ export function tryLogin(email, password) {
                 })
             }, 1000)
             */
-        }, 1000)
+        //}, 1000)
+    };
+}
+
+export function tryOpenBoard(boardID) {
+    return function(dispatch, getState) {
+        const { mindmap } = getState();
+        
+        const currBoardID = mindmap.get("boardID");
+        if (boardID === currBoardID) {
+            return;
+        }
+        if (currBoardID) {
+            closeBoard(currBoardID);
+        }
+        openBoard(boardID, "default"); // TODO: resolve proper session ID
     }
 }
 
 export function login(user) {
-    return { type: BACKEND_LOGIN, user }
+    return { type: BACKEND_LOGIN, user };
 }
 
 export function logout() {
-    return { type: BACKEND_LOGOUT }
+    return { type: BACKEND_LOGOUT };
 }
 
 export function error(err) {
-    return { type: BACKEND_ERROR, err }
+    return { type: BACKEND_ERROR, err };
 }
