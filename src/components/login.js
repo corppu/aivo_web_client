@@ -13,7 +13,10 @@ const Login = createClass({
 
         return (
             <div>
-                <form onSubmit={this.handleSubmit}>
+                <form
+                    name="login"
+                    onSubmit={this.handleSubmit}>
+
                     <div>
                         Auth required!
                     </div>
@@ -62,11 +65,9 @@ const Login = createClass({
     handleSubmit: function(e) {
         e.preventDefault();
 
-        //const { tryCreateUser } = this.props;
         const { tryLogin } = this.props;
         const { username, password } = this.state;
 
-        //tryCreateUser(username, password);
         tryLogin(username, password);
     }
 });

@@ -1,6 +1,6 @@
-import React, { createClass } from "react"
+import React, { createClass } from "react";
 
-import Login from "../containers/login"
+import Unauthed from "./unauthed";
 
 const App = createClass({
     render: function() {
@@ -9,10 +9,10 @@ const App = createClass({
         return (
             <div>
                 <h1>Aivo v0.0.1</h1>
-                {authed ? children : <Login/>}
+                {authed ? children : <Unauthed/>}
             </div>
-        )
+        );
     }
 })
 
-export default App
+export default App;
