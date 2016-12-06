@@ -238,14 +238,14 @@ function attachBoardListeners(boardId) {
 export function openBoardList() {
 	var userBoardsRef = firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards");
 	userBoardsRef.on("child_added", function(data) {
-		const boardId = data.val();
+		const boardId = data.key;
 		let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
 		metaRef.on("value", function(data) {
 			_storeAdapter.updateListItem(boardId, data.val());
 		});
 	});
 	userBoardsRef.on("child_removed", function(data) {
-		const boardId = data.val();
+		const boardId = data.key;
 		let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
 		metaRef.off();
 		_storeAdapter.removeListItem(boardId);
