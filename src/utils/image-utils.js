@@ -14,7 +14,7 @@ export function createImageCache() {
 */
 	function addImg(src) {
 		if(typeof src !== "string") {
-			console.log("invalid src");
+			// console.log("invalid src");
 			return;
 		}
 		
@@ -30,7 +30,7 @@ export function createImageCache() {
 	
 	function getImg(src) {
 		if(typeof src !== "string") {
-			console.log("invalid src");
+			// console.log("invalid src");
 			return null;
 		}
 		

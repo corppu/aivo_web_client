@@ -56,13 +56,14 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         ctx.arc(px, py, r, 0, 2 * Math.PI)
 		ctx.closePath();
 		ctx.clip();
-		ctx.drawImage(img, px, py);
-        if (strokeWidth > 0) {
-            ctx.strokeStyle = strokeColor || color
-            ctx.lineWidth = strokeWidth
-            ctx.stroke()
-        }
-				ctx.restore();
+		ctx.drawImage(img, 0, 0, 240, 240, px-r, py-r, 2*r, 2*r);
+		ctx.stroke();
+        // if (strokeWidth > 0) {
+            // ctx.strokeStyle = strokeColor || color
+            // ctx.lineWidth = strokeWidth
+            // ctx.stroke()
+        // }
+		ctx.restore();
 
     }
 	

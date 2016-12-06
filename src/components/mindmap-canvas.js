@@ -12,7 +12,8 @@ export default function() {
     let _actions = {
         addNode: null,
         updateNode: null,
-        removeNode: null
+        removeNode: null,
+        openNode: null
     };	
 
 	// Just testing....
@@ -43,6 +44,7 @@ export default function() {
         _actions.addNode = props.tryAddNode;
         _actions.updateNode = props.tryUpdateNode;
         _actions.removeNode = props.tryRemoveNode;
+        _actions.openNode = props.openNode;
         
         let propsNodes = new Map(props.nodes)
 
@@ -119,18 +121,28 @@ export default function() {
         }
         const result = actionResult(_inputAction, e.position) // does nothing atm
 
-        /*
+        
         const hits = Query.point(_engine.world.bodies, e.position)
 
         if (hits.length > 0) {
-           hits.forEach(body => {
+            /*
+            hits.forEach(body => {
                 const node = _bodyToNodeMapping[body.id];
 
                 if (_actions.removeNode) {
                     _actions.removeNode(node.id)
                 }
             })
-        } else {
+            */
+
+            const node = _bodyToNodeMapping[hits[0].id];
+            if (_actions.openNode) {
+                _actions.openNode(node.id);
+            }
+
+        }
+        /*
+        else {
             if (_actions.addNode) {
                 _actions.addNode({
                     title: "asd",
@@ -149,13 +161,22 @@ export default function() {
             return;
         }
         if (_inputAction.data && _actions.updateNode) {
-            const { id, title } = _inputAction.data
+            const { id, title, imgURL } = _inputAction.data
 
-            _actions.updateNode(id, {
-                title,
-                x: e.position.x,
-                y: e.position.y,
-            })
+			if(imgURL) {
+				_actions.updateNode(id, {
+					title,
+					x: e.position.x,
+					y: e.position.y,
+					imgURL
+				})
+			} else {
+				_actions.updateNode(id, {
+					title,
+					x: e.position.x,
+					y: e.position.y,
+				})
+			}
         }
     }
 
@@ -214,9 +235,15 @@ function drawFps(draw, fps) {
 
 function drawNode(draw, img, title = "Preview", x = 0, y = 0, r = 5) {
 
-    if(img) draw.circleImg({img, x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
-	else draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
-
+	
+    if(img) 
+	{
+		draw.circleImg({img, x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
+	}
+	else 
+	{
+		draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
+	}
     // draw the first title letter inside the circle
     const content = title.charAt(0).toUpperCase()
     draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"})

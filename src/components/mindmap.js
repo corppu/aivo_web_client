@@ -3,6 +3,11 @@ import React, { createClass } from "react"
 import createMindmap from "./mindmap-canvas"
 
 const MindMap = createClass({
+    componentWillMount: function() {
+        const { tryOpenBoard } = this.props;
+        tryOpenBoard();
+    },
+
     componentDidMount: function() {
         const ctx = this.canvas.getContext("2d")
         
@@ -26,12 +31,17 @@ const MindMap = createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
+        const { tryOpenBoard } = nextProps;
+        tryOpenBoard();
+
         if (this.mindmap) {
             this.mindmap.updateProps(nextProps)
         }
     },
     
-    render: function() {    
+    render: function() {
+        const { children } = this.props;
+
         return (
             <div
                 style={{
@@ -51,6 +61,8 @@ const MindMap = createClass({
                     onMouseUp={this.handleInputUp}
                     onMouseLeave={this.handleInputUp}
                     onMouseMove={this.handleInputMove}/>
+
+                {children}
             </div>
         )
     },
