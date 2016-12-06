@@ -1,21 +1,21 @@
 import React, { createClass } from "react";
 
-const Login = createClass({
+const Register = createClass({
     getInitialState: function() {
         return {
             username: "",
             password: ""
-        };
+        }
     },
-
+    
     render: function() {
         const { username, password } = this.state;
-
+    
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <div>
-                        Auth required!
+                        Create new user?
                     </div>
                     <div>
                         <label>
@@ -40,14 +40,14 @@ const Login = createClass({
                     <div>
                         <input
                             type="submit"
-                            value="login"/>
+                            value="register"/>
                     </div>
                 </form>
             </div>
         );
     },
 
-    handleUsernameChange: function(e) {
+     handleUsernameChange: function(e) {
         this.setState({
             username: e.target.value
         });
@@ -62,13 +62,11 @@ const Login = createClass({
     handleSubmit: function(e) {
         e.preventDefault();
 
-        //const { tryCreateUser } = this.props;
-        const { tryLogin } = this.props;
+        const { tryCreateUser } = this.props;
         const { username, password } = this.state;
 
-        //tryCreateUser(username, password);
-        tryLogin(username, password);
+        tryCreateUser(username, password);
     }
 });
 
-export default Login;
+export default Register;

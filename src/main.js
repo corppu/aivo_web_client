@@ -4,13 +4,14 @@ import thunk from "redux-thunk";
 import React, { createClass } from "react";
 import { render } from "react-dom";
 import { Provider } from "react-redux";
-import { Router, Route, IndexRedirect, browserHistory } from "react-router";
+import { Router, Route, IndexRoute, browserHistory } from "react-router";
 import { syncHistoryWithStore, routerReducer, routerMiddleware } from "react-router-redux";
 
 import authReducer from "./reducers/auth";
 import mindmapReducer from "./reducers/mindmap";
 
 import App from "./containers/app";
+import BoardList from "./containers/board-list";
 import MindMap from "./containers/mindmap";
 import NodeView from "./containers/node-view";
 
@@ -40,7 +41,7 @@ render(
     <Provider store={store}>
         <Router history={history}>
             <Route path="/" component={App}>
-                <IndexRedirect to="/board/-KX_x5LAZaLLVFp1drzg"/>
+                <IndexRoute component={BoardList}/>
                 <Route path="/board/:boardID" component={MindMap}>
                     <Route path="/board/:boardID/:nodeID" component={NodeView}/>
                 </Route>

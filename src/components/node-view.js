@@ -2,7 +2,7 @@ import React, { createClass } from "react";
 
 const NodeView = createClass({
     render: function() {
-        const { id } = this.props;
+        const { node } = this.props;
 
         return (
             <div
@@ -17,9 +17,15 @@ const NodeView = createClass({
                     justifyContent: "center",
                     alignItems: "center"
                 }}>
-                <div>
-                    TESTING! { id }
-                </div>
+                { node ? 
+                    <div
+                        style={{
+                            padding: 20,
+                            backgroundColor: "white"
+                        }}>
+                        TESTING! { node.title }
+                    </div>
+                : null }
             </div>
         );
     }
