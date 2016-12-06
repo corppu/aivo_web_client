@@ -28,17 +28,15 @@ export default function(store) {
     function removeNode(id) {
         store.dispatch(mindmapActions.removeNode(id))
     }
-	
 
 	// list actions
 	function updateListItem(id, data) {
-		
+		store.dispatch(backendActions.listUpdate(id, data));
 	}
 	
 	function removeListItem(id) {
-		
+		store.dispatch(backendActions.listRemove(id));
 	}
-	
 	
     return {
         userSignedIn,

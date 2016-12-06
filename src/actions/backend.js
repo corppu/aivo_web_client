@@ -1,7 +1,9 @@
 import {
     BACKEND_LOGIN,
     BACKEND_LOGOUT,
-    BACKEND_ERROR
+    BACKEND_ERROR,
+    LIST_UPDATE,
+    LIST_REMOVE
 } from "../constants/action-types";
 
 import {
@@ -66,4 +68,12 @@ export function logout() {
 
 export function error(err) {
     return { type: BACKEND_ERROR, err };
+}
+
+export function listUpdate(id, data) {
+    return { type: LIST_UPDATE, id, data };
+}
+
+export function listRemove(id) {
+    return { type: LIST_REMOVE, id };
 }
