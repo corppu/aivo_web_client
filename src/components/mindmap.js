@@ -55,8 +55,9 @@ const MindMap = createClass({
         )
     },
 
+	
 	handleTouchStart: function(e) {
-		const { clientX, clientY } = e.touches[0]
+		const { clientX, clientY } = e.changedTouches[0]
         if (this.mindmap) {
             this.mindmap.onInputStart({
                 position: calculatePosition(this.canvas, clientX, clientY)
@@ -65,7 +66,7 @@ const MindMap = createClass({
 	},
 	
 	handleTouchEnd: function(e) {
-		const { clientX, clientY } = e.touches[0]
+		const { clientX, clientY } = e.changedTouches[0]
         if (this.mindmap) {
             this.mindmap.onInputEnd({
                 position: calculatePosition(this.canvas, clientX, clientY)
@@ -74,7 +75,7 @@ const MindMap = createClass({
 	},
 	
 	handleTouchCancel: function(e) {
-		const { clientX, clientY } = e.touches[0]
+		const { clientX, clientY } = e.changedTouches[0]
         if (this.mindmap) {
             this.mindmap.onInputEnd({
                 position: calculatePosition(this.canvas, clientX, clientY)
@@ -83,7 +84,7 @@ const MindMap = createClass({
 	},
 	
 	handleTouchMove: function(e) {
-		const { clientX, clientY } = e.touches[0]
+		const { clientX, clientY } = e.changedTouches[0]
         if (this.mindmap) {
             this.mindmap.onInputMove({
                 position: calculatePosition(this.canvas, clientX, clientY)
