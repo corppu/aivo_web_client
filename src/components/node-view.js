@@ -5,7 +5,16 @@ const NodeView = createClass({
         const { id } = this.props;
 
         return (
-            <div>
+            <div
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    backgroundColor: "white",
+                    opacity: 0.95,
+                }}>
                 TESTING! { id }
             </div>
         );
