@@ -120,7 +120,17 @@ export default function() {
             return
         }
         const result = actionResult(_inputAction, e.position) // does nothing atm
-
+		if(result.deltaMagnitude < 10 && result.duration > 2) {
+			if (_actions.addNode) {
+				_actions.addNode({
+					title: Math.random().toString(36).substring(Math.random() * 20 + 1),
+					type: "undefined",
+					imgURL: "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png",
+					x: e.position.x,
+					y: e.position.y
+				});
+			}
+		}
         
         const hits = Query.point(_engine.world.bodies, e.position)
 
