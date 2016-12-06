@@ -50,10 +50,11 @@ render(
 , document.getElementById("app-root"));
 
 // add some test data
-store.dispatch(debugAddRandomNode("-KX_x5LAZaLLVFp1drzg", 5))
+//store.dispatch(debugAddRandomNode("-KX_x5LAZaLLVFp1drzg", 5))
 
-setInterval(() => {
+/*setInterval(() => {
     //store.dispatch(debugMoveRandomNode("-KX_x5LAZaLLVFp1drzg", 2))
 	//store.dispatch(debugAddRandomNode("-KX_x5LAZaLLVFp1drzg", 1))
 
 }, 1000)
+*/

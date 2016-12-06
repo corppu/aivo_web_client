@@ -14,7 +14,7 @@ export default function() {
         updateNode: null,
         removeNode: null,
         openNode: null
-    };	
+    };
 
 	// Just testing....
 	let _lastDate;
@@ -244,6 +244,9 @@ function drawNode(draw, img, title = "Preview", x = 0, y = 0, r = 5) {
 	{
 		draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
 	}
+	
+	
+	
     // draw the first title letter inside the circle
     const content = title.charAt(0).toUpperCase()
     draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"})

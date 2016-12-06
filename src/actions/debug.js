@@ -44,12 +44,16 @@ export function debugAddRandomNode(boardID, count = 1) {
         for (let i = 0; i < count; ++i) {
             addNode(boardID, {
 				title: makeTitle(),
+				type: "undefined",
                 x: tempRandomPosition(100, 900),
                 y: tempRandomPosition(100, 900),
 				imgURL: imgURLs[Math.floor(Math.random() * 6)]
             })
         }
     }
+}
+
+export function debugRemoveNodes(boardID, number = 0) {
 }
 
 export function debugRemoveRandomNode(boardID) {
