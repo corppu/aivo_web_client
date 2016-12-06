@@ -205,6 +205,10 @@ export function openBoard(boardId, sessionId) {
 	});
 }
 
+export function closeBoard(boardId) {
+	detachBoardListeners(boardId);
+}
+
 
 function attachBoardListeners(boardId) {
 	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
@@ -227,7 +231,7 @@ function attachBoardListeners(boardId) {
 }
 
 function detachBoardListeners(boardId) {
-	firebase.database().ref("boards/"+boardId + "/nodes").off();
+	firebase.database().ref("boards/"+boardId+"/nodes").off();
 	firebase.database().ref("boards/"+boardId+"/meta").off();
 }
 
