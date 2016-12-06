@@ -11,7 +11,8 @@ export default function() {
     let _actions = {
         addNode: null,
         updateNode: null,
-        removeNode: null
+        removeNode: null,
+        openNode: null
     };	
 
 	// Just testing....
@@ -40,6 +41,7 @@ export default function() {
         _actions.addNode = props.tryAddNode;
         _actions.updateNode = props.tryUpdateNode;
         _actions.removeNode = props.tryRemoveNode;
+        _actions.openNode = props.openNode;
         
         let propsNodes = new Map(props.nodes)
 
@@ -112,17 +114,25 @@ export default function() {
         }
         const result = actionResult(_inputAction, e.position) // does nothing atm
 
-        /*
+        
         const hits = Query.point(_engine.world.bodies, e.position)
 
         if (hits.length > 0) {
-           hits.forEach(body => {
+            /*
+            hits.forEach(body => {
                 const node = _bodyToNodeMapping[body.id];
 
                 if (_actions.removeNode) {
                     _actions.removeNode(node.id)
                 }
             })
+            */
+
+            const node = _bodyToNodeMapping[hits[0].id];
+            if (_actions.openNode) {
+                _actions.openNode(node.id);
+            }
+
         } else {
             if (_actions.addNode) {
                 _actions.addNode({
@@ -132,7 +142,7 @@ export default function() {
                 })
             }
         }
-        */
+        
 
         _inputAction = null
     }

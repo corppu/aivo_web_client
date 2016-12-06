@@ -1,22 +1,23 @@
-import { createStore, combineReducers, applyMiddleware } from "redux"
-import thunk from "redux-thunk"
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
 
-import React, { createClass } from "react"
-import { render } from "react-dom"
-import { Provider } from "react-redux"
-import { Router, Route, IndexRedirect, browserHistory } from "react-router"
-import { syncHistoryWithStore, routerReducer } from "react-router-redux"
+import React, { createClass } from "react";
+import { render } from "react-dom";
+import { Provider } from "react-redux";
+import { Router, Route, IndexRedirect, browserHistory } from "react-router";
+import { syncHistoryWithStore, routerReducer, routerMiddleware } from "react-router-redux";
 
-import authReducer from "./reducers/auth"
-import mindmapReducer from "./reducers/mindmap"
+import authReducer from "./reducers/auth";
+import mindmapReducer from "./reducers/mindmap";
 
-import App from "./containers/app"
-import MindMap from "./containers/mindmap"
+import App from "./containers/app";
+import MindMap from "./containers/mindmap";
+import NodeView from "./containers/node-view";
 
-import createStoreAdapter from "./backend/store-adapter"
-import { init } from "./backend/backend-adapter"
+import createStoreAdapter from "./backend/store-adapter";
+import { init } from "./backend/backend-adapter";
 
-import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug"
+import { debugAddRandomNode, debugMoveRandomNode } from "./actions/debug";
 
 const store = createStore(
 	combineReducers({
@@ -25,25 +26,28 @@ const store = createStore(
         routing: routerReducer
     }),
     applyMiddleware(
-        thunk
+        thunk,
+        routerMiddleware(browserHistory)
     )
 );
 
-const storeAdapter = createStoreAdapter(store)
-init(storeAdapter)
+const storeAdapter = createStoreAdapter(store);
+init(storeAdapter);
 
-const history = syncHistoryWithStore(browserHistory, store)
+const history = syncHistoryWithStore(browserHistory, store);
 
 render(
     <Provider store={store}>
         <Router history={history}>
             <Route path="/" component={App}>
                 <IndexRedirect to="/board/-KX_x5LAZaLLVFp1drzg"/>
-                <Route path="/board/:boardID" component={MindMap}/>
+                <Route path="/board/:boardID" component={MindMap}>
+                    <Route path="/board/:boardID/:nodeID" component={NodeView}/>
+                </Route>
             </Route>
         </Router>
     </Provider>
-, document.getElementById("app-root"))
+, document.getElementById("app-root"));
 
 // add some test data
 //store.dispatch(debugAddRandomNode(10))
