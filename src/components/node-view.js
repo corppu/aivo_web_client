@@ -23,7 +23,7 @@ const NodeView = createClass({
                             padding: 20,
                             backgroundColor: "white"
                         }}>
-                        TESTING! { node.get("title") }
+                        TESTING! { node.title }
                     </div>
                 : null }
             </div>
