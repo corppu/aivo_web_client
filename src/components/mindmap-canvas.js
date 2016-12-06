@@ -2,6 +2,7 @@ import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js
 
 import { clear, createRenderer } from "../utils/canvas-utils" 
 import { createAction, actionResult } from "../utils/input-utils" 
+import { createImageCache } from "../utils/image-utils"
 
 export default function() {
     let _engine = Engine.create()
@@ -28,6 +29,8 @@ export default function() {
 	  _fps = Math.round(1/delta);
 	}
 
+	let _imgCache = createImageCache();
+	
 	// Below some testing stuff for image drawing...
 	let _imgLoaded = false;
 	let _img = new Image();
@@ -82,10 +85,14 @@ export default function() {
             const node = {
                 id,
                 title: propsNode.get("title"),
+				imgURL: propsNode.get("imgURL"),
                 radius,
                 anchor,
                 body
             }
+			
+			if(!_imgCache.getImg(node.imgURL)) _imgCache.addImg(node.imgURL);
+			
             _bodyToNodeMapping[body.id] = node
             
             World.add(_engine.world, body)
@@ -181,11 +188,7 @@ export default function() {
         const draw = createRenderer(ctx)
 
 		// Draw the nodes
-        _nodes.forEach((node) => {
-			if (_imgLoaded) {
-                drawNode(draw, node.title, node.body.position.x, node.body.position.y, node.radius);	
-            }
-        });
+        _nodes.forEach(function(node){drawNode(draw, _imgCache.getImg(node.imgURL), node.title, node.body.position.x, node.body.position.y, node.radius)});
 		
 		drawFps(draw, _fps);
     }
@@ -209,9 +212,10 @@ function drawFps(draw, fps) {
     })
 }
 
-function drawNode(draw, title = "Preview", x = 0, y = 0, r = 5) {
+function drawNode(draw, img, title = "Preview", x = 0, y = 0, r = 5) {
 
-    draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
+    if(img) draw.circleImg({img, x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
+	else draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
 
     // draw the first title letter inside the circle
     const content = title.charAt(0).toUpperCase()

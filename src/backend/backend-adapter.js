@@ -226,7 +226,7 @@ function attachBoardListeners(boardId) {
 	});
 }
 
-function detachBoardListeners(boardId) {
+export function detachBoardListeners(boardId) {
 	firebase.database().ref("boards/"+boardId + "/nodes").off();
 	firebase.database().ref("boards/"+boardId+"/meta").off();
 }
