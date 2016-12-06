@@ -28,7 +28,7 @@ const imgURLs = ["default",
  "default"
  ];
 
- function makeTitle()
+function makeTitle()
 {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
