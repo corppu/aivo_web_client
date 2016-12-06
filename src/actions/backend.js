@@ -24,23 +24,15 @@ export function tryCreateUser(email, password) {
 export function tryLogin(email, password) {
     return function() {
         signInWithEmail(email, password);
-
-        // dirty hack for board creation/opening
-        //setTimeout(function() {
-            //createBoard({title:"stuff"})
-            //openBoard("-KX_x5LAZaLLVFp1drzg", "default")
-
-            /*
-            setTimeout(function() {
-                addNode("-KX_x5LAZaLLVFp1drzg", {
-                    x: 100,
-                    y: 100,
-                    title: "persereikä"
-                })
-            }, 1000)
-            */
-        //}, 1000)
     };
+}
+
+export function tryCreateBoard(title) {
+    return function() {
+        createBoard({
+            title
+        });
+    }
 }
 
 export function tryOpenBoard(boardID) {
