@@ -133,7 +133,9 @@ export default function() {
                 _actions.openNode(node.id);
             }
 
-        } else {
+        }
+        /*
+        else {
             if (_actions.addNode) {
                 _actions.addNode({
                     title: "asd",
@@ -142,7 +144,7 @@ export default function() {
                 })
             }
         }
-        
+        */
 
         _inputAction = null
     }
