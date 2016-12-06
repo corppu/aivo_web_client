@@ -176,7 +176,7 @@ export function createBoard(boardData, nodes = null) {
 			console.warn(error.message);
 			_storeAdapter.error(error.code);
 		} else {
-			firebase.database().ref("users/"+user.uid+"/boards/").child(boardId).setValue(true);
+			firebase.database().ref("users/"+user.uid+"/boards/").child(boardId).set(true);
 		}
 	});
 }
