@@ -4,7 +4,7 @@ import thunk from "redux-thunk"
 import React, { createClass } from "react"
 import { render } from "react-dom"
 import { Provider } from "react-redux"
-import { Router, Route, IndexRoute, browserHistory } from "react-router"
+import { Router, Route, IndexRedirect, browserHistory } from "react-router"
 import { syncHistoryWithStore, routerReducer } from "react-router-redux"
 
 import authReducer from "./reducers/auth"
@@ -38,7 +38,8 @@ render(
     <Provider store={store}>
         <Router history={history}>
             <Route path="/" component={App}>
-                <IndexRoute component={MindMap}/>
+                <IndexRedirect to="/board/-KX_x5LAZaLLVFp1drzg"/>
+                <Route path="/board/:boardID" component={MindMap}/>
             </Route>
         </Router>
     </Provider>
