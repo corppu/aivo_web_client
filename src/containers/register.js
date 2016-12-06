@@ -4,4 +4,4 @@ import Register from "../components/register";
 
 import { tryCreateUser } from "../actions/backend";
 
-export default connect(null, { tryLogin })(Register);
+export default connect(null, { tryCreateUser })(Register);

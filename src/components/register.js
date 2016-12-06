@@ -13,7 +13,10 @@ const Register = createClass({
     
         return (
             <div>
-                <form onSubmit={this.handleSubmit}>
+                <form
+                    name="register"
+                    onSubmit={this.handleSubmit}>
+
                     <div>
                         Create new user?
                     </div>
