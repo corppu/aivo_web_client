@@ -39,6 +39,33 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         }
     }
 
+	function circleImg({
+            img,
+			x = 0,
+            y = 0,
+            r = 5,
+            color = "#000",
+            strokeColor = null,
+            strokeWidth = 0} = {})
+        {
+        const px = x - camera.x
+        const py = y - camera.y
+
+		ctx.save();
+        ctx.beginPath()
+        ctx.arc(px, py, r, 0, 2 * Math.PI)
+		ctx.closePath();
+		ctx.clip();
+		ctx.drawImage(img, px, py);
+        if (strokeWidth > 0) {
+            ctx.strokeStyle = strokeColor || color
+            ctx.lineWidth = strokeWidth
+            ctx.stroke()
+        }
+				ctx.restore();
+
+    }
+	
     function line({start = {x: 0, y: 0}, end = {x: 0, y: 0}, color = "#000"} = {}) {
         const sx = start.x - camera.x
         const sy = start.y - camera.y
@@ -78,6 +105,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
     return {
         rect,
         circle,
+		circleImg,
         line,
         text,
         
