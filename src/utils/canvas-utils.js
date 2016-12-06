@@ -14,7 +14,14 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         ctx.fillRect(px - w/2, py - h/2, w, h)
     }
 
-    function circle({x = 0, y = 0, r = 5, color = "#000"} = {}) {
+    function circle({
+            x = 0,
+            y = 0,
+            r = 5,
+            color = "#000",
+            strokeColor = null,
+            strokeWidth = 0} = {})
+        {
         const px = x - camera.x
         const py = y - camera.y
 
@@ -23,8 +30,13 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
 
         ctx.fillStyle = color
         ctx.fill()
-        ctx.strokeStyle = color
-        ctx.stroke()
+
+        if (strokeWidth > 0) {
+            ctx.strokeStyle = strokeColor || color
+            ctx.lineWidth = strokeWidth
+
+            ctx.stroke()
+        }
     }
 
     function line({start = {x: 0, y: 0}, end = {x: 0, y: 0}, color = "#000"} = {}) {
@@ -38,7 +50,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         ctx.lineTo(ex, ey)
 
         ctx.strokeStyle = color
-        ctx.store()
+        ctx.stroke()
     }
 
     function text({
@@ -46,9 +58,9 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
             x = 0,
             y = 0,
             align = "start",
-            baseline = "hanging",
+            baseline = "alphabetic",
             color = "#000",
-            font = "24px Verdana"})        
+            font = "24px Verdana"} = {})        
     {
         ctx.font = font
         ctx.fillStyle = color
@@ -59,10 +71,16 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         ctx.fillText(text.toString(), x, y)
     }
 
+    function measureText(text) {
+        return ctx.measureText(text)
+    }
+
     return {
         rect,
         circle,
         line,
-        text
+        text,
+        
+        measureText
     }
 }
