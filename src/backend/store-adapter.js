@@ -30,6 +30,16 @@ export default function(store) {
     }
 	
 
+	// list actions
+	function updateListItem(id, data) {
+		
+	}
+	
+	function removeListItem(id) {
+		
+	}
+	
+	
     return {
         userSignedIn,
         userSignedOut,
@@ -38,6 +48,9 @@ export default function(store) {
 		updateBoard,
 		
         updateNode,
-        removeNode
+        removeNode,
+		
+		updateListItem,
+		removeListItem
     }
 }

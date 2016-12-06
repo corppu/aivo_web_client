@@ -176,9 +176,14 @@ export function createBoard(boardData, nodes = null) {
 			console.warn(error.message);
 			_storeAdapter.error(error.code);
 		} else {
-			openBoard(boardId, "default");
+			firebase.database().ref("users/"+user.uid+"/boards/"+boardId).setValue(true);
 		}
 	});
+}
+
+export function removeBoard(boardId) {
+	firebase.database().ref("boards/"+boardId).remove();
+	firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards/"+boardId).remove();
 }
 
 
@@ -228,6 +233,35 @@ function attachBoardListeners(boardId) {
 	nodesRef.on("child_removed", function(data) {
 		_storeAdapter.removeNode(data.key, data.val());
 	});
+}
+
+export function openBoardList() {
+	var userBoardsRef = firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards");
+	userBoardsRef.on("child_added", function(data) {
+		const boardId = data.val();
+		let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+		metaRef.on("value", function(data) {
+			_storeAdapter.updateListItem(boardId, data.val());
+		});
+	});
+	userBoardsRef.on("child_removed", function(data) {
+		const boardId = data.val();
+		let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+		metaRef.off();
+		_storeAdapter.removeListItem(boardId);
+	});	
+}
+
+export function closeBoardList() {
+	var userBoardsRef = firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards");
+	ref.once("value", function(snapshot) {
+		snapshot.forEach(function(keySnapshot) {
+			const boardId = keySnapshot.key;
+			let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+			metaRef.off();
+		});
+	});
+	userBoardsRef.off();
 }
 
 export function detachBoardListeners(boardId) {
