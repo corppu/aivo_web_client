@@ -34,7 +34,7 @@ export function createImageCache() {
 			return null;
 		}
 		
-		console.log("returning image mapped to: " + src);
+		//console.log("returning image mapped to: " + src);
 		//let tm = tms.get(src);
 		//if(tm === undefined) return tm;
 		//tm = new Date().now();
