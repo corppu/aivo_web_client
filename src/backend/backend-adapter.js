@@ -39,7 +39,8 @@ export function init(storeAdapter) {
     };
     firebase.initializeApp(config);
     _storeAdapter = storeAdapter;
-	loadDefaultBoard();
+	
+	//loadDefaultBoard();
 }
 
 /** Lataa vakiotaulun palvelimelta **/
