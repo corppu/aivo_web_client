@@ -1,4 +1,5 @@
 import React, { createClass } from "react";
+import { fromJS } from "immutable";
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -28,7 +29,8 @@ const NodeView = createClass({
     },
 
     render: function() {
-        const { node, goToParentBoard } = this.props;
+        const { goToParentBoard } = this.props;
+        const { node } = this.state;
 
         return (
             <div
@@ -52,7 +54,9 @@ const NodeView = createClass({
                             backgroundColor: "#fff",
                             boxShadow: "0px 5px 15px 2.5px #ddd",
                             overflow: "hidden"
-                        }}>
+                        }}
+                        onClick={ (e) => e.stopPropagation() }>
+
                         <div
                             style={{
                                 padding: "10px 20px", 
@@ -92,8 +96,35 @@ const NodeView = createClass({
         }    
         default:
             return (
-                <div>typeless node</div>
+                <div>
+                    <div>Select node type</div>
+                    <button
+                        onClick={ () => this.setNodeType(NODE_TYPE_TEXT) }>
+                        Text
+                    </button>
+                    <button
+                        onClick={ () => this.setNodeType(NODE_TYPE_IMAGE) }>
+                        Image
+                    </button>
+                </div>
             );
+        }
+    },
+
+    setNodeType: function(type) {
+        const { node } = this.state;
+
+        this.updateNodeData(node.set("type", type));
+    },
+
+    updateNodeData: function(newNode) {
+        const { node, updateNode } = this.props;
+        
+        if (newNode !== node) {
+            this.setState({
+                node: newNode
+            });
+            updateNode(newNode.toJS());
         }
     }
 });
