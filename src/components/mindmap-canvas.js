@@ -1,5 +1,9 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
+import {
+    NODE_TYPE_UNDEFINED
+} from "../constants/types";
+
 import { clear, createRenderer } from "../utils/canvas-utils";
 import { createAction, actionResult } from "../utils/input-utils";
 
@@ -132,7 +136,7 @@ export default function() {
                 if (_actions.addNode) {
                     _actions.addNode({
                         title: "",
-                        type: "undefined",
+                        type: NODE_TYPE_UNDEFINED,
                         imgURL: null,
                         x: e.position.x,
                         y: e.position.y

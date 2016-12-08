@@ -1,5 +1,11 @@
 import React, { createClass } from "react";
 
+import {
+    NODE_TYPE_UNDEFINED,
+    NODE_TYPE_TEXT,
+    NODE_TYPE_IMAGE
+} from "../constants/types";
+
 const NodeView = createClass({
     getInitialState: function() {
         const { nodeID, node } = this.props;
@@ -72,8 +78,22 @@ const NodeView = createClass({
         const { node } = this.state;
 
         switch (node.get("type")) {
+        case NODE_TYPE_TEXT:
+        {
+            return (
+                <div>text node</div>
+            );
+        }
+        case NODE_TYPE_IMAGE:
+        {
+            return (
+                <div>image node</div>
+            );
+        }    
         default:
-            return <div>typeless node!</div>
+            return (
+                <div>typeless node</div>
+            );
         }
     }
 });
