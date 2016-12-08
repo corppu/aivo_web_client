@@ -84,8 +84,17 @@ const NodeView = createClass({
         switch (node.get("type")) {
         case NODE_TYPE_TEXT:
         {
+            const text = node.get("text");
+
             return (
-                <div>text node</div>
+                <textarea
+                    rows="12"
+                    cols="60"
+                    value={ text || "" }
+                    onChange={(e) => {
+                        const { value } = e.target;
+                        this.updateNodeData(node.set("text", value));
+                    }}/>
             );
         }
         case NODE_TYPE_IMAGE:
