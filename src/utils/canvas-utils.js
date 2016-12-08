@@ -88,7 +88,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
             align = "start",
             baseline = "alphabetic",
             color = "#000",
-            font = "24px Verdana"} = {})        
+            font = "24px verdana"} = {})        
     {
         ctx.font = font
         ctx.fillStyle = color

@@ -3,18 +3,18 @@ import { fromJS } from "immutable";
 import {
     UPDATE_BOARD,
     UPDATE_NODE,
-    REMOVE_NODE
+    REMOVE_NODE,
+    LIST_UPDATE,
+    LIST_REMOVE
 } from "../constants/action-types";
 
 const initialState = fromJS({
     boardID: null,
-    nodes: {}
+    nodes: {},
+    boards: {}
 });
 
 export default function(state = initialState, action) {
-
-    console.log(action);
-
     switch (action.type) {
     case UPDATE_BOARD:
     {
@@ -41,7 +41,19 @@ export default function(state = initialState, action) {
 
         return state.deleteIn(["nodes", id]);
     }
+    case LIST_UPDATE:
+    {
+        const { id, data } = action;
+
+        return state.setIn(["boards", id], data);
+    }
+    case LIST_REMOVE:
+    {
+        const { id } = action;
+
+        return state.deleteIn(["boards", id]);
+    }
     default:
-        return state
+        return state;
     }
 }

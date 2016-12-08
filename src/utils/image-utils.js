@@ -31,7 +31,9 @@ export function createImageCache() {
 		}
 		
 		let tm = tms.get(src);
-		if(tm === undefined) return tm;
+		if(tm === undefined) {
+			return tm;
+		}
 		tm = new Date().now;
 
 		return imgs.get(src);
