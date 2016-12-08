@@ -92,7 +92,7 @@ export default function() {
             World.add(_engine.world, body)
             _nodes.push(node)
 
-            //console.log(`added node ${id}`)
+            console.log(`added node ${id}`)
         })
     }
 
@@ -111,21 +111,9 @@ export default function() {
         if (!_inputAction) {
             return
         }
-        const result = actionResult(_inputAction, e.position) // does nothing atm
-		if(result.deltaMagnitude < 10 && result.duration > 2) {
-			if (_actions.addNode) {
-				_actions.addNode({
-					title: Math.random().toString(36).substring(Math.random() * 20 + 1),
-					type: "undefined",
-					imgURL: "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png",
-					x: e.position.x,
-					y: e.position.y
-				});
-			}
-		}
-        
+        const result = actionResult(_inputAction, e.position)
+	        
         const hits = Query.point(_engine.world.bodies, e.position)
-
         if (hits.length > 0) {
             /*
             hits.forEach(body => {
@@ -142,18 +130,19 @@ export default function() {
                 _actions.openNode(node.id);
             }
 
-        }
-        /*
-        else {
-            if (_actions.addNode) {
-                _actions.addNode({
-                    title: "asd",
-                    x: e.position.x,
-                    y: e.position.y,
-                })
+        } else {
+            if (result.deltaMagnitude < 10 && result.duration > 0.25) {
+                if (_actions.addNode) {
+                    _actions.addNode({
+                        title: Math.random().toString(36).substring(Math.random() * 20 + 1),
+                        type: "undefined",
+                        imgURL: "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png",
+                        x: e.position.x,
+                        y: e.position.y
+                    });
+                }
             }
         }
-        */
 
         _inputAction = null
     }
