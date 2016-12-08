@@ -24,7 +24,7 @@ export default function() {
             _fps = 0;
             return;
         }
-        const delta = (Date.now() - _lastDate)/1000;
+        const delta = (Date.now() - _lastDate) / 1000;
         _lastDate = Date.now();
         _fps = Math.round(1/delta);
 	}
@@ -119,8 +119,6 @@ export default function() {
             })
             */
 
-            console.log(result.deltaMagnitude);
-
             if (result.deltaMagnitude <= 10) {
                 const node = _bodyToNodeMapping[hits[0].id];
                 
@@ -133,9 +131,9 @@ export default function() {
             if (result.deltaMagnitude <= 10 && result.duration >= 0.25) {
                 if (_actions.addNode) {
                     _actions.addNode({
-                        title: Math.random().toString(36).substring(Math.random() * 20 + 1),
+                        title: "",
                         type: "undefined",
-                        imgURL: "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png",
+                        imgURL: null,
                         x: e.position.x,
                         y: e.position.y
                     });
@@ -202,7 +200,7 @@ export default function() {
             drawNode(draw, node);
         });
 
-		drawFps(draw, _fps);
+		drawFPS(draw, _fps);
     }
 
     return {
@@ -215,7 +213,7 @@ export default function() {
     };
 }
 
-function drawFps(draw, fps) {
+function drawFPS(draw, fps) {
     draw.text({
         text: fps,
         x: 5,
