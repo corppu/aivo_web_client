@@ -90,10 +90,27 @@ const NodeView = createClass({
         }
         case NODE_TYPE_IMAGE:
         {
+            const imgURL = node.get("imgURL");
+
             return (
-                <div>image node</div>
+                <div>
+                    <img
+                        style={{
+                            display: "block",
+                            maxWidth: "75vw",
+                            maxHeight: "75vh",
+                        }}
+                        src={imgURL}/>
+                    <input
+                        value={ imgURL || "" }
+                        placeholder="input image URL"
+                        onChange={(e) => {
+                            const { value } = e.target;
+                            this.updateNodeData(node.set("imgURL", value));
+                        }}/>
+                </div>
             );
-        }    
+        }
         default:
             return (
                 <div>
@@ -116,7 +133,7 @@ const NodeView = createClass({
 
         this.updateNodeData(node.set("type", type));
     },
-
+    
     updateNodeData: function(newNode) {
         const { node, updateNode } = this.props;
         
