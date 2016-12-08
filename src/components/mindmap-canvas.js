@@ -228,12 +228,14 @@ function drawNode(draw, { imgURL, title, body, radius }) {
     const { x, y } = body.position;
 	
     draw.circle({x, y, r: radius,
-            color: "blue", imageURL: imgURL, strokeColor: "black", strokeWidth: 2});
+            color: "#808080", imageURL: imgURL, strokeColor: "black", strokeWidth: 2});
 	
-    // draw the first title letter inside the circle
-    const content = title.charAt(0).toUpperCase();
-    draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
-
+    // draw the first title letter inside the circle, if no image is present
+    if (!imgURL) {
+        const content = title.charAt(0).toUpperCase();
+        draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
+    }
+    
     // draw the title
     if (title.length > 10) {
         title = title.substring(0, 10);

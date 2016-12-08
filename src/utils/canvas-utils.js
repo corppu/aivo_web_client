@@ -31,8 +31,6 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         const px = x - camera.x;
         const py = y - camera.y;
 
-        ctx.save();
-
         ctx.beginPath();
         ctx.arc(px, py, r, 0, 2 * Math.PI);
         ctx.closePath();
@@ -44,8 +42,10 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
             if (img) {
                 const { width, height } = img;
 
+                ctx.save();
                 ctx.clip();
                 ctx.drawImage(img, 0, 0, width, height, px-r, py-r, 2*r, 2*r);
+                ctx.restore();
 
                 hasImage = true;
             }
@@ -61,7 +61,6 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
 
             ctx.stroke();
         }
-        ctx.restore();
     }
 
     function line({start = {x: 0, y: 0}, end = {x: 0, y: 0}, color = "#000"} = {}) {
