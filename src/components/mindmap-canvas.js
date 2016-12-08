@@ -2,7 +2,6 @@ import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js
 
 import { clear, createRenderer } from "../utils/canvas-utils";
 import { createAction, actionResult } from "../utils/input-utils";
-import { createImageCache } from "../utils/image-utils";
 
 export default function() {
     let _engine = Engine.create();
@@ -29,8 +28,6 @@ export default function() {
         _lastDate = Date.now();
         _fps = Math.round(1/delta);
 	}
-
-	let _imgCache = createImageCache();
 	
     function updateProps(props) {
         _actions.addNode = props.tryAddNode;
@@ -83,10 +80,7 @@ export default function() {
                 radius,
                 anchor,
                 body
-            }
-			
-			if(!_imgCache.getImg(node.imgURL)) _imgCache.addImg(node.imgURL);
-			
+            }		
             _bodyToNodeMapping[body.id] = node;
             
             World.add(_engine.world, body);
@@ -125,13 +119,18 @@ export default function() {
             })
             */
 
-            const node = _bodyToNodeMapping[hits[0].id];
-            if (_actions.openNode) {
-                _actions.openNode(node.id);
+            console.log(result.deltaMagnitude);
+
+            if (result.deltaMagnitude <= 10) {
+                const node = _bodyToNodeMapping[hits[0].id];
+                
+                if (_actions.openNode) {
+                    _actions.openNode(node.id);
+                }
             }
 
         } else {
-            if (result.deltaMagnitude < 10 && result.duration > 0.25) {
+            if (result.deltaMagnitude <= 10 && result.duration >= 0.25) {
                 if (_actions.addNode) {
                     _actions.addNode({
                         title: Math.random().toString(36).substring(Math.random() * 20 + 1),
@@ -199,7 +198,6 @@ export default function() {
 
         const draw = createRenderer(ctx);
 
-		// draw the nodes
         _nodes.forEach(node => {
             drawNode(draw, node);
         });
