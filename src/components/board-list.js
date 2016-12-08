@@ -1,6 +1,9 @@
-import React, { createClass } from "react"
+import React, { createClass } from "react";
+import { Link } from "react-router";
 
 import { openBoardList, closeBoardList } from "../backend/backend-adapter";
+
+import { constructBoardURL } from "../utils/url-utils";
 
 const BoardList = createClass({
     componentDidMount: function() {
@@ -17,9 +20,11 @@ const BoardList = createClass({
         return (
             <div>
                 {boards.map((data, id) =>
-                    <div key={id}>{data.title}</div>
+                    <div key={id}>
+                        <Link to={constructBoardURL(id)}>{data.title}</Link>
+                    </div>
                 ).toList()}
-                
+
                 <button
                     onClick={this.handleCreateBoard}>
 

@@ -1,4 +1,4 @@
-import { fromJS } from "immutable";
+import { fromJS, Map } from "immutable";
 
 import {
     UPDATE_BOARD,
@@ -10,6 +10,7 @@ import {
 
 const initialState = fromJS({
     boardID: null,
+    boardData: null,
     nodes: {},
     boards: {}
 });
@@ -21,9 +22,11 @@ export default function(state = initialState, action) {
         const { id, data } = action;
 
         if (id !== state.get("boardID")) {
-            state = state.clear("nodes");
+            state = state.set("nodes", Map());
         }
-        return state.set("boardID", id);
+        return state
+            .set("boardID", id)
+            .set("boardData", data);
     }
     case UPDATE_NODE:
     {
