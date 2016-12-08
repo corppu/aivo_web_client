@@ -12,12 +12,20 @@ const BoardList = createClass({
     },
 
     render: function() {
-        return (
-            <button
-                onClick={this.handleCreateBoard}>
+        const { boards } = this.props;
 
-                Create new board
-            </button>
+        return (
+            <div>
+                {boards.map((data, id) =>
+                    <div key={id}>{data.title}</div>
+                ).toList()}
+                
+                <button
+                    onClick={this.handleCreateBoard}>
+
+                    Create new board
+                </button>
+            </div>
         );
     },
 

@@ -4,8 +4,12 @@ import BoardList from "../components/board-list";
 
 import { tryCreateBoard } from "../actions/backend";
 
-function mapStateToProps() {
-    return {};
+function mapStateToProps(state) {
+    const { mindmap } = state;
+
+    return {
+        boards: mindmap.get("boards")
+    };
 }
 
 export default connect(mapStateToProps, { tryCreateBoard })(BoardList);
