@@ -1,8 +1,8 @@
-import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js"
+import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
-import { clear, createRenderer } from "../utils/canvas-utils" 
-import { createAction, actionResult } from "../utils/input-utils" 
-import { createImageCache } from "../utils/image-utils"
+import { clear, createRenderer } from "../utils/canvas-utils";
+import { createAction, actionResult } from "../utils/input-utils";
+import { createImageCache } from "../utils/image-utils";
 
 export default function() {
     let _engine = Engine.create();
@@ -20,14 +20,14 @@ export default function() {
 	let _lastDate;
 	let _fps;
 	function updateFps() {
-	  if(!_lastDate) {
-		 _lastDate = Date.now();
-		 _fps = 0;
-		 return;
-	  }
-	  const delta = (Date.now() - _lastDate)/1000;
-	  _lastDate = Date.now();
-	  _fps = Math.round(1/delta);
+        if (!_lastDate) {
+            _lastDate = Date.now();
+            _fps = 0;
+            return;
+        }
+        const delta = (Date.now() - _lastDate)/1000;
+        _lastDate = Date.now();
+        _fps = Math.round(1/delta);
 	}
 
 	let _imgCache = createImageCache();
@@ -38,44 +38,44 @@ export default function() {
         _actions.removeNode = props.tryRemoveNode;
         _actions.openNode = props.openNode;
         
-        let propsNodes = new Map(props.nodes)
+        let propsNodes = new Map(props.nodes);
 
         // match existing nodes to props
         _nodes = _nodes.map(node => {
-            const propsNode = propsNodes.get(node.id)
+            const propsNode = propsNodes.get(node.id);
             if (!propsNode) {
-                 const { body } = node
+                 const { body } = node;
 
-                _bodyToNodeMapping.delete(body.id)
-                World.remove(_engine.world, body)
+                _bodyToNodeMapping.delete(body.id);
+                World.remove(_engine.world, body);
 
-                console.log(`removed node ${node.id}`)
-                return null
+                console.log(`removed node ${node.id}`);
+                return null;
             }
-            propsNodes.delete(node.id)
+            propsNodes.delete(node.id);
 
             return Object.assign(node, {
                 anchor: {
                     x: propsNode.get("x"),
                     y: propsNode.get("y")
                 }
-            })
-        })
+            });
+        });
 
         // remove null nodes (were removed from props)
-        _nodes = _nodes.filter(node => node !== null)
+        _nodes = _nodes.filter(node => node !== null);
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
-            const radius = 20
+            const radius = 20;
             const anchor = {
                 x: propsNode.get("x"),
                 y: propsNode.get("y")
-            }        
+            };
             const body = Bodies.circle(anchor.x, anchor.y, radius, {
                 frictionAir: 1,
                 mass: 5
-            })
+            });
             const node = {
                 id,
                 title: propsNode.get("title"),
@@ -87,33 +87,33 @@ export default function() {
 			
 			if(!_imgCache.getImg(node.imgURL)) _imgCache.addImg(node.imgURL);
 			
-            _bodyToNodeMapping[body.id] = node
+            _bodyToNodeMapping[body.id] = node;
             
-            World.add(_engine.world, body)
-            _nodes.push(node)
+            World.add(_engine.world, body);
+            _nodes.push(node);
 
-            console.log(`added node ${id}`)
+            console.log(`added node ${id}`);
         })
     }
 
     function onInputStart(e) {
-        let node = null
+        let node = null;
 
-        const hits = Query.point(_engine.world.bodies, e.position)
+        const hits = Query.point(_engine.world.bodies, e.position);
 
         if (hits.length > 0) {
-            node = _bodyToNodeMapping[hits[0].id]
+            node = _bodyToNodeMapping[hits[0].id];
         }
-        _inputAction = createAction(e.position, node)
+        _inputAction = createAction(e.position, node);
     }
 
     function onInputEnd(e) {
         if (!_inputAction) {
-            return
+            return;
         }
-        const result = actionResult(_inputAction, e.position)
+        const result = actionResult(_inputAction, e.position);
 	        
-        const hits = Query.point(_engine.world.bodies, e.position)
+        const hits = Query.point(_engine.world.bodies, e.position);
         if (hits.length > 0) {
             /*
             hits.forEach(body => {
@@ -152,7 +152,7 @@ export default function() {
             return;
         }
         if (_inputAction.data && _actions.updateNode) {
-            const { id, title, imgURL } = _inputAction.data
+            const { id, title, imgURL } = _inputAction.data;
 
 			if(imgURL) {
 				_actions.updateNode(id, {
@@ -160,13 +160,13 @@ export default function() {
 					x: e.position.x,
 					y: e.position.y,
 					imgURL
-				})
+				});
 			} else {
 				_actions.updateNode(id, {
 					title,
 					x: e.position.x,
 					y: e.position.y,
-				})
+				});
 			}
         }
     }
@@ -197,9 +197,9 @@ export default function() {
     function render(ctx) {
 		clear(ctx, { color: "#f0f0f0" });
 
-        const draw = createRenderer(ctx)
+        const draw = createRenderer(ctx);
 
-		// Draw the nodes
+		// draw the nodes
         _nodes.forEach(node => {
             drawNode(draw, node);
         });
@@ -214,7 +214,7 @@ export default function() {
         onInputMove,
         update,
         render
-    }
+    };
 }
 
 function drawFps(draw, fps) {
@@ -223,7 +223,7 @@ function drawFps(draw, fps) {
         x: 5,
         y: 5,
         baseline: "hanging"
-    })
+    });
 }
 
 function drawNode(draw, { imgURL, title, body, radius }) {
