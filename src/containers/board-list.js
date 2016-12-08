@@ -7,8 +7,6 @@ import { tryCreateBoard } from "../actions/backend";
 function mapStateToProps(state) {
     const { mindmap } = state;
 
-    console.log(mindmap.toJS());
-
     return {
         boards: mindmap.get("boards")
     };

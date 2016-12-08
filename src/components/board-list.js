@@ -5,8 +5,6 @@ import { openBoardList, closeBoardList } from "../backend/backend-adapter";
 
 import { constructBoardURL } from "../utils/url-utils";
 
-
-
 const BoardList = createClass({
     componentDidMount: function() {
         openBoardList();

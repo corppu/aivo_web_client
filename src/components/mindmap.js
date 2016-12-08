@@ -1,6 +1,6 @@
-import React, { createClass } from "react"
+import React, { createClass } from "react";
 
-import createMindmap from "./mindmap-canvas"
+import createMindmap from "./mindmap-canvas";
 
 const MindMap = createClass({
     componentWillMount: function() {
@@ -9,25 +9,25 @@ const MindMap = createClass({
     },
 
     componentDidMount: function() {
-        const ctx = this.canvas.getContext("2d")
+        const ctx = this.canvas.getContext("2d");
         
-        this.mindmap = createMindmap()
-        this.mindmap.updateProps(this.props)
+        this.mindmap = createMindmap();
+        this.mindmap.updateProps(this.props);
 
         const renderLoop = () => {
             if (!this.mindmap) {
-                return
+                return;
             }
-            this.mindmap.update()
-            this.mindmap.render(ctx)
+            this.mindmap.update();
+            this.mindmap.render(ctx);
 
-            requestAnimationFrame(renderLoop)
+            requestAnimationFrame(renderLoop);
         }
-        requestAnimationFrame(renderLoop)
+        requestAnimationFrame(renderLoop);
     },
 
     componentWillUnmount: function() {
-        this.mindmap = null
+        this.mindmap = null;
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -35,7 +35,7 @@ const MindMap = createClass({
         tryOpenBoard();
 
         if (this.mindmap) {
-            this.mindmap.updateProps(nextProps)
+            this.mindmap.updateProps(nextProps);
         }
     },
     
@@ -61,79 +61,78 @@ const MindMap = createClass({
             </div>
         )
     },
-
 	
 	handleTouchStart: function(e) {
-		const { clientX, clientY } = e.changedTouches[0]
+		const { clientX, clientY } = e.changedTouches[0];
         if (this.mindmap) {
             this.mindmap.onInputStart({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }		
 	},
 	
 	handleTouchEnd: function(e) {
-		const { clientX, clientY } = e.changedTouches[0]
+		const { clientX, clientY } = e.changedTouches[0];
         if (this.mindmap) {
             this.mindmap.onInputEnd({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }
 	},
 	
 	handleTouchCancel: function(e) {
-		const { clientX, clientY } = e.changedTouches[0]
+		const { clientX, clientY } = e.changedTouches[0];
         if (this.mindmap) {
             this.mindmap.onInputEnd({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }
 	},
 	
 	handleTouchMove: function(e) {
-		const { clientX, clientY } = e.changedTouches[0]
+		const { clientX, clientY } = e.changedTouches[0];
         if (this.mindmap) {
             this.mindmap.onInputMove({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }	
 	},
 	
     handleInputDown: function(e) {
-		const { clientX, clientY } = e
+		const { clientX, clientY } = e;
         if (this.mindmap) {
             this.mindmap.onInputStart({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }
     },
 
     handleInputUp: function(e) {
-		const { clientX, clientY } = e
+		const { clientX, clientY } = e;
         if (this.mindmap) {
             this.mindmap.onInputEnd({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }
     },
 
     handleInputMove: function(e) {
-		const { clientX, clientY } = e
+		const { clientX, clientY } = e;
         if (this.mindmap) {
             this.mindmap.onInputMove({
                 position: calculatePosition(this.canvas, clientX, clientY)
-            })
+            });
         }
     }
-})
+});
 
 function calculatePosition(canvas, clientX, clientY) {
-    const bounds = canvas.getBoundingClientRect()
+    const bounds = canvas.getBoundingClientRect();
 
     return {
         x: clientX - bounds.left,
         y: clientY - bounds.top
-    }
+    };
 }
 
-export default MindMap
+export default MindMap;

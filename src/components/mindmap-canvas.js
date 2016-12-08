@@ -5,9 +5,9 @@ import { createAction, actionResult } from "../utils/input-utils"
 import { createImageCache } from "../utils/image-utils"
 
 export default function() {
-    let _engine = Engine.create()
-    let _nodes = []
-    let _bodyToNodeMapping = new Map()
+    let _engine = Engine.create();
+    let _nodes = [];
+    let _bodyToNodeMapping = new Map();
     let _inputAction = null;
     let _actions = {
         addNode: null,
@@ -32,14 +32,6 @@ export default function() {
 
 	let _imgCache = createImageCache();
 	
-	// Below some testing stuff for image drawing...
-	let _imgLoaded = false;
-	let _img = new Image();
-	_img.onload	 = function() {
-	 _imgLoaded = true;
-	};
-	_img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/DU30_small_triambic_icosahedron.png/240px-DU30_small_triambic_icosahedron.png";
-
     function updateProps(props) {
         _actions.addNode = props.tryAddNode;
         _actions.updateNode = props.tryUpdateNode;
@@ -271,18 +263,3 @@ function drawNode(draw, img, title = "Preview", x = 0, y = 0, r = 5) {
     draw.text({text: title, x, y: y + r * 2,
             baseline: "middle", align: "center"})
 }
-
- /*
-    ctx.font="30px Verdana";
-    
-    // Create gradient
-    var gradient=ctx.createLinearGradient(0,0,1000,0);
-    gradient.addColorStop("0","magenta");
-    gradient.addColorStop("0.5","blue");
-    gradient.addColorStop("1.0","red");
-
-    // Fill with gradient
-    ctx.fillStyle=gradient;
-    ctx.fillText(_fps.toString(),10,90);
-*/
-
