@@ -195,13 +195,15 @@ export default function() {
     }
     
     function render(ctx) {
-		clear(ctx);	
+		clear(ctx, { color: "#f0f0f0" });
 
         const draw = createRenderer(ctx)
 
 		// Draw the nodes
-        _nodes.forEach(function(node){drawNode(draw, _imgCache.getImg(node.imgURL), node.title, node.body.position.x, node.body.position.y, node.radius)});
-		
+        _nodes.forEach(node => {
+            drawNode(draw, node);
+        });
+
 		drawFps(draw, _fps);
     }
 
@@ -224,23 +226,25 @@ function drawFps(draw, fps) {
     })
 }
 
-function drawNode(draw, img, title = "Preview", x = 0, y = 0, r = 5) {
-
+function drawNode(draw, { imgURL, title, body, radius }) {
+    const { x, y } = body.position;
 	
+    /*
     if(img) 
 	{
 		draw.circleImg({img, x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
 	}
 	else 
 	{
-		draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
+        draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
 	}
-	
-	
+    */
+
+    draw.circle({x, y, r: radius, color: "blue", strokeColor: "black", strokeWidth: 2});
 	
     // draw the first title letter inside the circle
-    const content = title.charAt(0).toUpperCase()
-    draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"})
+    const content = title.charAt(0).toUpperCase();
+    draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
 
     // Draw the image once it is loaded instead of general drawing with the canvas context
     //if(_imgLoaded)ctx.drawImage(_img, 0, 0, 240, 240, x-r, y-r, 2*r, 2*r);
@@ -249,6 +253,5 @@ function drawNode(draw, img, title = "Preview", x = 0, y = 0, r = 5) {
     if (title.length > 10) {
         title = title.substring(0, 10);
     }
-    draw.text({text: title, x, y: y + r * 2,
-            baseline: "middle", align: "center"})
+    draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
 }
