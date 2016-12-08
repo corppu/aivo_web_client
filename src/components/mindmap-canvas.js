@@ -229,25 +229,12 @@ function drawFps(draw, fps) {
 function drawNode(draw, { imgURL, title, body, radius }) {
     const { x, y } = body.position;
 	
-    /*
-    if(img) 
-	{
-		draw.circleImg({img, x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
-	}
-	else 
-	{
-        draw.circle({x, y, r, color: "blue", strokeColor: "black", strokeWidth: 2})
-	}
-    */
-
-    draw.circle({x, y, r: radius, color: "blue", strokeColor: "black", strokeWidth: 2});
+    draw.circle({x, y, r: radius,
+            color: "blue", imageURL: imgURL, strokeColor: "black", strokeWidth: 2});
 	
     // draw the first title letter inside the circle
     const content = title.charAt(0).toUpperCase();
     draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
-
-    // Draw the image once it is loaded instead of general drawing with the canvas context
-    //if(_imgLoaded)ctx.drawImage(_img, 0, 0, 240, 240, x-r, y-r, 2*r, 2*r);
 
     // draw the title
     if (title.length > 10) {
