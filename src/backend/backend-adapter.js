@@ -1,6 +1,15 @@
 import firebase from "firebase";
 let _storeAdapter = null;
 
+
+// TODO: Start using chained promises for error handling on multi database call operations: https://firebase.googleblog.com/2016/01/keeping-our-promises-and-callbacks_76.html
+
+import {
+    NODE_TYPE_UNDEFINED,
+    NODE_TYPE_IMAGE,
+    NODE_TYPE_TEXT
+} from "../constants/types";
+
 /** JUST FOR DEBUGGING HERE **/
 function logUserData(user) {
 	if (user != null) {
@@ -43,6 +52,8 @@ export function init(storeAdapter) {
 	//loadDefaultBoard();
 }
 
+
+// Load default board still to be implemented in some future?
 /** Lataa vakiotaulun palvelimelta **/
 /** Esiehto: init on kutsuttu ja käyttäjä ei ole kirjautunut sisään **/
 /** Jälkiehto: Puskee vakiotaulun sisällön käyttöliittymälle kutsumalla sovittimen kautta tarvittavia funktioita. **/
@@ -92,27 +103,30 @@ function attachAuthChangedListener() {
 	});
 }
 
-function createHomeBoard() {
+// A function that creates the home board after user has signed up...
+// or user has signed in and no board exists...
+export function createHomeBoard() {
+	console.log("Trying to create home board");
 	const userId = firebase.auth().currentUser.uid;
 	const nodeId = firebase.database().ref("nodes").push().key;
 	const boardId = firebase.database().ref("boards").push().key;
 	
 	
 	
-	let updates{};
-	updates["/boards/" + boardId + "/meta" = {
+	let updates = {};
+	
+	updates["/boards/" + boardId + "/meta"] = {
 		title: "home",
-		type: "private"
 		imgURL: "http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/blue-jelly-icons-business/078551-blue-jelly-icon-business-home4.png",
 		stars: 0,
 		followers: 0
 	};
 	updates["/boards/" + boardId + "/nodes/" + nodeId] = {
 		title: "example",
-		type: "undefined"
+		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: 400, // On the center 
-		y, 400 // On the center
+		y: 400 // On the center
 	};
 	
 	updates["/nodes/" + nodeId] = {
@@ -126,11 +140,37 @@ function createHomeBoard() {
 	updates["/users/" + userId + "/home"] = boardId;
 	updates["/users/"+ userId + "/boards/" + boardId] = true;
 	
-	firebase.database().ref().update(updates).then(
-		function() {
-			//_storeAdapter.success({board: boardId});
+	firebase.database().ref().update(
+		updates, 
+		function(error) {
+			if(error) {
+				console.warn(error);
+				_storeAdapter.error(error.code);
+			} else {
+				console.log("Home board " + boardId + " created succesfully");
+			}
+		}
+	);
+}
+ 
+export function openHomeBoard() {
+	console.log("Trying to open home board...");
+	firebase.database().ref("/users/" + firebase.auth().currentUser.uid + "/home").once("value").then(
+		function(snapshot) {
+			if(snapshot) {
+				const boardId = snapshot.val();
+				if(boardId) {
+					console.log(boardId);
+					openBoard(boardId);
+				}
+			} else {
+				console.warn("Home board does not exist, trieing to create one...");
+				createHomeBoard();
+				//_storeAdapter.error(dataDoesNotExistCode)
+			}
 		},
 		function(error) {
+			console.warn(error);
 			_storeAdapter.error(error.code);
 		}
 	);
@@ -145,12 +185,12 @@ export function createUserWithEmailAndSignIn(email, password) {
     firebase.auth().createUserWithEmailAndPassword(email, password).then(
 	function(user) {
 		let sessionId = firebase.database().ref("sessions").push().key;
+		createHomeBoard();
 		_storeAdapter.userSignedIn(createUserData(sessionId, user));
 		attachAuthChangedListener();
-		
 	},
 	function(error) {
-		console.warn(error.message);
+		console.warn(error);
 		_storeAdapter.error(error);
 	});
 }
@@ -171,12 +211,8 @@ export function signInWithEmail(email, password, sessionId = null) {
 		attachAuthChangedListener();
 	},
 	function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-        console.warn(errorMessage);
-		_storeAdapter.error(errorCode);
+        console.warn(error);
+		_storeAdapter.error(error.code);
     });
 }
 
@@ -212,6 +248,7 @@ function presenceMachine() {
 	Jälkiehto: Avaa uuden taulun tai kutsuu virhefunktioo.
 **/
 export function createBoard(boardData, boardId = null) {
+	console.log("Trying to create board");
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -224,10 +261,21 @@ export function createBoard(boardData, boardId = null) {
 	
 	firebase.database().ref("boards/"+boardId+"/meta").update(boardData, function(error) {
 		if(error) {
-			console.warn(error.message);
+			console.warn(error);
 			_storeAdapter.error(error.code);
 		} else {
-			firebase.database().ref("users/"+user.uid+"/boards/").child(boardId).set(true);
+			firebase.database().ref("users/"+user.uid+"/boards/").child(boardId).set(
+				true, 
+				function(error) {
+					if(error) {
+						console.warn(error);
+						_storeAdapter.error(error);
+					}
+					else {
+						console.log("Board " + boardId + " created succesfully");
+					}
+				}
+			);
 		}
 	});
 }
@@ -239,6 +287,7 @@ export function removeBoard(boardId) {
 
 
 export function openBoard(boardId, sessionId) {
+	console.log("Trying to open board: " + boardId);
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -252,7 +301,7 @@ export function openBoard(boardId, sessionId) {
 	};
 	firebase.database().ref().update(updates, function(error){
 		if(error) {
-			console.warn(error.message);
+			console.warn(error);
 			_storeAdapter.error(error.code);
 		}
 		else {
@@ -262,6 +311,7 @@ export function openBoard(boardId, sessionId) {
 }
 
 export function openNode(nodeId, sessionId, boardId) {
+	console.log("Trying to open node: " + nodeId);
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -276,7 +326,7 @@ export function openNode(nodeId, sessionId, boardId) {
 	};
 	firebase.database().ref().update(updates, function(error){
 		if(error) {
-			console.warn(error.message);
+			console.warn(error);
 			_storeAdapter.error(error.code);
 		}
 		else {
@@ -367,9 +417,9 @@ export function updateNode(boardId, nodeId, nodeData) {
 		title: nodeData.title
 	};
 	
-	return firebase.database().ref().update(updates, function(error) {
+	firebase.database().ref().update(updates, function(error) {
 		if(error) {
-			console.warn(error.message);
+			console.warn(error);
 			_storeAdapter.error(error.code);
 		}
 	});
@@ -377,6 +427,7 @@ export function updateNode(boardId, nodeId, nodeData) {
 
 
 export function addNode(boardId, nodeData, nodeId = null) {
+	console.log("Trying to add node to the board: " + boardId);
     var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -390,13 +441,26 @@ export function addNode(boardId, nodeData, nodeId = null) {
 }
 
 export function removeNode(boardId, nodeId) {
+	console.log("Trying to remove node:" + nodeId);
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
 		return;
 	}
     _storeAdapter.removeNode(nodeId);
-    firebase.database().ref("/nodes/" + nodeId).remove();
-	firebase.database().ref("/boards/" + boardId + "/nodes/" + nodeId).remove();
+    firebase.database().ref("/nodes/" + nodeId).remove(function(error) {
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error);
+		}
+		console.log("Node " + nodeId + " is succesfully removed");
+	});
+	firebase.database().ref("/boards/" + boardId + "/nodes/" + nodeId).remove(function(error) {
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error);
+		}
+		console.log("Node " + nodeId + " is succesfully removed from board " + boardId);
+	});
 }
 
