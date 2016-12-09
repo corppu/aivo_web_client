@@ -3,6 +3,15 @@ import React, { createClass } from "react";
 import createMindmap from "./mindmap-canvas";
 
 const MindMap = createClass({
+    getInitialState: function() {
+        const { innerWidth, innerHeight } = window;
+
+        return {
+            width: innerWidth,
+            height: innerHeight
+        };
+    },
+
     componentWillMount: function() {
         const { tryOpenBoard } = this.props;
         tryOpenBoard();
@@ -24,10 +33,14 @@ const MindMap = createClass({
             requestAnimationFrame(renderLoop);
         }
         requestAnimationFrame(renderLoop);
+
+        window.addEventListener("resize", this.handleResize);
     },
 
     componentWillUnmount: function() {
         this.mindmap = null;
+
+        window.removeEventListener("resize", this.handleResize);
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -41,13 +54,25 @@ const MindMap = createClass({
     
     render: function() {
         const { children } = this.props;
+        const { width, height } = this.state;
 
         return (
-            <div>
+            <div
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    overflow: "hidden",
+                    cursor: "default",
+                    zIndex: -1
+                }}>
+
                 <canvas
                     ref={(canvas) => { this.canvas = canvas; }}
-                    width={1000}
-                    height={1000}
+                    width={width}
+                    height={height}
 					onTouchStart={this.handleTouchStart}
 					onTouchEnd={this.handleTouchEnd}
 					onTouchCancel={this.handleTouchCancel}
@@ -123,6 +148,15 @@ const MindMap = createClass({
                 position: calculatePosition(this.canvas, clientX, clientY)
             });
         }
+    },
+
+    handleResize: function() {
+        const { innerWidth, innerHeight } = window;
+
+        this.setState({
+            width: innerWidth,
+            height: innerHeight
+        });
     }
 });
 
