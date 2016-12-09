@@ -46,7 +46,7 @@ export default function() {
         
         let propsNodes = new Map(props.nodes);
 
-        // match existing nodes to props
+        // match existing nodes to props (update old ones)
         _nodes = _nodes.map(node => {
             const propsNode = propsNodes.get(node.id);
             if (!propsNode) {
@@ -61,10 +61,14 @@ export default function() {
             propsNodes.delete(node.id);
 
             return Object.assign(node, {
+                type: propsNode.get("type"),
                 anchor: {
                     x: propsNode.get("x"),
                     y: propsNode.get("y")
-                }
+                },
+                title: propsNode.get("title"),
+                text: propsNode.get("text"),
+                imgURL: propsNode.get("imgURL")
             });
         });
 
@@ -84,7 +88,9 @@ export default function() {
             });
             const node = {
                 id,
+                type: propsNode.get("type"),
                 title: propsNode.get("title"),
+                text: propsNode.get("text"),
 				imgURL: propsNode.get("imgURL"),
                 radius,
                 anchor,
@@ -167,25 +173,19 @@ export default function() {
 
         if (_inputAction.data) {
             if (_actions.updateNode) {
-                const { id, title, imgURL } = _inputAction.data;
-
-                if(imgURL) {
-                    _actions.updateNode(id, {
-                        title,
-                        x: pos.x,
-                        y: pos.y,
-                        imgURL
-                    });
-                } else {
-                    _actions.updateNode(id, {
-                        title,
-                        x: pos.x,
-                        y: pos.y,
-                    });
-                }
+                const { id, type, title, text, imgURL } = _inputAction.data;
+              
+                _actions.updateNode(id, {
+                    type: type || NODE_TYPE_UNDEFINED,
+                    x: pos.x,
+                    y: pos.y,
+                    title,
+                    text: text || null,
+                    imgURL: imgURL || null
+                });
             }
         } else {
-            _camera = Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+            Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
         }
     }
 
