@@ -5,7 +5,7 @@ import {
 } from "../constants/types";
 
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
-import { createAction, actionResult } from "../utils/input-utils";
+import { createAction, updateAction, actionResult } from "../utils/input-utils";
 
 export default function() {
     let _engine = Engine.create();
@@ -116,6 +116,8 @@ export default function() {
             return;
         }
         const pos = transformToCamera(_camera, e.position);
+
+        updateAction(_inputAction, pos);
         const result = actionResult(_inputAction, pos);
 	        
         const hits = Query.point(_engine.world.bodies, pos);
@@ -130,7 +132,7 @@ export default function() {
             })
             */
 
-            if (result.deltaMagnitude <= 10) {
+            if (_inputAction.totalDeltaMagnitude <= 10) {
                 const node = _bodyToNodeMapping[hits[0].id];
                 
                 if (_actions.openNode) {
@@ -139,7 +141,7 @@ export default function() {
             }
 
         } else {
-            if (result.deltaMagnitude <= 10 && result.duration >= 0.25) {
+            if (_inputAction.totalDeltaMagnitude <= 10 && result.duration >= 0.25) {
                 if (_actions.addNode) {
                     _actions.addNode({
                         title: "",
@@ -161,23 +163,29 @@ export default function() {
         }
         const pos = transformToCamera(_camera, e.position);
 
-        if (_inputAction.data && _actions.updateNode) {
-            const { id, title, imgURL } = _inputAction.data;
+        updateAction(_inputAction, pos);
 
-			if(imgURL) {
-				_actions.updateNode(id, {
-					title,
-					x: pos.x,
-					y: pos.y,
-					imgURL
-				});
-			} else {
-				_actions.updateNode(id, {
-					title,
-					x: pos.x,
-					y: pos.y,
-				});
-			}
+        if (_inputAction.data) {
+            if (_actions.updateNode) {
+                const { id, title, imgURL } = _inputAction.data;
+
+                if(imgURL) {
+                    _actions.updateNode(id, {
+                        title,
+                        x: pos.x,
+                        y: pos.y,
+                        imgURL
+                    });
+                } else {
+                    _actions.updateNode(id, {
+                        title,
+                        x: pos.x,
+                        y: pos.y,
+                    });
+                }
+            }
+        } else {
+            _camera = Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
         }
     }
 
