@@ -1,7 +1,9 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import {
-    NODE_TYPE_UNDEFINED
+    NODE_TYPE_UNDEFINED,
+    NODE_TYPE_IMAGE,
+    NODE_TYPE_TEXT
 } from "../constants/types";
 
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
@@ -244,17 +246,33 @@ function drawFPS(draw, fps) {
     });
 }
 
-function drawNode(draw, { imgURL, title, body, radius }) {
+function drawNode(draw, { type, imgURL, title, body, radius }) {
     const { x, y } = body.position;
-	
-    draw.circle({x, y, r: radius,
-            color: "#808080", imageURL: imgURL, strokeColor: "black", strokeWidth: 2});
-	
+
+    switch (type) {
+    case NODE_TYPE_TEXT:
+        draw.circle({x, y, r: radius,
+                color: "#080", strokeColor: "black", strokeWidth: 2});
+        break;
+    
+    case NODE_TYPE_IMAGE:
+        draw.circle({x, y, r: radius,
+                color: "#088", imageURL: imgURL, strokeColor: "black", strokeWidth: 2});
+        break;
+
+    default:
+        draw.circle({x, y, r: radius,
+                color: "#888", strokeColor: "black", strokeWidth: 2});
+        break; 
+    }
+
     // draw the first title letter inside the circle, if no image is present
+    /*
     if (!imgURL) {
         const content = title.charAt(0).toUpperCase();
         draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
     }
+    */
     
     // draw the title
     if (title.length > 10) {
