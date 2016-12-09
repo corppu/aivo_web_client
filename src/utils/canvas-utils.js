@@ -85,15 +85,19 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
             align = "start",
             baseline = "alphabetic",
             color = "#000",
-            font = "24px verdana"} = {})        
+            font = "24px verdana",
+            ignoreCamera = false} = {})
     {
+        const px = ignoreCamera ? x : x - camera.x;
+        const py = ignoreCamera ? y : y - camera.y;
+
         ctx.font = font;
         ctx.fillStyle = color;
 
         ctx.textAlign = align;
         ctx.textBaseline = baseline;
 
-        ctx.fillText(text.toString(), x, y);
+        ctx.fillText(text.toString(), px, py);
     }
 
     function measureText(text) {
