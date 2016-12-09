@@ -13,7 +13,16 @@ const Unauthed = createClass({
     render: function() {
         const { showRegister } = this.state;
 
-        return showRegister ? this.renderRegister() : this.renderLogin();
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center"
+                }}>
+                
+                { showRegister ? this.renderRegister() : this.renderLogin() }
+            </div>
+        );
     },
 
     renderLogin: function() {

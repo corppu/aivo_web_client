@@ -1,6 +1,9 @@
-import React, { createClass } from "react"
+import React, { createClass } from "react";
+import { Link } from "react-router";
 
 import { openBoardList, closeBoardList } from "../backend/backend-adapter";
+
+import { constructBoardURL } from "../utils/url-utils";
 
 const BoardList = createClass({
     componentDidMount: function() {
@@ -8,16 +11,26 @@ const BoardList = createClass({
     },
 
     componentWillUnmount: function() {
-        closeBoardList();
+        //closeBoardList(); TODO: CRASHES, REMEMBER TO UNCOMMENT ONCE FIXED!
     },
 
     render: function() {
-        return (
-            <button
-                onClick={this.handleCreateBoard}>
+        const { boards } = this.props;
 
-                Create new board
-            </button>
+        return (
+            <div>
+                {boards.map((data, id) =>
+                    <div key={id}>
+                        <Link to={constructBoardURL(id)}>{data.title}</Link>
+                    </div>
+                ).toList()}
+
+                <button
+                    onClick={this.handleCreateBoard}>
+
+                    Create new board
+                </button>
+            </div>
         );
     },
 

@@ -1,19 +1,23 @@
-import { fromJS } from "immutable";
+import { fromJS, Map } from "immutable";
 
 import {
     UPDATE_BOARD,
     UPDATE_NODE,
-    REMOVE_NODE
+    REMOVE_NODE,
+    LIST_UPDATE,
+    LIST_REMOVE
 } from "../constants/action-types";
 
 const initialState = fromJS({
     boardID: null,
-    nodes: {}
+    boardData: null,
+    nodes: {},
+    boards: {}
 });
 
 export default function(state = initialState, action) {
 
-    console.log(action);
+    //console.log(action);
 
     switch (action.type) {
     case UPDATE_BOARD:
@@ -21,9 +25,11 @@ export default function(state = initialState, action) {
         const { id, data } = action;
 
         if (id !== state.get("boardID")) {
-            state = state.clear("nodes");
+            state = state.set("nodes", Map());
         }
-        return state.set("boardID", id);
+        return state
+            .set("boardID", id)
+            .set("boardData", data);
     }
     case UPDATE_NODE:
     {
@@ -41,7 +47,19 @@ export default function(state = initialState, action) {
 
         return state.deleteIn(["nodes", id]);
     }
+    case LIST_UPDATE:
+    {
+        const { id, data } = action;
+
+        return state.setIn(["boards", id], data);
+    }
+    case LIST_REMOVE:
+    {
+        const { id } = action;
+
+        return state.deleteIn(["boards", id]);
+    }
     default:
-        return state
+        return state;
     }
 }
