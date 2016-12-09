@@ -4,13 +4,18 @@ import {
     NODE_TYPE_UNDEFINED
 } from "../constants/types";
 
-import { clear, createRenderer } from "../utils/canvas-utils";
+import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
 import { createAction, actionResult } from "../utils/input-utils";
 
 export default function() {
     let _engine = Engine.create();
     let _nodes = [];
     let _bodyToNodeMapping = new Map();
+    let _camera = {
+        x: 0,
+        y: 0
+    };
+
     let _inputAction = null;
     let _actions = {
         addNode: null,
@@ -95,23 +100,25 @@ export default function() {
     }
 
     function onInputStart(e) {
+        const pos = transformToCamera(_camera, e.position);
+
         let node = null;
 
-        const hits = Query.point(_engine.world.bodies, e.position);
-
+        const hits = Query.point(_engine.world.bodies, pos);
         if (hits.length > 0) {
             node = _bodyToNodeMapping[hits[0].id];
         }
-        _inputAction = createAction(e.position, node);
+        _inputAction = createAction(pos, node);
     }
 
     function onInputEnd(e) {
         if (!_inputAction) {
             return;
         }
-        const result = actionResult(_inputAction, e.position);
+        const pos = transformToCamera(_camera, e.position);
+        const result = actionResult(_inputAction, pos);
 	        
-        const hits = Query.point(_engine.world.bodies, e.position);
+        const hits = Query.point(_engine.world.bodies, pos);
         if (hits.length > 0) {
             /*
             hits.forEach(body => {
@@ -138,8 +145,8 @@ export default function() {
                         title: "",
                         type: NODE_TYPE_UNDEFINED,
                         imgURL: null,
-                        x: e.position.x,
-                        y: e.position.y
+                        x: pos.x,
+                        y: pos.y
                     });
                 }
             }
@@ -152,21 +159,23 @@ export default function() {
         if (!_inputAction) {
             return;
         }
+        const pos = transformToCamera(_camera, e.position);
+
         if (_inputAction.data && _actions.updateNode) {
             const { id, title, imgURL } = _inputAction.data;
 
 			if(imgURL) {
 				_actions.updateNode(id, {
 					title,
-					x: e.position.x,
-					y: e.position.y,
+					x: pos.x,
+					y: pos.y,
 					imgURL
 				});
 			} else {
 				_actions.updateNode(id, {
 					title,
-					x: e.position.x,
-					y: e.position.y,
+					x: pos.x,
+					y: pos.y,
 				});
 			}
         }
@@ -198,7 +207,7 @@ export default function() {
     function render(ctx) {
 		clear(ctx, { color: "#f0f0f0" });
 
-        const draw = createRenderer(ctx);
+        const draw = createRenderer(ctx, { camera: _camera });
 
         _nodes.forEach(node => {
             drawNode(draw, node);
@@ -222,7 +231,8 @@ function drawFPS(draw, fps) {
         text: fps,
         x: 5,
         y: 5,
-        baseline: "hanging"
+        baseline: "hanging",
+        ignoreCamera: true
     });
 }
 

@@ -104,32 +104,6 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         return ctx.measureText(text);
     }
 
-    function tryGetImage(src) {
-        const cacheData = _imageCache[src];
-
-        if (cacheData) {
-            if (cacheData.image) {
-                return cacheData.image;
-            }
-            cacheData.lastAccess = getTimestamp();
-
-        } else {
-            let img = new Image();
-        
-            img.onload = function() {
-                _imageCache[src] = Object.assign({}, cacheData, {
-                    image: img
-                });
-            }
-            img.src = src;
-
-            _imageCache[src] = {
-                lastAccess: getTimestamp()
-            };
-        }
-        return null;
-    }
-
     return {
         rect,
         circle,
@@ -137,6 +111,38 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         text,
         
         measureText,
-        tryGetImage
     };
+}
+
+export function transformToCamera(camera, position) {
+    return {
+        x: position.x + camera.x,
+        y: position.y + camera.y,
+    }
+}
+
+export  function tryGetImage(src) {
+    const cacheData = _imageCache[src];
+
+    if (cacheData) {
+        if (cacheData.image) {
+            return cacheData.image;
+        }
+        cacheData.lastAccess = getTimestamp();
+
+    } else {
+        let img = new Image();
+    
+        img.onload = function() {
+            _imageCache[src] = Object.assign({}, cacheData, {
+                image: img
+            });
+        }
+        img.src = src;
+
+        _imageCache[src] = {
+            lastAccess: getTimestamp()
+        };
+    }
+    return null;
 }
