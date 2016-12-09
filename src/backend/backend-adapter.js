@@ -91,6 +91,50 @@ function attachAuthChangedListener() {
 	});
 }
 
+function createHomeBoard() {
+	const userId = firebase.auth().currentUser.uid;
+	const nodeId = firebase.database().ref("nodes").push().key;
+	const boardId = firebase.database().ref("boards").push().key;
+	
+	
+	
+	let updates{};
+	updates["/boards/" + boardId + "/meta" = {
+		title: "home",
+		type: "private"
+		imgURL: "http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/blue-jelly-icons-business/078551-blue-jelly-icon-business-home4.png",
+		stars: 0,
+		followers: 0
+	};
+	updates["/boards/" + boardId + "/nodes/" + nodeId] = {
+		title: "example",
+		type: "undefined"
+		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
+		x: 400, // On the center 
+		y, 400 // On the center
+	};
+	
+	updates["/nodes/" + nodeId] = {
+		title: "example",
+		owner: userId,
+		stars: 0,
+		followers: 0
+	};
+	
+	updates["/users/" + userId + "/nodes/" + nodeId] = true;
+	updates["/users/" + userId + "/home"] = boardId;
+	updates["/users/"+ userId + "/boards/" + boardId] = true;
+	
+	firebase.database().ref().update(updates).then(
+		function() {
+			//_storeAdapter.success({board: boardId});
+		},
+		function(error) {
+			_storeAdapter.error(error.code);
+		}
+	);
+}
+
 /** Uuden käyttäjätilin luominen ja kirjautuminen sisään **/
 /** Parametreina välitetään sähköposti-osoite ja salasana **/
 /** Esiehto: init on kutsuttu ja käyttäjä ei ole kirjautunut sisään. **/
@@ -99,9 +143,10 @@ function attachAuthChangedListener() {
 export function createUserWithEmailAndSignIn(email, password) {
     firebase.auth().createUserWithEmailAndPassword(email, password).then(
 	function(user) {
-		var sessionId = "default"; // temp
+		let sessionId = firebase.database().ref("sessions").push().key;
 		_storeAdapter.userSignedIn(createUserData(sessionId, user));
 		attachAuthChangedListener();
+		
 	},
 	function(error) {
 		console.warn(error.message);
@@ -115,10 +160,12 @@ export function createUserWithEmailAndSignIn(email, password) {
 /** Jälkiehto: Puskee viimeisimmän taulun sisällön käyttäjälle **/
 /**            tai tulevaisuudessa voidaan istuntotunnuksen perusteella palauttaa edellinen istunto... **/
 /**            Virhetilanteessa palauttaa virhetunnisteen käyttöliittymälle kutsumalla sovittimen kautta sopivaa funktiota **/
-export function signInWithEmail(email, password) {	
+export function signInWithEmail(email, password, sessionId = null) {	
 	firebase.auth().signInWithEmailAndPassword(email, password).then(
 	function(user) {
-		var sessionId = "default"; // temp
+		if(!sessionId) {
+			sessionId = firebase.database().ref("sessions").push().key;
+		}
 		_storeAdapter.userSignedIn(createUserData(sessionId, user));
 		attachAuthChangedListener();
 	},
@@ -163,14 +210,17 @@ function presenceMachine() {
 	Esishto: Kirjautuminen suoritettu
 	Jälkiehto: Avaa uuden taulun tai kutsuu virhefunktioo.
 **/
-export function createBoard(boardData, nodes = null) {
+export function createBoard(boardData, boardId = null) {
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
 		return;
 	}
 	
-	var boardId = firebase.database().ref().child("boards").push().key;
+	if(!boardId) { 
+		boardId = firebase.database().ref().child("boards").push().key;
+	}
+	
 	firebase.database().ref("boards/"+boardId+"/meta").update(boardData, function(error) {
 		if(error) {
 			console.warn(error.message);
@@ -193,13 +243,13 @@ export function openBoard(boardId, sessionId) {
 		console.warn("User is not authenticated!");
 		return;
 	}
-	var userRef = firebase.database().ref("users/"+user.uid);
-
+	
 	var updates = {};
-	updates["users/"+user.uid+"/sessions/"+sessionId] = {
-		board: boardId
+	updates["/sessions/"+sessionId] = {
+		userId: user.uid,
+		boardId: boardId
 	};
-	return firebase.database().ref().update(updates, function(error){
+	firebase.database().ref().update(updates, function(error){
 		if(error) {
 			console.warn(error.message);
 			_storeAdapter.error(error.code);
@@ -210,10 +260,37 @@ export function openBoard(boardId, sessionId) {
 	});
 }
 
+export function openNode(nodeId, sessionId, boardId) {
+	var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+	
+	var updates = {};
+	updates["/sessions/"+sessionId] = {
+		userId: user.uid,
+		nodeId: nodeId,
+		boardId: boardId
+	};
+	firebase.database().ref().update(updates, function(error){
+		if(error) {
+			console.warn(error.message);
+			_storeAdapter.error(error.code);
+		}
+		else {
+			attachNodeListeners(nodeId);
+		}
+	});
+}
+
 export function closeBoard(boardId) {
 	detachBoardListeners(boardId);
 }
 
+export function closeNode(nodeId) {
+	detachNodeListeners(nodeId);
+}
 
 function attachBoardListeners(boardId) {
 	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
@@ -298,13 +375,16 @@ export function updateNode(boardId, nodeId, nodeData) {
 }
 
 
-export function addNode(boardId, nodeData) {
+export function addNode(boardId, nodeData, nodeId = null) {
     var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
 		return;
 	}
-	const nodeId = firebase.database().ref().child("nodes").push().key;
+	if(!nodeId) {
+		nodeId = firebase.database().ref().child("nodes").push().key;
+	}
+	
 	updateNode(boardId, nodeId, nodeData);
 }
 
