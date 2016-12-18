@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { push } from "react-router-redux";
 
-import { tryAddNode, tryUpdateNode, tryRemoveNode } from "../actions/mindmap";
+import { tryAddNode, tryAddLine, tryUpdateNode, tryUpdateLine, tryRemoveNode, tryRemoveLine } from "../actions/mindmap";
 import { tryOpenBoard } from "../actions/backend";
 
 import { constructNodeURL } from "../utils/url-utils";
@@ -15,6 +15,7 @@ function mapStateToProps(state, ownProps) {
 
     return {
         boardID,
+		lines: mindmap.get("lines"),
         nodes: mindmap.get("nodes"),
 
         children
@@ -22,17 +23,20 @@ function mapStateToProps(state, ownProps) {
 }
 
 function mergeProps(stateProps, dispatchProps) {
-    const { boardID, nodes, children } = stateProps;
-    const { tryAddNode, tryUpdateNode, tryRemoveNode, tryOpenBoard, push } = dispatchProps;
+    const { boardID, lines, nodes, children } = stateProps;
+    const { tryAddNode, tryAddLine, tryUpdateNode, tryUpdateLine, tryRemoveNode, tryRemoveLine, tryOpenBoard, push } = dispatchProps;
 
     return {
         nodes,
-
+		lines,
         children,
 
         tryAddNode,
+		tryAddLine,
         tryUpdateNode,
+		tryUpdateLine,
         tryRemoveNode,
+		tryRemoveLine,
         tryOpenBoard: function() {
             tryOpenBoard(boardID)
         },
@@ -43,4 +47,4 @@ function mergeProps(stateProps, dispatchProps) {
 }
 
 export default connect(mapStateToProps,
-        { tryAddNode, tryUpdateNode, tryRemoveNode, tryOpenBoard, push }, mergeProps)(MindMap);
+        { tryAddNode, tryAddLine, tryUpdateNode, tryUpdateLine, tryRemoveNode, tryRemoveLine, tryOpenBoard, push }, mergeProps)(MindMap);

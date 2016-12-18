@@ -1,7 +1,6 @@
 import firebase from "firebase";
 let _storeAdapter = null;
 
-
 // TODO: Start using chained promises for error handling on multi database call operations: https://firebase.googleblog.com/2016/01/keeping-our-promises-and-callbacks_76.html
 
 import {
@@ -108,9 +107,13 @@ function attachAuthChangedListener() {
 export function createHomeBoard() {
 	console.log("Trying to create home board");
 	const userId = firebase.auth().currentUser.uid;
-	const nodeId = firebase.database().ref("nodes").push().key;
+	const parentId = firebase.database().ref("nodes").push().key;
+	const childId = firebase.database().ref("nodes").push().key;
 	const boardId = firebase.database().ref("boards").push().key;
-	
+	const parentX = 500;
+	const parentY = 250;
+	const childX = 500;
+	const childY = 1000;
 	
 	
 	let updates = {};
@@ -121,24 +124,62 @@ export function createHomeBoard() {
 		stars: 0,
 		followers: 0
 	};
-	updates["/boards/" + boardId + "/nodes/" + nodeId] = {
-		title: "example",
+	
+	
+	updates["/boards/" + boardId + "/nodes/" + parentId] = {
+		title: "parent example",
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
-		x: 400, // On the center 
-		y: 400 // On the center
+		x: parentX,
+		y: parentY
 	};
 	
-	updates["/nodes/" + nodeId] = {
-		title: "example",
+	updates["/nodes/" + parentId] = {
+		title: "parent example",
+		owner: userId,
+		stars: 0,
+		followers: 0
+	};
+
+	updates["/boards/" + boardId + "/nodes/" + childId] = {
+		title: "child example",
+		type: NODE_TYPE_UNDEFINED,
+		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
+		x: childX,
+		y: childY
+	};
+	
+	updates["/nodes/" + childId] = {
+		title: "child example",
 		owner: userId,
 		stars: 0,
 		followers: 0
 	};
 	
-	updates["/users/" + userId + "/nodes/" + nodeId] = true;
+	updates["/users/" + userId + "/nodes/" + parentId] = true;
+	updates["/users/" + userId + "/nodes/" + childId] = true;
 	updates["/users/" + userId + "/home"] = boardId;
 	updates["/users/"+ userId + "/boards/" + boardId] = true;
+	
+	
+	updates["/boards/" + boardId + "/lines/" + lineId] = {
+		parentType: "node",
+		parentId,
+		childType: "node",
+		childId,
+		
+		sx: parentX,
+		sy: parentY,
+		ex: childX,
+		ey: childY,
+		cp1x: 500,
+		cp1y: 500, 
+		cp2x: 500, 
+		cp2y: 750,
+		
+		title: "insert verb"
+    };
+	
 	
 	firebase.database().ref().update(
 		updates, 
@@ -345,11 +386,13 @@ export function closeNode(nodeId) {
 
 function attachBoardListeners(boardId) {
 	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+	
 	metaRef.on("value", function(data) {
 		_storeAdapter.updateBoard(boardId, data.val());
 	});
 
 	var nodesRef = firebase.database().ref("boards/" + boardId + "/nodes");
+	
 	nodesRef.on("child_added", function(data) {
 		_storeAdapter.updateNode(data.key, data.val());
 	});
@@ -361,6 +404,21 @@ function attachBoardListeners(boardId) {
 	nodesRef.on("child_removed", function(data) {
 		_storeAdapter.removeNode(data.key, data.val());
 	});
+	
+	var linesRef = firebase.database().ref("boards/" + boardId + "/lines");
+	
+	linesRef.on("child_added", function(data) {
+		_storeAdapter.updateLine(data.key, data.val());
+	});
+	
+	linesRef.on("child_changed", function(data) {
+		_storeAdapter.updateLine(data.key, data.val());
+	});
+	
+	nodesRef.on("child_removed", function(data) {
+		_storeAdapter.removeLine(data.key, data.val());
+	});
+	
 }
 
 export function openBoardList() {
@@ -393,6 +451,7 @@ export function closeBoardList() {
 }
 
 export function detachBoardListeners(boardId) {
+	firebase.database().ref("boards/"+boardId+"/lines").off();
 	firebase.database().ref("boards/"+boardId+"/nodes").off();
 	firebase.database().ref("boards/"+boardId+"/meta").off();
 }
@@ -464,3 +523,54 @@ export function removeNode(boardId, nodeId) {
 	});
 }
 
+export function createLine(boardId, lineData, lineId = null) {
+	console.log("Trying to add line to the board: " + boardId);
+    var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+	if(!lineId) {
+		lineId = firebase.database().ref("/boards/" + boardId).child("lines").push().key;
+	}
+		
+		
+	updateLine(boardId, lineId, lineData);
+}
+
+export function updateLine(boardId, lineId, lineData) {
+	
+    var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+	_storeAdapter.updateNode(nodeId, nodeData);
+
+	var updates = {}
+	updates["/boards/" + boardId + "/lines/" + lineId] = lineData;
+	
+
+	firebase.database().ref().update(updates, function(error) {
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error.code);
+		}
+	});
+	
+	export function removeLine(boardId, lineId) {
+		console.log("Trying to remove line: " + lineId);
+		var user = firebase.auth().currentUser;
+		if(!user) {
+			console.warn("User is not authenticated!");
+			return;
+		}
+		_storeAdapter.removeLine(lineId);
+		firebase.database().ref("/boards/" + boardId + "/lines/" + lineId).remove(function(error) {
+			if(error) {
+				console.warn(error);
+				_storeAdapter.error(error);
+			}
+			console.log("Line " + lineId + " is succesfully removed");
+		});
+}

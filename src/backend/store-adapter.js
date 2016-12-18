@@ -29,6 +29,14 @@ export default function(store) {
         store.dispatch(mindmapActions.removeNode(id))
     }
 
+	function updateLine(id, data) {
+        store.dispatch(mindmapActions.updateLine(id, data))
+    }
+
+    function removeLine(id) {
+        store.dispatch(mindmapActions.removeLine(id))
+    }
+	
 	// list actions
 	function updateListItem(id, data) {
 		store.dispatch(backendActions.listUpdate(id, data));
@@ -47,6 +55,9 @@ export default function(store) {
 		
         updateNode,
         removeNode,
+		
+		updateLine,
+		removeLine,
 		
 		updateListItem,
 		removeListItem

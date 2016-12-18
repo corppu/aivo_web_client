@@ -12,6 +12,7 @@ import { createAction, updateAction, actionResult } from "../utils/input-utils";
 export default function() {
     let _engine = Engine.create();
     let _nodes = [];
+	let _lines = [];
     let _bodyToNodeMapping = new Map();
     let _camera = {
         x: 0,
@@ -21,8 +22,11 @@ export default function() {
     let _inputAction = null;
     let _actions = {
         addNode: null,
+		addLine: null,
         updateNode: null,
+		updateLine: null,
         removeNode: null,
+		removeLine: null,
         openNode: null
     };
 
@@ -42,12 +46,15 @@ export default function() {
 	
     function updateProps(props) {
         _actions.addNode = props.tryAddNode;
+		_actions.addLine = props.tryAddLine;
         _actions.updateNode = props.tryUpdateNode;
+		_actions.updateLine = props.tryUpdateLine;
         _actions.removeNode = props.tryRemoveNode;
+		_actions.removeLine = props.tryRemoveLine;
         _actions.openNode = props.openNode;
         
         let propsNodes = new Map(props.nodes);
-
+		let propsLines = new Map(props.lines);
         // match existing nodes to props (update old ones)
         _nodes = _nodes.map(node => {
             const propsNode = propsNodes.get(node.id);
@@ -73,9 +80,44 @@ export default function() {
                 imgURL: propsNode.get("imgURL")
             });
         });
+		
+        // match existing lines to props (update old ones)
+        _lines = _lines.map(line => {
+            const propsLine = propsLines.get(line.id);
+            if (!propsLine) {
+                //const { body } = node;
 
+                //_bodyToNodeMapping.delete(body.id);
+                //World.remove(_engine.world, body);
+
+                console.log(`removed line ${line.id}`);
+                return null;
+            }
+            propsLines.delete(line.id);
+
+            return Object.assign(line, {
+
+				parentId: propsLine.get("parentId"),
+				childId: propsLine.get("childId"),
+				
+				sx: propsLine.get("sx"),
+				sy: propsLine.get("sy"),
+				ex: propsLine.get("ex"),
+				ey: propsLine.get("ey"),				
+				cp1x: propsLine.get("cp1x"),
+				cp1y: propsLine.get("cp1y"), 
+				cp2x: propsLine.get("cp2x"), 
+				cp2y: propsLine.get("cp2y"),
+				
+                title: propsLine.get("title")
+            });
+        });		
+		
         // remove null nodes (were removed from props)
         _nodes = _nodes.filter(node => node !== null);
+		
+		// remove null lines (were removed from props)
+        _lines = _lines.filter(line => line !== null);
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
@@ -103,8 +145,34 @@ export default function() {
             World.add(_engine.world, body);
             _nodes.push(node);
 
-            console.log(`added node ${id}`);
+            console.log("added node ${id}");
         })
+		
+		 // add new Lines (were in props and not in state)
+        propsLines.forEach((propsLine, id) => {
+			const line = {
+				id,
+				
+				parentType: propsLine.get("parentType"),
+				parentId: propsLine.get("parentId"),
+				childType: propsLine.get("childType"),
+				childId: propsLine.get("childId"),
+				
+				sx: propsLine.get("sx"),
+				sy: propsLine.get("sy"),
+				ex: propsLine.get("ex"),
+				ey: propsLine.get("ey"),
+				cp1x: props.get("cp1x"),
+				cp1y: propsLine.get("cp1y"), 
+				cp2x: propsLine.get("cp2x"), 
+				cp2y: propsLine.get("cp2y"),
+				
+                title: propsLine.get("title")
+            };
+			
+		   _lines.push(line);
+			console.log("added line ${id}");
+		});
     }
 
     function onInputStart(e) {
@@ -223,6 +291,10 @@ export default function() {
             drawNode(draw, node);
         });
 
+		_lines.forEach(line => {
+            drawLine(draw, line);
+        });
+		
 		drawFPS(draw, _fps);
     }
 
@@ -244,6 +316,10 @@ function drawFPS(draw, fps) {
         baseline: "hanging",
         ignoreCamera: true
     });
+}
+
+function drawLine(draw, line) {
+	draw.bezierCurve({line.sx, line.sy, line.cp1x, line.cp1y, line.cp2x, line.cp2y, line.ex, line.ey});
 }
 
 function drawNode(draw, { type, imgURL, title, body, radius }) {

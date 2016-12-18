@@ -63,7 +63,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         }
     }
 
-    function line({start = {x: 0, y: 0}, end = {x: 0, y: 0}, color = "#000"} = {}) {
+    function line({start = {x: 0, y: 0}, end = {x: 0, y: 0}, lineWidth = 10, color = "#000"} = {}) {
         const sx = start.x - camera.x;
         const sy = start.y - camera.y;
         const ex = end.x - camera.x;
@@ -77,7 +77,26 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         ctx.strokeStyle = color;
         ctx.stroke();
     }
-
+	
+	
+	function bezierCurve({sx: 0, sy: 0, cp1x: 0, cp1y: 0, cp2x: 0, cp2y: 0, ex: 0, ey: 0} = {}) {
+		const psx = sx - camera.x;
+        const psy = sy - camera.y;
+        const pex = sx - camera.x;
+        const pey = sy - camera.y;
+		const pcp1x = cp1x - camera.x;
+		const pcp1y = cp1y - camera.y;
+		const pcp2x = cp2x - camera.x;
+		const pcp2y = cp2y - camera.y;
+		
+		ctx.beginPath();
+		ctx.moveTo(psx, psy);
+		ctx.bezierCurveTo(pcp1x, pcp1y, pcp2x, pcp2y, pex, pey);
+		ctx.closePath();
+		ctx.strokeStyle = "black";
+		ctx.stroke();
+	}
+	
     function text({
             text = "",
             x = 0,
