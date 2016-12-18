@@ -2,7 +2,7 @@ import firebase from "firebase";
 let _storeAdapter = null;
 
 // TODO: Start using chained promises for error handling on multi database call operations: https://firebase.googleblog.com/2016/01/keeping-our-promises-and-callbacks_76.html
-
+// TODO: Start using context with listeners in order to separate the listeners from each other, because currently boardlist and board views use the same listener...
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
@@ -91,9 +91,8 @@ function attachAuthChangedListener() {
 	firebase.auth().onAuthStateChanged(function(user) {
 	if (user) {
 		// User is signed in.
-		logUserData(user);
-		_storeAdapter.userSignedIn(createUserData("default", user));
-		openHomeBoard();
+		//logUserData(user);
+		//_storeAdapter.userSignedIn(createUserData("default", user));
 	} else {
 		// No user is signed in.
 		console.log("Currently no user is signed in.");
@@ -104,8 +103,8 @@ function attachAuthChangedListener() {
 }
 
 // A function that creates the home board after user has signed up...
-// or user has signed in and no board exists...
-export function createHomeBoard() {
+// or user try to open home board, but it does not exist.
+function createHomeBoard() {
 	console.log("Trying to create home board");
 	const userId = firebase.auth().currentUser.uid;
 	const parentId = firebase.database().ref("nodes").push().key;
@@ -115,11 +114,13 @@ export function createHomeBoard() {
 	const parentY = 250;
 	const childX = 500;
 	const childY = 1000;
+	const lineId = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
 	
 	
 	let updates = {};
 	
 	updates["/boards/" + boardId + "/meta"] = {
+		parentBoard: boardId, // Recursively is parent of itself, as is home/root...
 		title: "home",
 		imgURL: "http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/blue-jelly-icons-business/078551-blue-jelly-icon-business-home4.png",
 		stars: 0,
@@ -132,7 +133,8 @@ export function createHomeBoard() {
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: parentX,
-		y: parentY
+		y: parentY,
+		lines: {lineId: childId}
 	};
 	
 	updates["/nodes/" + parentId] = {
@@ -147,7 +149,8 @@ export function createHomeBoard() {
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: childX,
-		y: childY
+		y: childY,
+		lines: {lineId: parentId}
 	};
 	
 	updates["/nodes/" + childId] = {
@@ -162,20 +165,19 @@ export function createHomeBoard() {
 	updates["/users/" + userId + "/home"] = boardId;
 	updates["/users/"+ userId + "/boards/" + boardId] = true;
 	
-	const lineId = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
 	updates["/boards/" + boardId + "/lines/" + lineId] = {
 		parentType: "node",
-		parentId,
+		parentId: parentId,
 		childType: "node",
-		childId,
+		childId: childId,
 		
 		sx: parentX,
-		sy: parentY,
+		sy: parentY + 60, // The bottom anchor point: (centerY + height / 2 + bottomTextHeight)
 		ex: childX,
-		ey: childY,
-		cp1x: 500,
+		ey: childY - 20, // The top anchor point: (centerY - height / 2) 
+		cp1x: 550,
 		cp1y: 500, 
-		cp2x: 500, 
+		cp2x: 450, 
 		cp2y: 750,
 		
 		title: "insert verb"
@@ -194,28 +196,23 @@ export function createHomeBoard() {
 		}
 	);
 }
- 
+
+// Is called after user has signed in....
+// if home board does not exist, createHomeBoard function is called once...
 export function openHomeBoard() {
 	console.log("Trying to open home board...");
 	firebase.database().ref("/users/" + firebase.auth().currentUser.uid + "/home").once("value").then(
 		function(snapshot) {
-		console.log("SNAPSHOT");
-			if(snapshot) {
-				console.log("SNAPSHOT IS: " + snapshot);
+		
 				const boardId = snapshot.val();
-				console.log(boardId);
+				
 				if(boardId) {
-					console.log(boardId);
+					console.log("Homeboards id is: " + boardId);
 					openBoard(boardId);
 				} else {
-					console.warn("Home board does not exist, trieing to create one...");
+					console.warn("Home board does not exist, trying to create one...");
 					createHomeBoard();
 				}
-			} else {
-				console.warn("Home board does not exist, trieing to create one...");
-				createHomeBoard();
-				//_storeAdapter.error(dataDoesNotExistCode)
-			}
 		},
 		function(error) {
 			console.warn(error);
@@ -252,6 +249,13 @@ export function createUserWithEmailAndSignIn(email, password) {
 export function signInWithEmail(email, password, sessionId = null) {	
 	firebase.auth().signInWithEmailAndPassword(email, password).then(
 	function(user) {
+		firebase.database().ref("/users/" + firebase.auth().currentUser.uid + "/home").once("value").then(
+			function(snapshot) {
+				if(!snapshot.val()) {
+					createHomeBoard();
+				}
+			}
+		);
 		if(!sessionId) {
 			sessionId = firebase.database().ref("sessions").push().key;
 		}
@@ -518,15 +522,17 @@ export function removeNode(boardId, nodeId) {
 		if(error) {
 			console.warn(error);
 			_storeAdapter.error(error);
+		} else {
+			console.log("Node " + nodeId + " is succesfully removed");
 		}
-		console.log("Node " + nodeId + " is succesfully removed");
 	});
 	firebase.database().ref("/boards/" + boardId + "/nodes/" + nodeId).remove(function(error) {
 		if(error) {
 			console.warn(error);
 			_storeAdapter.error(error);
+		} else {
+			console.log("Node " + nodeId + " is succesfully removed from board " + boardId);
 		}
-		console.log("Node " + nodeId + " is succesfully removed from board " + boardId);
 	});
 }
 
@@ -578,7 +584,8 @@ export function removeLine(boardId, lineId) {
 		if(error) {
 			console.warn(error);
 			_storeAdapter.error(error);
+		} else {
+			console.log("Line " + lineId + " is succesfully removed");
 		}
-		console.log("Line " + lineId + " is succesfully removed");
 	});
 }

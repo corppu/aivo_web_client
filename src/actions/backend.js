@@ -35,6 +35,7 @@ export function tryCreateBoard(title) {
     }
 }
 
+let currentSessionId = null;
 export function tryOpenBoard(boardID) {
     return function(dispatch, getState) {
         const { mindmap } = getState();
@@ -46,11 +47,12 @@ export function tryOpenBoard(boardID) {
         if (currBoardID) {
             closeBoard(currBoardID);
         }
-        openBoard(boardID, "default"); // TODO: resolve proper session ID
+        openBoard(boardID, currentSessionId);
     }
 }
 
 export function login(user) {
+	currentSessionId = user.sessionId;
     return { type: BACKEND_LOGIN, user };
 }
 

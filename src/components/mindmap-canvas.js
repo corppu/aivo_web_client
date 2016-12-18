@@ -10,7 +10,9 @@ import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils"
 import { createAction, updateAction, actionResult } from "../utils/input-utils";
 
 export default function() {
-    let _engine = Engine.create();
+   
+	
+	let _engine = Engine.create();
     let _nodes = [];
 	let _lines = [];
     let _bodyToNodeMapping = new Map();
@@ -97,7 +99,9 @@ export default function() {
 
             return Object.assign(line, {
 
+				parentType: propsLine.get("parentType"),
 				parentId: propsLine.get("parentId"),
+				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId"),
 				
 				sx: propsLine.get("sx"),
@@ -352,7 +356,8 @@ function drawNode(draw, { type, imgURL, title, body, radius }) {
     
     // draw the title
     if (title.length > 10) {
-        title = title.substring(0, 10);
+        title = title.substring(0, 7);
+		title += "...";
     }
     draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
 }
