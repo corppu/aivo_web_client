@@ -93,6 +93,7 @@ function attachAuthChangedListener() {
 		// User is signed in.
 		logUserData(user);
 		_storeAdapter.userSignedIn(createUserData("default", user));
+		openHomeBoard();
 	} else {
 		// No user is signed in.
 		console.log("Currently no user is signed in.");
@@ -161,7 +162,7 @@ export function createHomeBoard() {
 	updates["/users/" + userId + "/home"] = boardId;
 	updates["/users/"+ userId + "/boards/" + boardId] = true;
 	
-	
+	const lineId = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
 	updates["/boards/" + boardId + "/lines/" + lineId] = {
 		parentType: "node",
 		parentId,
@@ -198,11 +199,17 @@ export function openHomeBoard() {
 	console.log("Trying to open home board...");
 	firebase.database().ref("/users/" + firebase.auth().currentUser.uid + "/home").once("value").then(
 		function(snapshot) {
+		console.log("SNAPSHOT");
 			if(snapshot) {
+				console.log("SNAPSHOT IS: " + snapshot);
 				const boardId = snapshot.val();
+				console.log(boardId);
 				if(boardId) {
 					console.log(boardId);
 					openBoard(boardId);
+				} else {
+					console.warn("Home board does not exist, trieing to create one...");
+					createHomeBoard();
 				}
 			} else {
 				console.warn("Home board does not exist, trieing to create one...");
@@ -557,20 +564,21 @@ export function updateLine(boardId, lineId, lineData) {
 			_storeAdapter.error(error.code);
 		}
 	});
+}
 	
-	export function removeLine(boardId, lineId) {
-		console.log("Trying to remove line: " + lineId);
-		var user = firebase.auth().currentUser;
-		if(!user) {
-			console.warn("User is not authenticated!");
-			return;
+export function removeLine(boardId, lineId) {
+	console.log("Trying to remove line: " + lineId);
+	var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+	_storeAdapter.removeLine(lineId);
+	firebase.database().ref("/boards/" + boardId + "/lines/" + lineId).remove(function(error) {
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error);
 		}
-		_storeAdapter.removeLine(lineId);
-		firebase.database().ref("/boards/" + boardId + "/lines/" + lineId).remove(function(error) {
-			if(error) {
-				console.warn(error);
-				_storeAdapter.error(error);
-			}
-			console.log("Line " + lineId + " is succesfully removed");
-		});
+		console.log("Line " + lineId + " is succesfully removed");
+	});
 }

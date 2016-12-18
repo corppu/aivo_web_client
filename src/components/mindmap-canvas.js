@@ -162,7 +162,7 @@ export default function() {
 				sy: propsLine.get("sy"),
 				ex: propsLine.get("ex"),
 				ey: propsLine.get("ey"),
-				cp1x: props.get("cp1x"),
+				cp1x: propsLine.get("cp1x"),
 				cp1y: propsLine.get("cp1y"), 
 				cp2x: propsLine.get("cp2x"), 
 				cp2y: propsLine.get("cp2y"),
@@ -319,7 +319,7 @@ function drawFPS(draw, fps) {
 }
 
 function drawLine(draw, line) {
-	draw.bezierCurve({line.sx, line.sy, line.cp1x, line.cp1y, line.cp2x, line.cp2y, line.ex, line.ey});
+	draw.bezierCurve({sx: line.sx, sy: line.sy, cp1x: line.cp1x, cp1y: line.cp1y, cp2x: line.cp2x, cp2y: line.cp2y, ex: line.ex, ey: line.ey});
 }
 
 function drawNode(draw, { type, imgURL, title, body, radius }) {

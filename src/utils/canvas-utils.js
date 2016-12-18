@@ -79,7 +79,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
     }
 	
 	
-	function bezierCurve({sx: 0, sy: 0, cp1x: 0, cp1y: 0, cp2x: 0, cp2y: 0, ex: 0, ey: 0} = {}) {
+	function bezierCurve({sx = 0, sy = 0, cp1x = 0, cp1y = 0, cp2x = 0, cp2y = 0, ex = 0, ey = 0} = {}) {
 		const psx = sx - camera.x;
         const psy = sy - camera.y;
         const pex = sx - camera.x;
@@ -128,6 +128,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
         circle,
         line,
         text,
+		bezierCurve,
         
         measureText,
     };
