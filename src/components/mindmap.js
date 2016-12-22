@@ -1,6 +1,7 @@
 import React, { createClass } from "react";
 
 import createMindmap from "./mindmap-canvas";
+import Hammer from "react-hammerjs";
 
 const MindMap = createClass({
     getInitialState: function() {
@@ -57,6 +58,7 @@ const MindMap = createClass({
         const { width, height } = this.state;
 
         return (
+		<Hammer onTap={this.handleTap} onDoubleTap={this.handleDoubleTap} onPress={this.handlePress}>
             <div
                 style={{
                     position: "fixed",
@@ -73,75 +75,31 @@ const MindMap = createClass({
                     ref={(canvas) => { this.canvas = canvas; }}
                     width={width}
                     height={height}
-					onTouchStart={this.handleTouchStart}
-					onTouchEnd={this.handleTouchEnd}
-					onTouchCancel={this.handleTouchCancel}
-					onTouchMove={this.handleTouchMove}
-                    onMouseDown={this.handleInputDown}
-                    onMouseUp={this.handleInputUp}
-                    onMouseLeave={this.handleInputUp}
-                    onMouseMove={this.handleInputMove}/>
-
+					onTouchMove={this.handleTouchMove} // MOVE
+					onMouseMove={this.handleMouseMove} // MOVE
+					onMouseUp={this.handleMouseEnd} // END
+                    onMouseLeave={this.handleMouseEnd} // END
+					onTouchEnd={this.handleTouchEnd} // END
+					onTouchCancel={this.handleTouchEnd} // END
+					/>
                 {children}
             </div>
+		</Hammer>
         )
     },
 	
-	handleTouchStart: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputStart({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }		
-	},
-	
-	handleTouchEnd: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
-	},
-	
-	handleTouchCancel: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
-	},
-	
 	handleTouchMove: function(e) {
+		// TODO: Try moving the selected object from the map... use the pointer identifier as key...
 		const { clientX, clientY } = e.changedTouches[0];
         if (this.mindmap) {
             this.mindmap.onInputMove({
                 position: calculatePosition(this.canvas, clientX, clientY)
             });
-        }	
+        }
 	},
 	
-    handleInputDown: function(e) {
-		const { clientX, clientY } = e;
-        if (this.mindmap) {
-            this.mindmap.onInputStart({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
-    },
-
-    handleInputUp: function(e) {
-		const { clientX, clientY } = e;
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
-    },
-
-    handleInputMove: function(e) {
+    handleMouseMove: function(e) {
+		// TODO: Try moving the selected object from the map... use "mouse" as the key...
 		const { clientX, clientY } = e;
         if (this.mindmap) {
             this.mindmap.onInputMove({
@@ -157,7 +115,45 @@ const MindMap = createClass({
             width: innerWidth,
             height: innerHeight
         });
-    }
+    },
+	
+	handleTouchEnd: function(e) {
+		const { clientX, clientY } = e.changedTouches[0];
+        if (this.mindmap) {
+            this.mindmap.onInputEnd({
+                position: calculatePosition(this.canvas, clientX, clientY)
+            });
+        }
+	},
+
+	handleMouseEnd: function(e) {
+		const { clientX, clientY } = e;
+        if (this.mindmap) {
+            this.mindmap.onInputEnd({
+                position: calculatePosition(this.canvas, clientX, clientY)
+            });
+        }
+    },
+	
+	handleTap: function(e) {
+		// Try selecting and if selected object was selected already open it.. unselect if fails...
+		console.log("TAP on (" + e.center.x.toString() + "," + e.center.y.toString() + ")");
+	},
+
+	handleDoubleTap: function(e) {
+		// TODO: Try selecting object from mindmap-canvas.js... Open the object or if none selected create one... 
+		console.log("DOUBLE TAP on (" + e.center.x.toString() + "," + e.center.y.toString() + ")");
+	},
+
+	handlePress: function(e) {
+		// TODO: Try selecting object from mindmap-canvas.js... Bind the object to the pointer identifier. 
+		console.log("PRESS on (" + e.center.x.toString() + "," + e.center.y.toString() + ")");
+		
+		// TODO: Remove this hack...
+		this.mindmap.onInputStart({
+			position: calculatePosition(this.canvas, e.center.x, e.center.y)
+		});
+	}
 });
 
 function calculatePosition(canvas, clientX, clientY) {

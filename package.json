@@ -1,24 +1,22 @@
 {
-    "name": "aivo-app",
-    "version": "0.0.0",
-    "scripts": {
-        "start": "kotatsu serve --es2015 --jsx --public ./assets/ --index index.html ./src/main.js",
-        "build": "kotatsu build client --es2015 --jsx -s false --quiet --minify --progress ./src/main.js -o ./build/bundle.js"
-    },
-    "dependencies": {
-        "immutable": "^3.8.1",
-        "redux": "^3.5.2",
-		"redux-thunk": "^2.1.0",
-        "redux-logger": "^2.6.1",
-
-        "react": "^15.3.2",
-        "react-redux": "^4.4.5",
-		"react-dom": "^15.3.2",
-		"react-router": "^2.3.0",
-		"react-router-redux": "^4.0.5",
-
-		"matter-js": "^0.10.0",
-
-        "firebase": "^3.6.1"
-    }
+  "name": "aivo-app",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "kotatsu serve --es2015 --jsx --public ./assets/ --index index.html ./src/main.js",
+    "build": "kotatsu build client --es2015 --jsx -s false --quiet --minify --progress ./src/main.js -o ./build/bundle.js"
+  },
+  "dependencies": {
+    "firebase": "^3.6.1",
+    "immutable": "^3.8.1",
+    "matter-js": "^0.10.0",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "react-hammerjs": "^0.5.0",
+    "react-redux": "^4.4.5",
+    "react-router": "^2.3.0",
+    "react-router-redux": "^4.0.5",
+    "redux": "^3.5.2",
+    "redux-logger": "^2.6.1",
+    "redux-thunk": "^2.1.0"
+  }
 }
