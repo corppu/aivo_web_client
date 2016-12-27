@@ -395,12 +395,25 @@ export function closeNode(nodeId) {
 	detachNodeListeners(nodeId);
 }
 
+
+
+
+const B_FAKE_CONTEXT = new Object();
+const B_META_VALUE = function(boardId) 
+{
+	return function(data) {
+		_storeAdapter.updateBoard(boardId, data.val());
+	}
+}
+
 function attachBoardListeners(boardId) {
 	var metaRef = firebase.database().ref("boards/"+boardId+"/meta");
 	
-	metaRef.on("value", function(data) {
-		_storeAdapter.updateBoard(boardId, data.val());
-	});
+	metaRef.on(
+		"value", 
+		B_META_VALUE(boardId),
+		B_FAKE_CONTEXT
+	);
 
 	var nodesRef = firebase.database().ref("boards/" + boardId + "/nodes");
 	
@@ -429,24 +442,63 @@ function attachBoardListeners(boardId) {
 	nodesRef.on("child_removed", function(data) {
 		_storeAdapter.removeLine(data.key, data.val());
 	});
-	
+}
+
+export function detachBoardListeners(boardId) {
+	firebase.database().ref("boards/"+boardId+"/lines").off();
+	firebase.database().ref("boards/"+boardId+"/nodes").off();
+	firebase.database().ref("boards/"+boardId+"/meta").off(
+		"value",
+		B_META_VALUE,
+		B_FAKE_CONTEXT
+	);
+}
+
+
+const L_FAKE_CONTEXT = new Object();
+const L_META_VALUE = function(boardId)
+{
+	return function(data) {
+		_storeAdapter.updateListItem(boardId, data.val());
+	}
+}
+
+const L_BOARD_ADDED = function(data) 
+{
+	const boardId = data.key;
+	console.log(boardId);
+	let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+	metaRef.on(
+		"value",
+		L_META_VALUE(boardId),
+		L_FAKE_CONTEXT // Fake context as id.
+	);
+}
+const L_BOARD_REMOVED = function(data) 
+{
+	const boardId = data.key;
+	console.log(boardId);
+	let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
+	metaRef.off(
+		"value",
+		L_META_VALUE(boardId),
+		L_FAKE_CONTEXT
+	);
+	_storeAdapter.removeListItem(boardId);
 }
 
 export function openBoardList() {
 	var userBoardsRef = firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards");
-	userBoardsRef.on("child_added", function(data) {
-		const boardId = data.key;
-		let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
-		metaRef.on("value", function(data) {
-			_storeAdapter.updateListItem(boardId, data.val());
-		});
-	});
-	userBoardsRef.on("child_removed", function(data) {
-		const boardId = data.key;
-		let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
-		metaRef.off();
-		_storeAdapter.removeListItem(boardId);
-	});	
+	userBoardsRef.on(
+		"child_added",
+		L_BOARD_ADDED,
+		L_FAKE_CONTEXT // Fake context as id.
+	);
+	userBoardsRef.on(
+		"child_removed",
+		L_BOARD_REMOVED,
+		L_FAKE_CONTEXT // Fake context as id.
+	);
 }
 
 export function closeBoardList() {
@@ -455,17 +507,26 @@ export function closeBoardList() {
 		snapshot.forEach(function(keySnapshot) {
 			const boardId = keySnapshot.key;
 			let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
-			metaRef.off();
+			metaRef.off(
+				"value",
+				L_META_VALUE(boardId),
+				L_FAKE_CONTEXT // Fake context as id.
+			);
 		});
 	});
-	userBoardsRef.off();
+	userBoardsRef.off(
+		"child_added",
+		L_BOARD_ADDED,
+		L_FAKE_CONTEXT
+	);
+	userBoardsRef.off(
+		"child_removed",
+		L_BOARD_REMOVED,
+		L_FAKE_CONTEXT
+	);
 }
 
-export function detachBoardListeners(boardId) {
-	firebase.database().ref("boards/"+boardId+"/lines").off();
-	firebase.database().ref("boards/"+boardId+"/nodes").off();
-	firebase.database().ref("boards/"+boardId+"/meta").off();
-}
+
 
 export function signOut() {
     firebase.auth().signOut();

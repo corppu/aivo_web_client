@@ -1,3 +1,4 @@
+// View for the mindmap
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import {
@@ -6,8 +7,14 @@ import {
     NODE_TYPE_TEXT
 } from "../constants/types";
 
+import {
+	NODE_RADIUS,
+	NODE_TXT_BOX_WIDTH,
+	NODE_TXT_BOX_HEIGHT
+} from "../constants/values";
+
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
-import { createAction, updateAction, actionResult } from "../utils/input-utils";
+// import { createAction, updateAction, actionResult } from "../utils/input-utils";
 
 export default function() {
    
@@ -125,7 +132,7 @@ export default function() {
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
-            const radius = 20;
+            const radius = NODE_RADIUS;
             const anchor = {
                 x: propsNode.get("x"),
                 y: propsNode.get("y")
@@ -179,6 +186,18 @@ export default function() {
 		});
     }
 
+	function getObject(position) {
+        // TODO: also return lines or line specific control points so add lines or control points to the engine, but without physics?
+		let object = null;
+		const pos = transformToCamera(_camera, position);
+		const hits = Query.point(_engine.world.bodies, pos);
+        if (hits.length > 0) {
+            object = _bodyToNodeMapping[hits[0].id];
+        }
+		
+		return object;
+	}
+	
     function onInputStart(e) {
         const pos = transformToCamera(_camera, e.position);
 
@@ -188,17 +207,17 @@ export default function() {
         if (hits.length > 0) {
             node = _bodyToNodeMapping[hits[0].id];
         }
-        _inputAction = createAction(pos, node);
+        // _inputAction = createAction(pos, node);
     }
 
     function onInputEnd(e) {
-        if (!_inputAction) {
-            return;
-        }
+        // // if (!_inputAction) {
+            // // return;
+        // // }
         const pos = transformToCamera(_camera, e.position);
 
-        updateAction(_inputAction, pos);
-        const result = actionResult(_inputAction, pos);
+        // updateAction(_inputAction, pos);
+        // const result = actionResult(_inputAction, pos);
 	        
         const hits = Query.point(_engine.world.bodies, pos);
         if (hits.length > 0) {
