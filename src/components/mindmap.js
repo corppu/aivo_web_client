@@ -17,9 +17,9 @@ import {
 	NODE_TXT_BOX_HEIGHT
 } from "../constants/values";
 
-let _ignoreOpenNodeInDblTap = true;
 let _pressedObj = null;
 let _selectedObj = null;
+let _lastPoint = {x: 0, y: 0};
 
 const MindMap = createClass({
     getInitialState: function() {
@@ -93,6 +93,8 @@ const MindMap = createClass({
                     ref={(canvas) => { this.canvas = canvas; }}
                     width={width}
                     height={height}
+					onTouchStart={this.handleTouchStart}
+					onMouseDown={this.handleMouseDown}
 					onTouchMove={this.handleTouchMove} // MOVE
 					onMouseMove={this.handleMouseMove} // MOVE
 					onMouseUp={this.handleMouseEnd} // END
@@ -105,16 +107,64 @@ const MindMap = createClass({
 		</Hammer>
         )
     },
+
+	handleTouchStart: function(e) {
+		if(e.touches.length > 1) return;
+		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+	},
+	
+	handleMouseDown(e) {
+		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.clientX, e.clientY);
+	},
+	
+	handleMoveNode: function(point) {
+		const value = this.props.nodes.get(_pressedObj.id);
+		this.props.tryUpdateNode(
+			_pressedObj.id, 
+			{
+				type: value.get("type") || NODE_TYPE_UNDEFINED,
+				x: point.x,
+				y: point.y,
+				title: value.get("title"),
+				text: value.get("text") || null,
+				imgURL: value.get("imgURL") || null	
+			}
+		);
+	},
+	
+	handleMoveCamera: function(point) {
+		this.mindmap.moveCameraBy(_lastPoint.x - point.x, _lastPoint.y - point.y);
+		_lastPoint = point;
+	},
 	
 	handleTouchMove: function(e) {
+		const point = calculatePoint(this.canvas, this.mindmap.getCamera(), e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+
 		if(e.touches.length === 1 && _pressedObj) {
-			const point = calculatePosition(this.canvas, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+			
+			if(_pressedObj.type === TYPE_NODE) {
+				this.handleMoveNode(point);
+			}
+			
+		} 
+		
+		else if(e.touches.length === 1 && !_pressedObj) {
+			this.handleMoveCamera(point);
 		}
 	},
 	
     handleMouseMove: function(e) {
-		if(e.touches.length === 1 && _pressedObj) {
-			const point = calculatePosition(this.canvas, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+		if(e.button === 2) {
+			const point = calculatePoint(this.canvas, this.mindmap.getCamera(), e.clientX, e.clientY);
+
+			if(_pressedObj) {
+				if(_pressedObj.type === TYPE_NODE) {
+					this.handleMoveNode(point);
+				}
+			}
+			else {
+				this.handleMoveCamera(point);
+			}
 		}
     },
 
@@ -128,21 +178,11 @@ const MindMap = createClass({
     },
 	
 	handleTouchEnd: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
+		_pressedObj = null;
 	},
 
 	handleMouseEnd: function(e) {
-		const { clientX, clientY } = e;
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
+		_pressedObj = null;
     },
 	/*
 	    _actions.addNode = props.tryAddNode(data);
@@ -155,88 +195,93 @@ const MindMap = createClass({
 	*/
 	
 	handleTap: function(e) {
-		_ignoreOpenNodeInDblTap = false;
-		// Try selecting and if selected object was selected already open it.. unselect if fails...
 		console.log("TAP on (" + e.center.x.toString() + "," + e.center.y.toString() + ")");
-		const point = calculatePosition(this.canvas, e.center.x, e.center.y);
-		_pressedObj = trySelectNode(point, this.props.nodes);
-		if(_selectedObj && _pressedObj && _selectedObj.type === TYPE_NODE && _pressedObj.type === TYPE_NODE && _selectedObj.id === _pressedObj.id) {
-			this.props.openNode(_pressedObj.id);
-			_ignoreOpenNodeInDblTap = true;
-		}
 		
-		_selectedObj = _pressedObj;
+		const point = calculatePoint(this.canvas, this.mindmap.getCamera(), e.center.x, e.center.y);
+		
+		_selectedObj = trySelectNode(point, this.props.nodes);
 	},
 
 	handleDoubleTap: function(e) {
 		console.log("DOUBLE TAP on (" + e.center.x.toString() + "," + e.center.y.toString() + ")");
-
-		if(_ignoreOpenNodeInDblTap) return;
 		
-		const point = calculatePosition(this.canvas, e.center.x, e.center.y);
-		_pressedObj = trySelectNode(point, this.props.nodes);
+		const point = calculatePoint(this.canvas, this.mindmap.getCamera(), e.center.x, e.center.y);
 		
-		if(_selectedObj && _pressedObj && _selectedObj.type === TYPE_NODE && _pressedObj.type === TYPE_NODE && _selectedObj.id === _pressedObj.id) {
-			this.props.openNode(_pressedObj.id);
-			return;
+		if(_selectedObj && _selectedObj.type === TYPE_NODE) {
+			const value = this.props.nodes.get(_selectedObj.id);
+			if(!value) {
+				_selectedObj = null;
+				return;
+			}
+			if(pointInCircle(point.x, point.y, value.get("x"), value.get("y"), NODE_RADIUS)) {
+				this.props.openNode(_selectedObj.id);
+			}
 		}
 
-		
-		props.tryAddNode({
-			title: "parent example",
-			type: NODE_TYPE_UNDEFINED,
-			imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
-			x: point.x,
-			y: point.y
-		});
+		else if(!_selectedObj) {
+			this.props.tryAddNode({
+				title: "parent example",
+				type: NODE_TYPE_UNDEFINED,
+				imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
+				x: point.x,
+				y: point.y
+			});
+		}
 	},
 
 	handlePress: function(e) {
 		console.log("PRESS on (" + e.center.x.toString() + "," + e.center.y.toString() + ")");
-		const point = calculatePosition(this.canvas, e.center.x, e.center.y);
-		_pressedObj = trySelectNode(point, this.props.nodes);
+		const point = calculatePoint(this.canvas, this.mindmap.getCamera(), e.center.x, e.center.y);
+		_selectedObj = trySelectNode(point, this.props.nodes);
+		_pressedObj = _selectedObj;
+		
+		if(_pressedObj) {
+			console.log("Pressed object: " + _pressedObj.type + " " + _pressedObj.id);
+		}
 	}
 });
 
-function calculatePosition(canvas, clientX, clientY) {
+function calculatePoint(canvas, camera, clientX, clientY) {
     const bounds = canvas.getBoundingClientRect();
 
     return {
-        x: clientX - bounds.left,
-        y: clientY - bounds.top
+        x: (clientX - bounds.left) + camera.x,
+        y: (clientY - bounds.top) + camera.y
     };
 }
 
 function trySelectNode(point, nodes) {
-	nodes.forEach(
-		function(value, key, map) {
-			console.log("m[" + key + "]");
-		
-			if(pointInsideCircle(point, value.x, value.y, NODE_RADIUS)) {		
-
-				return {
-					type: TYPE_NODE,
-					id: key
-					//data: value
-				};
-			}
-		}
-	);
-	return null;
-}
-
-function pointInsideCircle(point, circleX, circleY, circleR) {
-	const dist = Math.sqrt((circleX - point.x) ** 2 + (circleY - point.y) ** 2);
-    return dist <= circleR;
-}
-
-function pointInsideRect(point, rectX, rectY, rectW, rectH) {
-	const left =  circleX - rectW / 2;
-	const right = circleX + rectW / 2;
-	const top = circleY - rectH / 2;
-	const btm = circleY + rectH / 2;
+	let rVal = null;
 	
-	return left <= point.x && point.x <= right && top <= point.y && point.y <= btm;
+	for (var [key, value] of nodes) {
+		if(pointInCircle(point.x, point.y, value.get("x"), value.get("y"), NODE_RADIUS)) {
+			rVal = {
+				type: TYPE_NODE,
+				id: key,
+			}
+			
+			console.log("Node selected: " + key);
+			break;
+		}
+	}
+	
+	return rVal;
+}
+
+// x,y is the point to test
+// cx, cy is circle center, and radius is circle radius
+function pointInCircle(x, y, cx, cy, radius) {
+	var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+	return distancesquared <= radius * radius;
+}
+
+function pointInRect(point, rectX, rectY, rectW, rectH) {
+	const left =  rectX - rectW / 2;
+	const right = rectX + rectW / 2;
+	const top = rectY - rectH / 2;
+	const btm = rectY + rectH / 2;
+	
+	return (left <= point.x && point.x <= right && top <= point.y && point.y <= btm);
 }
 
 export default MindMap;
