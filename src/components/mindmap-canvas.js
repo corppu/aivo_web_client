@@ -17,8 +17,6 @@ import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils"
 import { createAction, updateAction, actionResult } from "../utils/input-utils";
 
 export default function() {
-   
-	
 	let _engine = Engine.create();
     let _nodes = [];
 	let _lines = [];

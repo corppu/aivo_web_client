@@ -113,7 +113,7 @@ const MindMap = createClass({
 		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	},
 	
-	handleMouseDown(e) {
+	handleMouseDown: function(e) {
 		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.clientX, e.clientY);
 	},
 	
