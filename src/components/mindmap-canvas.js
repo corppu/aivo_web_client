@@ -15,12 +15,14 @@ import {
 
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
 import { createAction, updateAction, actionResult } from "../utils/input-utils";
+import { flagHidden } from "../utils/node-utils";
 
 export default function() {
 	let _engine = Engine.create();
     let _nodes = [];
 	let _lines = [];
     let _bodyToNodeMapping = new Map();
+    let _searchFilter = "";
     let _camera = {
         x: 0,
         y: 0
@@ -62,6 +64,7 @@ export default function() {
         
         let propsNodes = new Map(props.nodes);
 		let propsLines = new Map(props.lines);
+
         // match existing nodes to props (update old ones)
         _nodes = _nodes.map(node => {
             const propsNode = propsNodes.get(node.id);
@@ -182,6 +185,13 @@ export default function() {
 		   _lines.push(line);
 			console.log("added line ${id}");
 		});
+
+        // search filtering
+        if (props.searchFilter && props.searchFilter !== _searchFilter) {
+            _searchFilter = props.searchFilter;
+
+            _nodes = flagHidden(_nodes, _searchFilter);
+        }
     }
 
 	function moveCameraBy(dx, dy) {
@@ -312,7 +322,10 @@ function drawLine(draw, line) {
 	draw.bezierCurve({sx: line.sx, sy: line.sy, cp1x: line.cp1x, cp1y: line.cp1y, cp2x: line.cp2x, cp2y: line.cp2y, ex: line.ex, ey: line.ey});
 }
 
-function drawNode(draw, { type, imgURL, title, body, radius }) {
+function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
+    if (hidden) {
+        return;
+    }
     const { x, y } = body.position;
 
     switch (type) {
