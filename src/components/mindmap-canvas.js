@@ -17,7 +17,6 @@ import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils"
 import { createAction, updateAction, actionResult } from "../utils/input-utils";
 
 export default function() {
-   
 	
 	let _engine = Engine.create();
     let _nodes = [];
@@ -111,14 +110,14 @@ export default function() {
 				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId"),
 				
-				sx: propsLine.get("sx"),
-				sy: propsLine.get("sy"),
-				ex: propsLine.get("ex"),
-				ey: propsLine.get("ey"),				
-				cp1x: propsLine.get("cp1x"),
-				cp1y: propsLine.get("cp1y"), 
-				cp2x: propsLine.get("cp2x"), 
-				cp2y: propsLine.get("cp2y"),
+				// sx: propsLine.get("sx"),
+				// sy: propsLine.get("sy"),
+				// ex: propsLine.get("ex"),
+				// ey: propsLine.get("ey"),				
+				// cp1x: propsLine.get("cp1x"),
+				// cp1y: propsLine.get("cp1y"), 
+				// cp2x: propsLine.get("cp2x"), 
+				// cp2y: propsLine.get("cp2y"),
 				
                 title: propsLine.get("title")
             });
@@ -169,14 +168,14 @@ export default function() {
 				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId"),
 				
-				sx: propsLine.get("sx"),
-				sy: propsLine.get("sy"),
-				ex: propsLine.get("ex"),
-				ey: propsLine.get("ey"),
-				cp1x: propsLine.get("cp1x"),
-				cp1y: propsLine.get("cp1y"), 
-				cp2x: propsLine.get("cp2x"), 
-				cp2y: propsLine.get("cp2y"),
+				// sx: propsLine.get("sx"),
+				// sy: propsLine.get("sy"),
+				// ex: propsLine.get("ex"),
+				// ey: propsLine.get("ey"),
+				// cp1x: propsLine.get("cp1x"),
+				// cp1y: propsLine.get("cp1y"), 
+				// cp2x: propsLine.get("cp2x"), 
+				// cp2y: propsLine.get("cp2y"),
 				
                 title: propsLine.get("title")
             };
@@ -285,7 +284,7 @@ export default function() {
         });
 
 		_lines.forEach(line => {
-            drawLine(draw, line);
+            //drawLine(draw, line, _engine.world.bodies, );
         });
 		
 		drawFPS(draw, _fps);
@@ -310,8 +309,52 @@ function drawFPS(draw, fps) {
     });
 }
 
-function drawLine(draw, line) {
-	draw.bezierCurve({sx: line.sx, sy: line.sy, cp1x: line.cp1x, cp1y: line.cp1y, cp2x: line.cp2x, cp2y: line.cp2y, ex: line.ex, ey: line.ey});
+function findAnchors(parentAnchor, childAnchor) {
+	let anchors = {
+		parentAnchor: {
+			x: parentAnchor.x,
+			y: parentAnchor.y
+		},
+		
+		childAnchor: {
+			x: childAnchor.x,
+			y: childAnchor.y
+		}
+	};
+	
+	if(parentAnchor.x < childAnchor.x) {
+		anchors.parentAnchor.x = parentAnchor.x + NODE_RADIUS;
+		anchors.childAnchor.x = childAnchor.x - NODE_RADIUS;
+	}
+	else if(parentAnchor.x > childAnchor.x) {
+		anchors.parentAnchor.x = parentAnchor.x - NODE_RADIUS;
+		anchors.childAnchor.x = childAnchor.y + NODE_RADIUS;
+	}
+	
+	if(parentAnchor.y < childAnchor.y) {
+		anchors.parentAnchor.y = parentAnchor.y + NODE_RADIUS;
+		anchors.childAnchor.y = childAnchor.y - NODE_RADIUS;
+	}
+	else if(parentAnchor.y > childAnchor.y) {
+		anchors.parentAnchor.y = parentAnchor.y - NODE_RADIUS;
+		anchors.childAnchor.y = childAnchor.y + NODE_RADIUS;
+	}
+	
+	return anchors;
+}
+
+
+function drawLine(draw, line, bodies, parentNode, childNode) {
+	const anchors = findAnchors(parentNode.anchor, childNode.anchor);
+	draw.curve(
+		createPath(
+			bodies, 
+			anchors.parentAnchor.x,
+			anchors.parentAnchor.y,
+			anchors.childAnchor.x,
+			anchors.childAnchor.y
+		)
+	);
 }
 
 function drawNode(draw, { type, imgURL, title, body, radius }) {
@@ -348,4 +391,81 @@ function drawNode(draw, { type, imgURL, title, body, radius }) {
 		title += "...";
     }
     draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
+}
+
+
+
+
+function createPath(bodies, sx, sy, ex, ey) {
+	const startPoint = Vector.create(sx, sy);
+	const endPoint = Vector.create(ex, ey);
+	//const rayWidth = 6;
+	//Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
+	const collisions = Query.ray(bodies, startPoint, endPoint);
+	if(collisions.length === 0) {
+		return [sx, sy, ex, ey];
+	}
+
+	let topMostBdy = collisions[0].body;
+	let leftMostBdy = collisions[0].body;
+	let rightMostBdy = collisions[0].body;
+	let bottomMostBdy = collisions[0].body;
+	let bdyBoundsA = null;
+	let bdyBoundsB = null;
+	for(let i = 1; i < collisions.length; ++i) {
+		bdyBoundsA = collisions[i].body.bounds;
+		
+		// Check leftMostBdy
+		bdyBoundsB = leftMostBdy.bounds;
+		if(bdyBoundsA.min.x < bdyBoundsB.min.x) {
+			leftMostBdy = collisions[i].body;
+		}
+		// Check topMostBdy
+		bdyBoundsB = topMostBdy.bounds;
+		if(bdyBoundsA.min.y < bdyBoundsB.min.y) {
+			topMostBdy = collisions[i].body;
+		}
+		
+		// Check rightMostBdy
+		bdyBoundsB = rightMostBdy.bounds;
+		if(bdyBoundsA.max.x > bdyBoundsB.max.x) {
+			rightMostBdy = collisions[i].body;
+		}
+		
+		// Check bottomMostBdy
+		bdyBoundsB = bottomMostBdy.bounds;
+		if(bdyBoundsA.max.y > bdyBoundsB.max.y) {
+			bottomMostBdy = collisions[i].body;
+		}
+	}
+	
+	let point1 = {x:sx, y:sy};
+	let point2 = {x:ex, y:ey};
+	
+	// Start is top
+	if(sy < ey) {
+		point1.y = topMostBdy.bounds.min.y;
+		point2.y = bottomMostBdy.bounds.max.y;
+	}
+
+	// Start is bottom
+	else if(sy >= ey) {
+		point1.y = bottomMostBdy.bounds.max.y;
+		point2.y = topMostBdy.bounds.min.y;
+	}
+	
+	// Start is left
+	if(sx < ex) {
+		point1.x = leftMostBdy.bounds.min.x;
+		point2.x = point1.x;
+	}
+	
+	// Start is right
+	else if(sx >= ex) {
+		point1.x = rightMostBdy.bounds.max.x;
+		point2.x = point1.x;
+	}
+	
+	
+	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
