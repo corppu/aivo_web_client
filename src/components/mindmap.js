@@ -76,35 +76,35 @@ const MindMap = createClass({
         const { width, height } = this.state;
 
         return (
-		<Hammer onTap={this.handleTap} onDoubleTap={this.handleDoubleTap} onPress={this.handlePress}>
-            <div
-                style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100vw",
-                    height: "100vh",
-                    overflow: "hidden",
-                    cursor: "default",
-                    zIndex: -1
-                }}>
+			<Hammer onTap={this.handleTap} onDoubleTap={this.handleDoubleTap} onPress={this.handlePress}>
+				<div
+					style={{
+						position: "fixed",
+						top: 0,
+						left: 0,
+						width: "100vw",
+						height: "100vh",
+						overflow: "hidden",
+						cursor: "default",
+						zIndex: -1
+					}}>
 
-                <canvas
-                    ref={(canvas) => { this.canvas = canvas; }}
-                    width={width}
-                    height={height}
-					onTouchStart={this.handleTouchStart}
-					onMouseDown={this.handleMouseDown}
-					onTouchMove={this.handleTouchMove} // MOVE
-					onMouseMove={this.handleMouseMove} // MOVE
-					onMouseUp={this.handleMouseEnd} // END
-                    onMouseLeave={this.handleMouseEnd} // END
-					onTouchEnd={this.handleTouchEnd} // END
-					onTouchCancel={this.handleTouchEnd} // END
-					/>
-                {children}
-            </div>
-		</Hammer>
+					<canvas
+						ref={(canvas) => { this.canvas = canvas; }}
+						width={width}
+						height={height}
+						onTouchStart={this.handleTouchStart}
+						onMouseDown={this.handleMouseDown}
+						onTouchMove={this.handleTouchMove} // MOVE
+						onMouseMove={this.handleMouseMove} // MOVE
+						onMouseUp={this.handleMouseEnd} // END
+						onMouseLeave={this.handleMouseEnd} // END
+						onTouchEnd={this.handleTouchEnd} // END
+						onTouchCancel={this.handleTouchEnd} // END
+						/>
+					{children}
+				</div>
+			</Hammer>
         )
     },
 
