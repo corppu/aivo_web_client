@@ -19,7 +19,7 @@ import { flagHidden } from "../utils/node-utils";
 
 export default function() {
 	let _engine = Engine.create();
-    let _nodes = [];
+    let _nodes = new Map();
 	let _lines = [];
     let _bodyToNodeMapping = new Map();
     let _searchFilter = "";
@@ -66,20 +66,22 @@ export default function() {
 		let propsLines = new Map(props.lines);
 
         // match existing nodes to props (update old ones)
-        _nodes = _nodes.map(node => {
-            const propsNode = propsNodes.get(node.id);
-            if (!propsNode) {
+        _nodes.forEach((node, id) => {
+            const propsNode = propsNodes.get(id);
+
+             if (!propsNode) {
                  const { body } = node;
 
+                _nodes.delete(id)
                 _bodyToNodeMapping.delete(body.id);
                 World.remove(_engine.world, body);
 
-                console.log(`removed node ${node.id}`);
-                return null;
+                console.log(`removed node ${id}`);
+                return;
             }
-            propsNodes.delete(node.id);
+            propsNodes.delete(id);
 
-            return Object.assign(node, {
+            Object.assign(node, {
                 type: propsNode.get("type"),
                 anchor: {
                     x: propsNode.get("x"),
@@ -90,7 +92,7 @@ export default function() {
                 imgURL: propsNode.get("imgURL")
             });
         });
-		
+
         // match existing lines to props (update old ones)
         _lines = _lines.map(line => {
             const propsLine = propsLines.get(line.id);
@@ -125,9 +127,6 @@ export default function() {
             });
         });		
 		
-        // remove null nodes (were removed from props)
-        _nodes = _nodes.filter(node => node !== null);
-		
 		// remove null lines (were removed from props)
         _lines = _lines.filter(line => line !== null);
 
@@ -152,10 +151,9 @@ export default function() {
                 anchor,
                 body
             }		
+            _nodes.set(node.id, node);
             _bodyToNodeMapping[body.id] = node;
-            
             World.add(_engine.world, body);
-            _nodes.push(node);
 
             console.log("added node ${id}");
         })
