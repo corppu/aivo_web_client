@@ -75,21 +75,11 @@ const NodeView = createClass({
 
         return (
              <div
-                style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#1e90ff",
-                }}>
+                className="node-title">
                 <input
+                    className="node-title-input"
                     value={node.get("title")}
-                    style={{
-                        outline: "none",
-                        border: "none",
-                        backgroundColor: "inherit",
-                        color: "#fff",
-                        fontFamily: "inherit",
-                        fontSize: "inherit",
-                        fontWeight: "bold"
-                    }}
+                    placeholder="Click to edit title..."
                     onChange={(e) => {
                         const { value } = e.target;
                         this.updateNodeData(node.set("title", value));
