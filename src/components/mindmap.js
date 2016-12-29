@@ -19,6 +19,7 @@ import {
 	NODE_TXT_BOX_HEIGHT
 } from "../constants/values";
 
+let _pressed = false;
 let _pressedObj = null;
 let _selectedObj = null;
 let _lastPoint = {x: 0, y: 0};
@@ -114,12 +115,16 @@ const MindMap = createClass({
     },
 
 	handleTouchStart: function(e) {
-		if(e.touches.length > 1) return;
+		if(e.touches.length > 1)
+			return;
+
 		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+		_pressed = true;
 	},
 	
 	handleMouseDown: function(e) {
 		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.clientX, e.clientY);
+		_pressed = true;
 	},
 	
 	handleMoveNode: function(point) {
@@ -159,7 +164,7 @@ const MindMap = createClass({
 	},
 	
     handleMouseMove: function(e) {
-		if(e.button === 2) {
+		if(_pressed) {
 			const point = calculatePoint(this.canvas, this.mindmap.getCamera(), e.clientX, e.clientY);
 
 			if(_pressedObj) {
@@ -184,10 +189,12 @@ const MindMap = createClass({
 	
 	handleTouchEnd: function(e) {
 		_pressedObj = null;
+		_pressed = false;
 	},
 
 	handleMouseEnd: function(e) {
 		_pressedObj = null;
+		_pressed = false;
     },
 	/*
 	    _actions.addNode = props.tryAddNode(data);
