@@ -194,7 +194,14 @@ export default function() {
 	
     function onInputStart(e) {
         const pos = transformToCamera(_camera, e.position);
-        _inputAction = createAction(pos);
+
+        let node = null;
+
+        const hits = Query.point(_engine.world.bodies, pos);
+        if (hits.length > 0) {
+            node = _bodyToNodeMapping[hits[0].id];
+        }
+        _inputAction = createAction(pos, node);
     }
 
     function onInputEnd(e) {
@@ -208,19 +215,15 @@ export default function() {
 	        
         const hits = Query.point(_engine.world.bodies, pos);
         if (hits.length > 0) {
-            
-            // delete node
             /*
             hits.forEach(body => {
                 const node = _bodyToNodeMapping[body.id];
-
                 if (_actions.removeNode) {
                     _actions.removeNode(node.id)
                 }
             })
             */
 
-            // move node
             if (_inputAction.totalDeltaMagnitude <= 10) {
                 const node = _bodyToNodeMapping[hits[0].id];
                 
@@ -242,6 +245,7 @@ export default function() {
                 }
             }
         }
+
         _inputAction = null
     }
 
@@ -250,9 +254,25 @@ export default function() {
             return;
         }
         const pos = transformToCamera(_camera, e.position);
+
         updateAction(_inputAction, pos);
 
-        Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+        if (_inputAction.data) {
+            if (_actions.updateNode) {
+                const { id, type, title, text, imgURL } = _inputAction.data;
+              
+                _actions.updateNode(id, {
+                    type: type || NODE_TYPE_UNDEFINED,
+                    x: pos.x,
+                    y: pos.y,
+                    title,
+                    text: text || null,
+                    imgURL: imgURL || null
+                });
+            }
+        } else {
+            Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+        }
     }
 
     function update() {
