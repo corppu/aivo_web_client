@@ -289,11 +289,11 @@ export default function() {
 
             const diff = Vector.sub(anchor, body.position);
 
-            if (Vector.magnitude(diff) > radius * 1.5) {
+            //if (Vector.magnitude(diff) > radius * 1.5) {
                 const vel = Vector.mult(diff, 1/1000);
 
                 Body.applyForce(body, Vector.create(0, 0), vel);
-            }
+            //}
         });
 
         // update physics
@@ -308,14 +308,23 @@ export default function() {
 
         const draw = createRenderer(ctx, { camera: _camera });
 
-        _context.nodes.forEach(node => {
-            drawNode(draw, node, node === _selectedNode);
-        });
-
+         // draw lines
 		_context.lines.forEach(line => {
             drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
         });
-		
+
+        // draw non-selected node(s)
+        _context.nodes.forEach(node => {
+            if (node !== _selectedNode) {
+                drawNode(draw, node, false);
+            }
+        });
+
+        // draw selected node(s)
+        if (_selectedNode !== null) {
+            drawNode(draw, _selectedNode, true);
+        }
+
 		drawFPS(draw, _fps);
     }
 
