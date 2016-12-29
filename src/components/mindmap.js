@@ -3,6 +3,15 @@ import React, { createClass } from "react";
 import createMindmap from "./mindmap-canvas";
 import MindMapToolbar from "./mindmap-toolbar";
 
+import {
+    NODE_TYPE_UNDEFINED,
+    NODE_TYPE_IMAGE,
+    NODE_TYPE_TEXT,
+	TYPE_NODE,
+	TYPE_LINE,
+	TYPE_NONE
+} from "../constants/types";
+
 const MindMap = createClass({
     getInitialState: function() {
         const { innerWidth, innerHeight } = window;
@@ -98,17 +107,7 @@ const MindMap = createClass({
             this.mindmap.onInputStart({
                 position: calculatePosition(this.canvas, clientX, clientY)
             });
-        }
-	},
-	
-	handleMoveNode: function(point) {
-
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputStart({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
+        }		
 	},
 	
 	handleTouchEnd: function(e) {
