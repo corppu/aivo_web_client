@@ -9,6 +9,7 @@ import {
 } from "../constants/types";
 import {
 	MINDMAP_NODE_RADIUS,
+    MINDMAP_NODE_HIGHLIGHT_MARGIN,
     MINDMAP_MODE_DEFAULT,
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
@@ -29,6 +30,7 @@ export default function() {
         y: 0
     };
 	
+    let _selectedNode = null;
     let _inputAction = null;
     let _actions = {
         addNode: null,
@@ -225,12 +227,18 @@ export default function() {
             if (_inputAction.totalDeltaMagnitude <= 10) {
                 const node = _context.bodyToNodeMapping[hits[0].id];
                 
-                if (_actions.openNode) {
+                if (_selectedNode !== node) {
+                    _selectedNode = node;
+
+                } else if ( _actions.openNode) {
                     _actions.openNode(node.id);
                 }
+            } else {
+                _selectedNode = null;
             }
-
         } else {
+            _selectedNode = null;
+
             if (_inputAction.totalDeltaMagnitude <= 10 && result.duration >= 0.25) {
                 if (_actions.addNode) {
                     _actions.addNode({
@@ -243,7 +251,6 @@ export default function() {
                 }
             }
         }
-
         _inputAction = null
     }
 
@@ -301,7 +308,7 @@ export default function() {
         const draw = createRenderer(ctx, { camera: _camera });
 
         _context.nodes.forEach(node => {
-            drawNode(draw, node);
+            drawNode(draw, node, node === _selectedNode);
         });
 
 		_context.lines.forEach(line => {
@@ -378,12 +385,18 @@ function drawLine(draw, line, bodies, parentNode, childNode) {
 	);
 }
 
-function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
+function drawNode(draw, { type, imgURL, title, body, radius, hidden}, isSelected = false) {
     if (hidden) {
         return;
     }
     const { x, y } = body.position;
 
+    // draw selection highlight
+    if (isSelected) {
+        draw.circle({x, y, r: radius + MINDMAP_NODE_HIGHLIGHT_MARGIN, color: "red"});
+    }
+
+    // draw node graphic
     switch (type) {
     case NODE_TYPE_TEXT:
         draw.circle({x, y, r: radius,
@@ -401,14 +414,6 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
         break; 
     }
 
-    // draw the first title letter inside the circle, if no image is present
-    /*
-    if (!imgURL) {
-        const content = title.charAt(0).toUpperCase();
-        draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
-    }
-    */
-    
     // draw the title
     if (title.length > 10) {
         title = title.substring(0, 7);
