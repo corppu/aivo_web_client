@@ -1,4 +1,3 @@
-// View for the mindmap
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import {
@@ -17,15 +16,17 @@ import { createAction, updateAction, actionResult } from "../utils/input-utils";
 import { flagHidden } from "../utils/node-utils";
 
 export default function() {
-	let _engine = Engine.create();
-    let _nodes = new Map();
-	let _lines = [];
-    let _bodyToNodeMapping = new Map();
-    let _camera = {
+    let _context = {
+        engine: Engine.create(),
+        nodes: new Map(),
+        lines: [],
+        bodyToNodeMapping: new Map(),  
+    };
+    let _camera ={
         x: 0,
         y: 0
     };
-
+	
     let _inputAction = null;
     let _actions = {
         addNode: null,
@@ -67,15 +68,15 @@ export default function() {
 		let propsLines = new Map(props.lines);
 
         // match existing nodes to props (update old ones)
-        _nodes.forEach((node, id) => {
+        _context.nodes.forEach((node, id) => {
             const propsNode = propsNodes.get(id);
 
              if (!propsNode) {
                  const { body } = node;
 
-                _nodes.delete(id)
-                _bodyToNodeMapping.delete(body.id);
-                World.remove(_engine.world, body);
+                _context.nodes.delete(id)
+                _context.bodyToNodeMapping.delete(body.id);
+                World.remove(_context.engine.world, body);
 
                 console.log(`removed node ${id}`);
                 return;
@@ -95,7 +96,7 @@ export default function() {
         });
 
         // match existing lines to props (update old ones)
-        _lines = _lines.map(line => {
+        _context.lines = _context.lines.map(line => {
             const propsLine = propsLines.get(line.id);
             if (!propsLine) {
                 //const { body } = node;
@@ -129,7 +130,7 @@ export default function() {
         });		
 		
 		// remove null lines (were removed from props)
-        _lines = _lines.filter(line => line !== null);
+        _context.lines = _context.lines.filter(line => line !== null);
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
@@ -152,9 +153,9 @@ export default function() {
                 anchor,
                 body
             }		
-            _nodes.set(node.id, node);
-            _bodyToNodeMapping[body.id] = node;
-            World.add(_engine.world, body);
+            _context.nodes.set(node.id, node);
+            _context.bodyToNodeMapping[body.id] = node;
+            World.add(_context.engine.world, body);
 
             console.log("added node ${id}");
         })
@@ -181,7 +182,7 @@ export default function() {
                 title: propsLine.get("title")
             };
 			
-		   _lines.push(line);
+		   _context.lines.push(line);
 			console.log("added line ${id}");
 		});
 
@@ -189,7 +190,7 @@ export default function() {
         if (props.searchFilter && props.searchFilter !== _searchFilter) {
             _searchFilter = props.searchFilter;
 
-            _nodes = flagHidden(_nodes, _searchFilter);
+            _context.nodes = flagHidden(_context.nodes, _searchFilter);
         }
     }
 	
@@ -198,9 +199,9 @@ export default function() {
 
         let node = null;
 
-        const hits = Query.point(_engine.world.bodies, pos);
+        const hits = Query.point(_context.engine.world.bodies, pos);
         if (hits.length > 0) {
-            node = _bodyToNodeMapping[hits[0].id];
+            node = _context.bodyToNodeMapping[hits[0].id];
         }
         _inputAction = createAction(pos, node);
     }
@@ -214,7 +215,7 @@ export default function() {
         updateAction(_inputAction, pos);
         const result = actionResult(_inputAction, pos);
 	        
-        const hits = Query.point(_engine.world.bodies, pos);
+        const hits = Query.point(_context.engine.world.bodies, pos);
         if (hits.length > 0) {
             /*
             hits.forEach(body => {
@@ -226,7 +227,7 @@ export default function() {
             */
 
             if (_inputAction.totalDeltaMagnitude <= 10) {
-                const node = _bodyToNodeMapping[hits[0].id];
+                const node = _context.bodyToNodeMapping[hits[0].id];
                 
                 if (_actions.openNode) {
                     _actions.openNode(node.id);
@@ -279,7 +280,7 @@ export default function() {
     function update() {
         updateFps(); // Just testing...
 
-        _nodes.forEach((node) => {
+        _context.nodes.forEach((node) => {
             const { radius, anchor, body } = node;
 
             const diff = Vector.sub(anchor, body.position);
@@ -292,10 +293,10 @@ export default function() {
         });
 
         // update physics
-        _engine.world.gravity.x = 0;
-        _engine.world.gravity.y = 0;
+        _context.engine.world.gravity.x = 0;
+        _context.engine.world.gravity.y = 0;
         
-        Engine.update(_engine);
+        Engine.update(_context.engine);
     }
     
     function render(ctx) {
@@ -303,11 +304,11 @@ export default function() {
 
         const draw = createRenderer(ctx, { camera: _camera });
 
-        _nodes.forEach(node => {
+        _context.nodes.forEach(node => {
             drawNode(draw, node);
         });
 
-		_lines.forEach(line => {
+		_context.lines.forEach(line => {
             drawLine(draw, line, _engine.world.bodies, _nodes.get(line.parentId), _nodes.get(line.childId));
         });
 		

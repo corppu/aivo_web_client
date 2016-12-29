@@ -11,11 +11,6 @@ import {
 	TYPE_LINE,
 	TYPE_NONE
 } from "../constants/types";
-import {
-	NODE_RADIUS,
-	NODE_TXT_BOX_WIDTH,
-	NODE_TXT_BOX_HEIGHT
-} from "../constants/values";
 
 const MindMap = createClass({
     getInitialState: function() {
