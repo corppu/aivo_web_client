@@ -417,7 +417,7 @@ function PointOnBounds(bounds, aDirection)
      aDirection = Vector.normalise(aDirection);
      var e = bounds.max;
      var v = aDirection;
-     float y = e.x * v.y / v.x;
+     var y = e.x * v.y / v.x;
      if (Math.abs(y) < e.y)
          return Vector.create(e.x, y);
      return Vector.create(e.y * v.x / v.y, e.y);
