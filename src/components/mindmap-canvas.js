@@ -346,27 +346,26 @@ function findAnchors(parentAnchor, childAnchor) {
 		}
 	};
 	
-	if(parentAnchor.x < childAnchor.x) {
+	if (parentAnchor.x < childAnchor.x) {
 		anchors.parentAnchor.x = parentAnchor.x + NODE_RADIUS;
 		anchors.childAnchor.x = childAnchor.x - NODE_RADIUS;
 	}
-	else if(parentAnchor.x > childAnchor.x) {
+	else if (parentAnchor.x > childAnchor.x) {
 		anchors.parentAnchor.x = parentAnchor.x - NODE_RADIUS;
 		anchors.childAnchor.x = childAnchor.y + NODE_RADIUS;
 	}
 	
-	if(parentAnchor.y < childAnchor.y) {
+	if (parentAnchor.y < childAnchor.y) {
 		anchors.parentAnchor.y = parentAnchor.y + NODE_RADIUS;
 		anchors.childAnchor.y = childAnchor.y - NODE_RADIUS;
 	}
-	else if(parentAnchor.y > childAnchor.y) {
+	else if (parentAnchor.y > childAnchor.y) {
 		anchors.parentAnchor.y = parentAnchor.y - NODE_RADIUS;
 		anchors.childAnchor.y = childAnchor.y + NODE_RADIUS;
 	}
 	
 	return anchors;
 }
-
 
 function drawLine(draw, line, bodies, parentNode, childNode) {
 	const anchors = findAnchors(parentNode.anchor, childNode.anchor);
@@ -419,9 +418,6 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
     }
     draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
 }
-
-
-
 
 function createPath(bodies, sx, sy, ex, ey) {
 	const startPoint = Vector.create(sx, sy);
@@ -492,7 +488,5 @@ function createPath(bodies, sx, sy, ex, ey) {
 		point1.x = rightMostBdy.bounds.max.x;
 		point2.x = point1.x;
 	}
-	
-	
 	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
