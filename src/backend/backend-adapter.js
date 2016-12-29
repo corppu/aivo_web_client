@@ -169,18 +169,18 @@ function createHomeBoard() {
 		parentType: "node",
 		parentId: parentId,
 		childType: "node",
-		childId: childId,
+		childId: childId//,
 		
-		sx: parentX,
-		sy: parentY + 60, // The bottom anchor point: (centerY + height / 2 + bottomTextHeight)
-		ex: childX,
-		ey: childY - 20, // The top anchor point: (centerY - height / 2) 
-		cp1x: 550,
-		cp1y: 500, 
-		cp2x: 450, 
-		cp2y: 750,
+		// sx: parentX,
+		// sy: parentY + 60, // The bottom anchor point: (centerY + height / 2 + bottomTextHeight)
+		// ex: childX,
+		// ey: childY - 20, // The top anchor point: (centerY - height / 2) 
+		// cp1x: 550,
+		// cp1y: 500, 
+		// cp2x: 450, 
+		// cp2y: 750,
 		
-		title: "insert verb"
+		// title: "insert verb"
     };
 	
 	
