@@ -6,12 +6,11 @@ import {
     NODE_TYPE_IMAGE,
     NODE_TYPE_TEXT
 } from "../constants/types";
-
 import {
-	NODE_RADIUS,
-	NODE_TXT_BOX_WIDTH,
-	NODE_TXT_BOX_HEIGHT
-} from "../constants/values";
+	MINDMAP_NODE_RADIUS,
+    MINDMAP_MODE_DEFAULT,
+    MINDMAP_MODE_LINE_EDIT
+} from "../constants/config";
 
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
 import { createAction, updateAction, actionResult } from "../utils/input-utils";
@@ -22,7 +21,6 @@ export default function() {
     let _nodes = new Map();
 	let _lines = [];
     let _bodyToNodeMapping = new Map();
-    let _searchFilter = "";
     let _camera = {
         x: 0,
         y: 0
@@ -38,6 +36,9 @@ export default function() {
 		removeLine: null,
         openNode: null
     };
+
+    let _searchFilter = "";
+    let _mode = MINDMAP_MODE_LINE_EDIT;
 
 	// Just testing....
 	let _lastDate;
@@ -132,7 +133,7 @@ export default function() {
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
-            const radius = NODE_RADIUS;
+            const radius = MINDMAP_NODE_RADIUS;
             const anchor = {
                 x: propsNode.get("x"),
                 y: propsNode.get("y")
