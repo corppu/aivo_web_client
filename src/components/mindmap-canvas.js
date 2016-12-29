@@ -14,7 +14,7 @@ import {
 } from "../constants/values";
 
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
-import { createAction, updateAction, actionResult } from "../utils/input-utils";
+//import { createAction, updateAction, actionResult } from "../utils/input-utils";
 import { flagHidden } from "../utils/node-utils";
 
 export default function() {
@@ -202,6 +202,7 @@ export default function() {
 		return _camera;
 	}
 	
+    /*
     function onInputStart(e) {
         const pos = transformToCamera(_camera, e.position);
         _inputAction = createAction(pos);
@@ -218,15 +219,13 @@ export default function() {
 	        
         const hits = Query.point(_engine.world.bodies, pos);
         if (hits.length > 0) {
-            /*
-            hits.forEach(body => {
-                const node = _bodyToNodeMapping[body.id];
+            //hits.forEach(body => {
+                //const node = _bodyToNodeMapping[body.id];
 
-                if (_actions.removeNode) {
-                    _actions.removeNode(node.id)
-                }
-            })
-            */
+                //if (_actions.removeNode) {
+                    //_actions.removeNode(node.id)
+                //}
+            //})
 
             if (_inputAction.totalDeltaMagnitude <= 10) {
                 const node = _bodyToNodeMapping[hits[0].id];
@@ -258,6 +257,7 @@ export default function() {
         updateAction(_inputAction, pos);
         Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
     }
+    */
 
     function update() {
         updateFps(); // Just testing...
