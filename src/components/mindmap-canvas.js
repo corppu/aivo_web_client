@@ -66,7 +66,7 @@ export default function() {
         let propsNodes = new Map(props.nodes);
 		let propsLines = new Map(props.lines);
 
-		console.log("updatting props");
+		
         // match existing nodes to props (update old ones)
         _nodes.forEach((node, id) => {
             const propsNode = propsNodes.get(id);
@@ -82,9 +82,6 @@ export default function() {
                 return;
             }
             propsNodes.delete(id);
-
-			console.log(propsNode.get("x"));
-			console.log(propsNode.get("y"));
 			
             Object.assign(node, {
                 type: propsNode.get("type"),
@@ -409,8 +406,34 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
 
 
 
+function createPath(startBounds, endBounds) {
+	const startPoint = Vector.create();
+	
+	const collisions = Query.ray(bodies, startPoint, endPoint);
+}
 
-function createPath(bodies, sx, sy, ex, ey) {
+function PointOnBounds(bounds, aDirection)
+{
+     aDirection = Vector.normalise(aDirection);
+     var e = bounds.max;
+     var v = aDirection;
+     float y = e.x * v.y / v.x;
+     if (Math.abs(y) < e.y)
+         return Vector.create(e.x, y);
+     return Vector.create(e.y * v.x / v.y, e.y);
+}
+ 
+function PointOnBounds(bounds, aAngle)
+{
+     a = Math.radians(aAngle);
+     return PointOnBounds(bounds, Vector.create(Math.cos(a), Math.sin(a)));
+}
+
+
+
+
+
+function createPath(bodies, startBody, endBody) {
 	const startPoint = Vector.create(sx, sy);
 	const endPoint = Vector.create(ex, ey);
 	//const rayWidth = 6;
@@ -426,6 +449,7 @@ function createPath(bodies, sx, sy, ex, ey) {
 	let bottomMostBdy = collisions[0].body;
 	let bdyBoundsA = null;
 	let bdyBoundsB = null;
+
 	for(let i = 1; i < collisions.length; ++i) {
 		bdyBoundsA = collisions[i].body.bounds;
 		
@@ -456,30 +480,34 @@ function createPath(bodies, sx, sy, ex, ey) {
 	let point1 = {x:sx, y:sy};
 	let point2 = {x:ex, y:ey};
 	
-	// Start is top
-	if(sy < ey) {
-		point1.y = topMostBdy.bounds.min.y;
-		point2.y = bottomMostBdy.bounds.max.y;
-	}
+	// // Start is top
+	// if(sy < ey) {
+		// point1.y = topMostBdy.bounds.min.y;
+		// point2.y = bottomMostBdy.bounds.max.y;
+	// }
 
-	// Start is bottom
-	else if(sy >= ey) {
-		point1.y = bottomMostBdy.bounds.max.y;
-		point2.y = topMostBdy.bounds.min.y;
-	}
+	// // Start is bottom
+	// else if(sy >= ey) {
+		// point1.y = bottomMostBdy.bounds.max.y;
+		// point2.y = topMostBdy.bounds.min.y;
+	// }
 	
-	// Start is left
-	if(sx < ex) {
-		point1.x = leftMostBdy.bounds.min.x;
-		point2.x = point1.x;
-	}
+	// // Start is left
+	// if(sx < ex) {
+		// point1.x = leftMostBdy.bounds.min.x;
+		// point2.x = point1.x;
+	// }
 	
-	// Start is right
-	else if(sx >= ex) {
-		point1.x = rightMostBdy.bounds.max.x;
-		point2.x = point1.x;
-	}
+	// // Start is right
+	// else if(sx >= ex) {
+		// point1.x = rightMostBdy.bounds.max.x;
+		// point2.x = point1.x;
+	// }
 	
 	
 	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
+
+function findWayPoint(obstacleBounds, startPoint, endPoint) {
+	const dir = Vector.dir(startPoint, endPoint);
+}	
