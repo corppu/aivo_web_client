@@ -57,15 +57,7 @@ const NodeView = createClass({
                         }}
                         onClick={ (e) => e.stopPropagation() }>
 
-                        <div
-                            style={{
-                                padding: "10px 20px", 
-                                backgroundColor: "#1e90ff",
-                                color: "#fff",
-                                fontWeight: "bold"
-                            }}>
-                            { node.get("title") }
-                        </div>
+                        { this.renderNodeTitle() }
                         <div
                             style={{
                                 margin: 20
@@ -74,6 +66,24 @@ const NodeView = createClass({
                         </div>
                     </div>
                 : null }
+            </div>
+        );
+    },
+
+    renderNodeTitle: function() {
+        const { node } = this.state;
+
+        return (
+             <div
+                className="node-title">
+                <input
+                    className="node-title-input"
+                    value={node.get("title")}
+                    placeholder="Click to edit title..."
+                    onChange={(e) => {
+                        const { value } = e.target;
+                        this.updateNodeData(node.set("title", value));
+                    }}/>
             </div>
         );
     },

@@ -1,0 +1,36 @@
+
+.node-title {
+    padding: 10px 20px;
+    background-color: #1e90ff;
+}
+
+.node-title-input {
+    outline: none;
+    border: none;
+    background-color: inherit;
+    color: #fff;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: bold;         
+}
+.node-title-input::placeholder {
+    color: #ccc;
+}
+.node-title-input::-webkit-input-placeholder {
+    color: #ccc;
+}
+.node-title-input::-moz-placeholder {
+    color: #ccc;
+}
+.node-title-input::-ms-input-placeholder {
+    color: #ccc;
+}
+.node-title-input::-moz-placeholder {
+    color: #ccc;
+}
+.node-title-input::selection {
+    background: #ddd;
+}
+.node-title-input::-moz-selection {
+    background: #ddd;
+}

@@ -20,7 +20,6 @@ export function tryAddNode(data) {
     }
 }
 
-
 export function tryAddLine(data) {
     return function (dispatch, getState) {
         const { mindmap } = getState();
@@ -32,8 +31,6 @@ export function tryAddLine(data) {
         backendAdapter.addLine(boardID, data);
     }
 }
-
-
 
 export function tryUpdateNode(id, data) {
     return function (dispatch, getState) {
@@ -47,7 +44,6 @@ export function tryUpdateNode(id, data) {
     }
 }
 
-
 export function tryUpdateLine(id, data) {
     return function (dispatch, getState) {
         const { mindmap } = getState();
@@ -60,7 +56,6 @@ export function tryUpdateLine(id, data) {
     }
 }
 
-
 export function tryRemoveNode(id) {
     return function (dispatch, getState) {
         const { mindmap } = getState();
@@ -72,7 +67,6 @@ export function tryRemoveNode(id) {
         backendAdapter.removeNode(boardID, id);
     }
 }
-
 
 export function tryRemoveLine(id) {
     return function (dispatch, getState) {

@@ -2,6 +2,9 @@
 import React, { createClass } from "react";
 import createMindmap from "./mindmap-canvas";
 import Hammer from "react-hammerjs";
+
+import MindMapToolbar from "./mindmap-toolbar";
+
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
@@ -10,7 +13,6 @@ import {
 	TYPE_LINE,
 	TYPE_NONE
 } from "../constants/types";
-
 import {
 	NODE_RADIUS,
 	NODE_TXT_BOX_WIDTH,
@@ -76,35 +78,38 @@ const MindMap = createClass({
         const { width, height } = this.state;
 
         return (
-		<Hammer onTap={this.handleTap} onDoubleTap={this.handleDoubleTap} onPress={this.handlePress}>
-            <div
-                style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100vw",
-                    height: "100vh",
-                    overflow: "hidden",
-                    cursor: "default",
-                    zIndex: -1
-                }}>
+			<div>
+				<MindMapToolbar/>
+				<Hammer onTap={this.handleTap} onDoubleTap={this.handleDoubleTap} onPress={this.handlePress}>
+					<div
+						style={{
+							position: "fixed",
+							top: 0,
+							left: 0,
+							width: "100vw",
+							height: "100vh",
+							overflow: "hidden",
+							cursor: "default",
+							zIndex: -1
+						}}>
 
-                <canvas
-                    ref={(canvas) => { this.canvas = canvas; }}
-                    width={width}
-                    height={height}
-					onTouchStart={this.handleTouchStart}
-					onMouseDown={this.handleMouseDown}
-					onTouchMove={this.handleTouchMove} // MOVE
-					onMouseMove={this.handleMouseMove} // MOVE
-					onMouseUp={this.handleMouseEnd} // END
-                    onMouseLeave={this.handleMouseEnd} // END
-					onTouchEnd={this.handleTouchEnd} // END
-					onTouchCancel={this.handleTouchEnd} // END
-					/>
-                {children}
-            </div>
-		</Hammer>
+						<canvas
+							ref={(canvas) => { this.canvas = canvas; }}
+							width={width}
+							height={height}
+							onTouchStart={this.handleTouchStart}
+							onMouseDown={this.handleMouseDown}
+							onTouchMove={this.handleTouchMove} // MOVE
+							onMouseMove={this.handleMouseMove} // MOVE
+							onMouseUp={this.handleMouseEnd} // END
+							onMouseLeave={this.handleMouseEnd} // END
+							onTouchEnd={this.handleTouchEnd} // END
+							onTouchCancel={this.handleTouchEnd} // END
+							/>
+						{children}
+					</div>
+				</Hammer>
+			</div>
         )
     },
 
@@ -113,7 +118,7 @@ const MindMap = createClass({
 		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	},
 	
-	handleMouseDown(e) {
+	handleMouseDown: function(e) {
 		_lastPoint = calculatePoint(this.canvas, this.mindmap.getCamera(), e.clientX, e.clientY);
 	},
 	
