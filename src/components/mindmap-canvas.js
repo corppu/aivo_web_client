@@ -66,6 +66,7 @@ export default function() {
         let propsNodes = new Map(props.nodes);
 		let propsLines = new Map(props.lines);
 
+		console.log("updatting props");
         // match existing nodes to props (update old ones)
         _nodes.forEach((node, id) => {
             const propsNode = propsNodes.get(id);
@@ -82,6 +83,9 @@ export default function() {
             }
             propsNodes.delete(id);
 
+			console.log(propsNode.get("x"));
+			console.log(propsNode.get("y"));
+			
             Object.assign(node, {
                 type: propsNode.get("type"),
                 anchor: {
