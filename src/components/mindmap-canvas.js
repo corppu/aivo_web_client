@@ -71,6 +71,7 @@ export default function() {
         let propsNodes = new Map(props.nodes);
 		let propsLines = new Map(props.lines);
 
+		
         // match existing nodes to props (update old ones)
         _context.nodes.forEach((node, id) => {
             const propsNode = propsNodes.get(id);
@@ -86,7 +87,7 @@ export default function() {
                 return;
             }
             propsNodes.delete(id);
-
+			
             Object.assign(node, {
                 type: propsNode.get("type"),
                 anchor: {
@@ -224,7 +225,7 @@ export default function() {
             })
             */
 
-            if (_inputAction.totalDeltaMagnitude <= 10) {
+             if (_inputAction.totalDeltaMagnitude <= 10) {
                 const node = _context.bodyToNodeMapping[hits[0].id];
                 
                 if (_selectedNode !== node) {
@@ -312,7 +313,7 @@ export default function() {
         });
 
 		_context.lines.forEach(line => {
-            drawLine(draw, line, _engine.world.bodies, _nodes.get(line.parentId), _nodes.get(line.childId));
+            drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
         });
 		
 		drawFPS(draw, _fps);
@@ -352,21 +353,21 @@ function findAnchors(parentAnchor, childAnchor) {
 	};
 	
 	if (parentAnchor.x < childAnchor.x) {
-		anchors.parentAnchor.x = parentAnchor.x + NODE_RADIUS;
-		anchors.childAnchor.x = childAnchor.x - NODE_RADIUS;
+		anchors.parentAnchor.x = parentAnchor.x + MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.x = childAnchor.x - MINDMAP_NODE_RADIUS;
 	}
 	else if (parentAnchor.x > childAnchor.x) {
-		anchors.parentAnchor.x = parentAnchor.x - NODE_RADIUS;
-		anchors.childAnchor.x = childAnchor.y + NODE_RADIUS;
+		anchors.parentAnchor.x = parentAnchor.x - MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.x = childAnchor.y + MINDMAP_NODE_RADIUS;
 	}
 	
 	if (parentAnchor.y < childAnchor.y) {
-		anchors.parentAnchor.y = parentAnchor.y + NODE_RADIUS;
-		anchors.childAnchor.y = childAnchor.y - NODE_RADIUS;
+		anchors.parentAnchor.y = parentAnchor.y + MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.y = childAnchor.y - MINDMAP_NODE_RADIUS;
 	}
 	else if (parentAnchor.y > childAnchor.y) {
-		anchors.parentAnchor.y = parentAnchor.y - NODE_RADIUS;
-		anchors.childAnchor.y = childAnchor.y + NODE_RADIUS;
+		anchors.parentAnchor.y = parentAnchor.y - MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.y = childAnchor.y + MINDMAP_NODE_RADIUS;
 	}
 	
 	return anchors;
@@ -422,6 +423,34 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden}, isSelected
     draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
 }
 
+
+function createPath(startBounds, endBounds) {
+	const startPoint = Vector.create();
+	
+	const collisions = Query.ray(bodies, startPoint, endPoint);
+}
+
+function PointOnBounds(bounds, aDirection)
+{
+     aDirection = Vector.normalise(aDirection);
+     var e = bounds.max;
+     var v = aDirection;
+     var y = e.x * v.y / v.x;
+     if (Math.abs(y) < e.y)
+         return Vector.create(e.x, y);
+     return Vector.create(e.y * v.x / v.y, e.y);
+}
+ 
+function PointOnBounds(bounds, aAngle)
+{
+     a = Math.radians(aAngle);
+     return PointOnBounds(bounds, Vector.create(Math.cos(a), Math.sin(a)));
+}
+
+
+
+
+
 function createPath(bodies, sx, sy, ex, ey) {
 	const startPoint = Vector.create(sx, sy);
 	const endPoint = Vector.create(ex, ey);
@@ -438,6 +467,7 @@ function createPath(bodies, sx, sy, ex, ey) {
 	let bottomMostBdy = collisions[0].body;
 	let bdyBoundsA = null;
 	let bdyBoundsB = null;
+
 	for(let i = 1; i < collisions.length; ++i) {
 		bdyBoundsA = collisions[i].body.bounds;
 		
@@ -468,28 +498,5 @@ function createPath(bodies, sx, sy, ex, ey) {
 	let point1 = {x:sx, y:sy};
 	let point2 = {x:ex, y:ey};
 	
-	// Start is top
-	if(sy < ey) {
-		point1.y = topMostBdy.bounds.min.y;
-		point2.y = bottomMostBdy.bounds.max.y;
-	}
-
-	// Start is bottom
-	else if(sy >= ey) {
-		point1.y = bottomMostBdy.bounds.max.y;
-		point2.y = topMostBdy.bounds.min.y;
-	}
-	
-	// Start is left
-	if(sx < ex) {
-		point1.x = leftMostBdy.bounds.min.x;
-		point2.x = point1.x;
-	}
-	
-	// Start is right
-	else if(sx >= ex) {
-		point1.x = rightMostBdy.bounds.max.x;
-		point2.x = point1.x;
-	}
 	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
