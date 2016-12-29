@@ -129,6 +129,7 @@ const MindMap = createClass({
 	
 	handleMoveNode: function(point) {
 		const value = this.props.nodes.get(_pressedObj.id);
+		console.log(value);
 		this.props.tryUpdateNode(
 			_pressedObj.id, 
 			{
