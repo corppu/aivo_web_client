@@ -224,31 +224,31 @@ export default function() {
                 }
             })
             */
-
-             if (_inputAction.totalDeltaMagnitude <= 10) {
-                const node = _context.bodyToNodeMapping[hits[0].id];
-                
+            
+            const node = _context.bodyToNodeMapping[hits[0].id];
+            
+            if (_inputAction.totalDeltaMagnitude <= 10) {
                 if (_selectedNode !== node) {
                     _selectedNode = node;
 
-                } else if ( _actions.openNode) {
+                } else if (_actions.openNode) {
                     _actions.openNode(node.id);
                 }
-            } else {
-                _selectedNode = null;
             }
         } else {
-            _selectedNode = null;
+            if (_inputAction.totalDeltaMagnitude <= 10) {
+                _selectedNode = null;
 
-            if (_inputAction.totalDeltaMagnitude <= 10 && result.duration >= 0.25) {
-                if (_actions.addNode) {
-                    _actions.addNode({
-                        title: "",
-                        type: NODE_TYPE_UNDEFINED,
-                        imgURL: null,
-                        x: pos.x,
-                        y: pos.y
-                    });
+                if (result.duration >= 0.25) {
+                    if (_actions.addNode) {
+                        _actions.addNode({
+                            title: "",
+                            type: NODE_TYPE_UNDEFINED,
+                            imgURL: null,
+                            x: pos.x,
+                            y: pos.y
+                        });
+                    }
                 }
             }
         }
