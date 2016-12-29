@@ -6,24 +6,21 @@ import {
     NODE_TYPE_IMAGE,
     NODE_TYPE_TEXT
 } from "../constants/types";
-
 import {
-	NODE_RADIUS,
-	NODE_TXT_BOX_WIDTH,
-	NODE_TXT_BOX_HEIGHT
-} from "../constants/values";
+	MINDMAP_NODE_RADIUS,
+    MINDMAP_MODE_DEFAULT,
+    MINDMAP_MODE_LINE_EDIT
+} from "../constants/config";
 
 import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
 import { createAction, updateAction, actionResult } from "../utils/input-utils";
 import { flagHidden } from "../utils/node-utils";
 
 export default function() {
-
 	let _engine = Engine.create();
     let _nodes = new Map();
 	let _lines = [];
     let _bodyToNodeMapping = new Map();
-    let _searchFilter = "";
     let _camera = {
         x: 0,
         y: 0
@@ -39,6 +36,9 @@ export default function() {
 		removeLine: null,
         openNode: null
     };
+
+    let _searchFilter = "";
+    let _mode = MINDMAP_MODE_LINE_EDIT;
 
 	// Just testing....
 	let _lastDate;
@@ -134,7 +134,7 @@ export default function() {
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
-            const radius = NODE_RADIUS;
+            const radius = MINDMAP_NODE_RADIUS;
             const anchor = {
                 x: propsNode.get("x"),
                 y: propsNode.get("y")
@@ -193,36 +193,33 @@ export default function() {
             _nodes = flagHidden(_nodes, _searchFilter);
         }
     }
-
-	function moveCameraBy(dx, dy) {
-		_camera.x += dx;
-		_camera.y += dy;
-	}
-	
-	function getCamera() {
-		return _camera;
-	}
 	
     function onInputStart(e) {
         const pos = transformToCamera(_camera, e.position);
-        _inputAction = createAction(pos);
+
+        let node = null;
+
+        const hits = Query.point(_engine.world.bodies, pos);
+        if (hits.length > 0) {
+            node = _bodyToNodeMapping[hits[0].id];
+        }
+        _inputAction = createAction(pos, node);
     }
 
     function onInputEnd(e) {
-        // // if (!_inputAction) {
-            // // return;
-        // // }
+        if (!_inputAction) {
+            return;
+        }
         const pos = transformToCamera(_camera, e.position);
 
-        // updateAction(_inputAction, pos);
-        // const result = actionResult(_inputAction, pos);
+        updateAction(_inputAction, pos);
+        const result = actionResult(_inputAction, pos);
 	        
         const hits = Query.point(_engine.world.bodies, pos);
         if (hits.length > 0) {
             /*
             hits.forEach(body => {
                 const node = _bodyToNodeMapping[body.id];
-
                 if (_actions.removeNode) {
                     _actions.removeNode(node.id)
                 }
@@ -255,9 +252,29 @@ export default function() {
     }
 
     function onInputMove(e) {
+        if (!_inputAction) {
+            return;
+        }
         const pos = transformToCamera(_camera, e.position);
+
         updateAction(_inputAction, pos);
-        Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+
+        if (_inputAction.data) {
+            if (_actions.updateNode) {
+                const { id, type, title, text, imgURL } = _inputAction.data;
+              
+                _actions.updateNode(id, {
+                    type: type || NODE_TYPE_UNDEFINED,
+                    x: pos.x,
+                    y: pos.y,
+                    title,
+                    text: text || null,
+                    imgURL: imgURL || null
+                });
+            }
+        } else {
+            Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+        }
     }
 
     function update() {
@@ -300,8 +317,9 @@ export default function() {
 
     return {
         updateProps,
-		getCamera,
-		moveCameraBy,
+        onInputStart,
+        onInputEnd,
+        onInputMove,
         update,
         render
     };
@@ -330,27 +348,26 @@ function findAnchors(parentAnchor, childAnchor) {
 		}
 	};
 	
-	if(parentAnchor.x < childAnchor.x) {
-		anchors.parentAnchor.x = parentAnchor.x + NODE_RADIUS;
-		anchors.childAnchor.x = childAnchor.x - NODE_RADIUS;
+	if (parentAnchor.x < childAnchor.x) {
+		anchors.parentAnchor.x = parentAnchor.x + MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.x = childAnchor.x - MINDMAP_NODE_RADIUS;
 	}
-	else if(parentAnchor.x > childAnchor.x) {
-		anchors.parentAnchor.x = parentAnchor.x - NODE_RADIUS;
-		anchors.childAnchor.x = childAnchor.y + NODE_RADIUS;
+	else if (parentAnchor.x > childAnchor.x) {
+		anchors.parentAnchor.x = parentAnchor.x - MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.x = childAnchor.y + MINDMAP_NODE_RADIUS;
 	}
 	
-	if(parentAnchor.y < childAnchor.y) {
-		anchors.parentAnchor.y = parentAnchor.y + NODE_RADIUS;
-		anchors.childAnchor.y = childAnchor.y - NODE_RADIUS;
+	if (parentAnchor.y < childAnchor.y) {
+		anchors.parentAnchor.y = parentAnchor.y + MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.y = childAnchor.y - MINDMAP_NODE_RADIUS;
 	}
-	else if(parentAnchor.y > childAnchor.y) {
-		anchors.parentAnchor.y = parentAnchor.y - NODE_RADIUS;
-		anchors.childAnchor.y = childAnchor.y + NODE_RADIUS;
+	else if (parentAnchor.y > childAnchor.y) {
+		anchors.parentAnchor.y = parentAnchor.y - MINDMAP_NODE_RADIUS;
+		anchors.childAnchor.y = childAnchor.y + MINDMAP_NODE_RADIUS;
 	}
 	
 	return anchors;
 }
-
 
 function drawLine(draw, line, bodies, parentNode, childNode) {
 	const anchors = findAnchors(parentNode.anchor, childNode.anchor);
@@ -405,7 +422,6 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
 }
 
 
-
 function createPath(startBounds, endBounds) {
 	const startPoint = Vector.create();
 	
@@ -433,7 +449,7 @@ function PointOnBounds(bounds, aAngle)
 
 
 
-function createPath(bodies, startBody, endBody) {
+function createPath(bodies, sx, sy, ex, ey) {
 	const startPoint = Vector.create(sx, sy);
 	const endPoint = Vector.create(ex, ey);
 	//const rayWidth = 6;
@@ -480,34 +496,5 @@ function createPath(bodies, startBody, endBody) {
 	let point1 = {x:sx, y:sy};
 	let point2 = {x:ex, y:ey};
 	
-	// // Start is top
-	// if(sy < ey) {
-		// point1.y = topMostBdy.bounds.min.y;
-		// point2.y = bottomMostBdy.bounds.max.y;
-	// }
-
-	// // Start is bottom
-	// else if(sy >= ey) {
-		// point1.y = bottomMostBdy.bounds.max.y;
-		// point2.y = topMostBdy.bounds.min.y;
-	// }
-	
-	// // Start is left
-	// if(sx < ex) {
-		// point1.x = leftMostBdy.bounds.min.x;
-		// point2.x = point1.x;
-	// }
-	
-	// // Start is right
-	// else if(sx >= ex) {
-		// point1.x = rightMostBdy.bounds.max.x;
-		// point2.x = point1.x;
-	// }
-	
-	
 	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
-
-function findWayPoint(obstacleBounds, startPoint, endPoint) {
-	const dir = Vector.dir(startPoint, endPoint);
-}	
