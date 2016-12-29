@@ -262,24 +262,23 @@ export default function() {
     function update() {
         updateFps(); // Just testing...
 
-        for (let i = 0; i < _nodes.length; ++i) {
-            const node = _nodes[i]
-            const { radius, anchor, body } = node
+        _nodes.forEach((node) => {
+            const { radius, anchor, body } = node;
 
-            const diff = Vector.sub(anchor, body.position)
+            const diff = Vector.sub(anchor, body.position);
 
             if (Vector.magnitude(diff) > radius * 1.5) {
-                const vel = Vector.mult(diff, 1/1000)
+                const vel = Vector.mult(diff, 1/1000);
 
-                Body.applyForce(body, Vector.create(0, 0), vel)
+                Body.applyForce(body, Vector.create(0, 0), vel);
             }
-        }
+        });
 
         // update physics
-        _engine.world.gravity.x = 0
-        _engine.world.gravity.y = 0
+        _engine.world.gravity.x = 0;
+        _engine.world.gravity.y = 0;
         
-        Engine.update(_engine)
+        Engine.update(_engine);
     }
     
     function render(ctx) {
