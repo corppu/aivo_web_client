@@ -1,5 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
+import { queryNodeAtPoint } from "./mindmap-canvas-physics";
+
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
@@ -198,13 +200,7 @@ export default function() {
     function onInputStart(e) {
         const pos = transformToCamera(_camera, e.position);
 
-        let node = null;
-
-        const hits = Query.point(_context.engine.world.bodies, pos);
-        if (hits.length > 0) {
-            node = _context.bodyToNodeMapping[hits[0].id];
-        }
-        _inputAction = createAction(pos, node);
+        _inputAction = createAction(pos, queryNodeAtPoint(_context, pos));
     }
 
     function onInputEnd(e) {
