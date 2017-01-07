@@ -263,8 +263,6 @@ export default function() {
                     imgURL: imgURL || null
                 });
             }
-            return action.data;
-
         } else {
             Object.assign(_camera, Vector.add(_camera, action.lastDelta));
         }
