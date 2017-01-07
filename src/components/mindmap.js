@@ -5,10 +5,21 @@ import MindMapToolbar from "./mindmap-toolbar";
 
 import { createAction, updateAction } from "../utils/input-utils";
 
+import {
+    LONGPRESS_TIMEOUT,
+    PRESS_DELTA_THRESHOLD,
+    DOUBLE_INPUT_TIMEOUT
+} from "../constants/config";
+
 const MindMap = createClass({
     getInitialState: function() {
         const { innerWidth, innerHeight } = window;
 
+        this.canvas = null;
+        this.mindmap = null;
+
+        this.longPressTimeout = null;
+        this.lastInputAction = null;
         this.inputAction = null;
 
         return {
@@ -127,6 +138,25 @@ const MindMap = createClass({
         if (this.inputAction) {
             this.handleInputEnd( { x: clientX, y: clientY });
         }
+        
+        // long press logic
+        if (this.longPressTimeout) {
+            clearTimeout(this.longPressTimeout);
+        }
+        this.longPressTimeout = window.setTimeout(() => {
+            if (!this.mindmap || !this.mindmap.onLongPress || !this.inputAction) {
+                return;
+            }
+            updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
+
+            if (this.inputAction.deltaMagnitude <= PRESS_DELTA_THRESHOLD) {
+                const nextData = this.mindmap.onLongPress(this.inputAction);
+                if (nextData !== undefined) {
+                    this.inputAction.data = nextData;
+                }
+            }
+        }, LONGPRESS_TIMEOUT * 1000);
+
         this.inputAction = createAction(calculatePosition(this.canvas, clientX, clientY));
         this.inputAction.data = this.mindmap.onInputStart(this.inputAction);
     },

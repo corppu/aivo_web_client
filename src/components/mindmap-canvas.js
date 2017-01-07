@@ -269,6 +269,10 @@ export default function() {
         }
     }
 
+    function onLongPress(action) {
+        console.log(action);
+    }
+
     function update() {
         updateFps(); // Just testing...
 
@@ -321,6 +325,7 @@ export default function() {
         onInputStart,
         onInputEnd,
         onInputMove,
+        onLongPress,
         update,
         render
     };
