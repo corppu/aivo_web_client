@@ -2,8 +2,10 @@ import {
     UPDATE_BOARD,
     UPDATE_NODE,
 	UPDATE_LINE,
+	UPDATE_PIN,
     REMOVE_NODE,
-	REMOVE_LINE
+	REMOVE_LINE,
+	REMOVE_PIN
 } from "../constants/action-types";
 
 import * as backendAdapter from "../backend/backend-adapter";
@@ -32,6 +34,18 @@ export function tryAddLine(data) {
     }
 }
 
+export function tryAddPin(data) {
+    return function (dispatch, getState) {
+        const { mindmap } = getState();
+
+        const boardID = mindmap.get("boardID");
+        if (!boardID) {
+            return;
+        }
+        backendAdapter.addPin(boardID, data);
+    }
+}
+
 export function tryUpdateNode(id, data) {
     return function (dispatch, getState) {
         const { mindmap } = getState();
@@ -53,6 +67,18 @@ export function tryUpdateLine(id, data) {
             return;
         }
         backendAdapter.updateLine(boardID, id, data);
+    }
+}
+
+export function tryUpdatePin(id, data) {
+    return function (dispatch, getState) {
+        const { mindmap } = getState();
+
+        const boardID = mindmap.get("boardID");
+        if (!boardID) {
+            return;
+        }
+        backendAdapter.updatePin(boardID, id, data);
     }
 }
 
@@ -80,6 +106,18 @@ export function tryRemoveLine(id) {
     }
 }
 
+export function tryRemovePin(id) {
+    return function (dispatch, getState) {
+        const { mindmap } = getState();
+
+        const boardID = mindmap.get("boardID");
+        if (!boardID) {
+            return;
+        }
+        backendAdapter.removePin(boardID, id);
+    }
+}
+
 export function updateBoard(id, data) {
     return { type: UPDATE_BOARD, id, data };
 }
@@ -92,10 +130,18 @@ export function updateLine(id, data) {
 	return { type: UPDATE_LINE, id, data };
 }
 
+export function updatePin(id, data) {
+	return { type: UPDATE_PIN, id, data };
+}
+
 export function removeNode(id) {
     return { type: REMOVE_NODE, id };
 }
 
 export function removeLine(id) {
 	return { type: REMOVE_LINE, id };
+}
+
+export function removePin(id) {
+	return { type: REMOVE_PIN, id };
 }

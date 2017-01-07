@@ -9,6 +9,7 @@ import {
     NODE_TYPE_TEXT
 } from "../constants/types";
 import {
+	MINDMAP_PIN_RADIUS,
 	MINDMAP_NODE_RADIUS,
     MINDMAP_NODE_HIGHLIGHT_MARGIN,
     MINDMAP_MODE_DEFAULT,
@@ -23,7 +24,8 @@ export default function() {
     let _context = {
         engine: Engine.create(),
         nodes: new Map(),
-        lines: [],
+        lines: new Map(),
+		pins: new Map(),
         bodyToNodeMapping: new Map(),  
     };
     let _camera ={
@@ -36,10 +38,13 @@ export default function() {
     let _actions = {
         addNode: null,
 		addLine: null,
+		addPin: null,
         updateNode: null,
 		updateLine: null,
+		updatePin: null,
         removeNode: null,
 		removeLine: null,
+		removePin: null,
         openNode: null
     };
 
@@ -102,18 +107,20 @@ export default function() {
         });
 
         // match existing lines to props (update old ones)
-        _context.lines = _context.lines.map(line => {
-            const propsLine = propsLines.get(line.id);
-            if (!propsLine) {
-                //const { body } = node;
+          _context.lines.forEach((line, id) => {
+            const propsLine = propsLines.get(id);
 
-                //_bodyToNodeMapping.delete(body.id);
-                //World.remove(_engine.world, body);
+             if (!propsLine) {
+                // const { body } = line;
 
-                console.log(`removed line ${line.id}`);
-                return null;
+                _context.lines.delete(id)
+                // _context.bodyToNodeMapping.delete(body.id);
+                // World.remove(_context.engine.world, body);
+
+                console.log(`removed line ${id}`);
+                return;
             }
-            propsLines.delete(line.id);
+            propsNodes.delete(id);
 
             return Object.assign(line, {
 
@@ -310,7 +317,13 @@ export default function() {
         const draw = createRenderer(ctx, { camera: _camera });
 
 		_context.lines.forEach(line => {
-            drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
+            drawLine(
+				draw,
+				line,
+				_context.engine.world.bodies,
+				line.parentType === "node" ? _context.nodes.get(line.parentId) : _context.pins.get(line.parentId), 
+				line.childType === "node" ? _context.nodes.get(line.childId) : _context.pins.get(line.childId)
+			);
         });
 		
         // draw non-selected node(s)
@@ -383,7 +396,7 @@ function findAnchors(parentAnchor, childAnchor) {
 }
 
 function drawLine(draw, line, bodies, parentNode, childNode) {
-	const anchors = findAnchors(parentNode.anchor, childNode.anchor);
+	//const anchors = findAnchors(parentNode.anchor, childNode.anchor);
 	draw.curve(
 		findPath(bodies, parentNode.body, childNode.body)
 	);

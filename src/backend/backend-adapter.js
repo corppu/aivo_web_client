@@ -115,7 +115,8 @@ function createHomeBoard() {
 	const childX = 500;
 	const childY = 1000;
 	const lineId = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
-	
+	const lineIdToPin = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
+	const pinId = firebase.database().ref("/boards/" + boardId + "/pins/").push().key;
 	
 	let updates = {};
 	
@@ -183,6 +184,22 @@ function createHomeBoard() {
 		// title: "insert verb"
     };
 	
+
+	updates["/boards/" + boardId + "/pins/" + pinId] = {
+		// title: "child example",
+		// type: NODE_TYPE_UNDEFINED,
+		// imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
+		x: 800,
+		y: 800,
+		lines: {lineIdToPin: parentId}
+	};	
+	
+	updates["/boards/" + boardId + "/lines/" + lineIdToPin] = {
+		parentType: "node",
+		parentId: parentId,
+		childType: "pin",
+		childId: pinId
+	};
 	
 	firebase.database().ref().update(
 		updates, 
@@ -428,6 +445,20 @@ function attachBoardListeners(boardId) {
 	nodesRef.on("child_removed", function(data) {
 		_storeAdapter.removeNode(data.key, data.val());
 	});
+
+	var pinsRef = firebase.database().ref("boards/" + boardId + "/pins");
+	
+	pinsRef.on("child_added", function(data) {
+		_storeAdapter.updatePin(data.key, data.val());
+	});
+	
+	pinsRef.on("child_changed", function(data) {
+		_storeAdapter.updatePin(data.key, data.val());
+	});
+	
+	pinsRef.on("child_removed", function(data) {
+		_storeAdapter.removePin(data.key, data.val());
+	});
 	
 	var linesRef = firebase.database().ref("boards/" + boardId + "/lines");
 	
@@ -439,7 +470,7 @@ function attachBoardListeners(boardId) {
 		_storeAdapter.updateLine(data.key, data.val());
 	});
 	
-	nodesRef.on("child_removed", function(data) {
+	linesRef.on("child_removed", function(data) {
 		_storeAdapter.removeLine(data.key, data.val());
 	});
 }
@@ -447,6 +478,7 @@ function attachBoardListeners(boardId) {
 export function detachBoardListeners(boardId) {
 	firebase.database().ref("boards/"+boardId+"/lines").off();
 	firebase.database().ref("boards/"+boardId+"/nodes").off();
+	firebase.database().ref("boards/"+boardId+"/pins").off();
 	firebase.database().ref("boards/"+boardId+"/meta").off(
 		"value",
 		B_META_VALUE,
@@ -647,6 +679,63 @@ export function removeLine(boardId, lineId) {
 			_storeAdapter.error(error);
 		} else {
 			console.log("Line " + lineId + " is succesfully removed");
+		}
+	});
+}
+
+
+
+export function updatePin(boardId, pinId, pinData) {
+	
+    var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+	_storeAdapter.updatePin(pinId, pinData);
+
+	var updates = {}
+	updates["/boards/" + boardId + "/pins/" + pinId] = pinData;
+	
+	firebase.database().ref().update(updates, function(error) {
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error.code);
+		}
+	});
+}
+
+
+export function addPin(boardId, pinData, pinId = null) {
+	console.log("Trying to add pin to the board: " + boardId);
+    var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+	if(!pinId) {
+		pinId = firebase.database().ref().child("pins").push().key;
+	}
+	
+	updatePin(boardId, pinId, pinData);
+}
+
+export function removePin(boardId, pinId) {
+	console.log("Trying to remove pin:" + pinId);
+	var user = firebase.auth().currentUser;
+	if(!user) {
+		console.warn("User is not authenticated!");
+		return;
+	}
+    _storeAdapter.removePin(pinId);
+   
+   
+	firebase.database().ref("/boards/" + boardId + "/pins/" + pinId).remove(function(error) {
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error);
+		} else {
+			console.log("Pin " + pinId + " is succesfully removed from board " + boardId);
 		}
 	});
 }

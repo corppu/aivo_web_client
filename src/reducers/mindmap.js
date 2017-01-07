@@ -4,8 +4,10 @@ import {
     UPDATE_BOARD,
     UPDATE_NODE,
 	UPDATE_LINE,
+	UPDATE_PIN,
     REMOVE_NODE,
 	REMOVE_LINE,
+	REMOVE_PIN,
     LIST_UPDATE,
     LIST_REMOVE
 } from "../constants/action-types";
@@ -15,6 +17,7 @@ const initialState = fromJS({
     boardData: null,
     nodes: {},
 	lines: {},
+	pins: {},
     boards: {}
 });
 
@@ -54,6 +57,16 @@ export default function(state = initialState, action) {
             return line ? line.merge(immutableData) : immutableData;
 		});
 	}
+	case UPDATE_PIN:
+	{
+		const { id, data } = action;
+		
+		return state.updateIn(["pins", id], pin => {
+			const immutableData = fromJS(data);
+
+            return pin ? pin.merge(immutableData) : immutableData;
+		});
+	}
     case REMOVE_NODE:
     {
         const { id } = action;
@@ -66,6 +79,12 @@ export default function(state = initialState, action) {
 
         return state.deleteIn(["lines", id]);
 	}
+	case REMOVE_PIN:
+    {
+        const { id } = action;
+
+        return state.deleteIn(["pins", id]);
+    }
     case LIST_UPDATE:
     {
         const { id, data } = action;

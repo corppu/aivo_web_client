@@ -5,3 +5,4 @@ export const NODE_TYPE_IMAGE = "image";
 export const TYPE_NODE = "node";
 export const TYPE_LINE = "line";
 export const TYPE_NONE = "none";
+export const TYPE_PIN = "pin";
