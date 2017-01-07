@@ -10,6 +10,7 @@ import {
 } from "../constants/types";
 import {
 	MINDMAP_NODE_RADIUS,
+    MINDMAP_NODE_HIGHLIGHT_MARGIN,
     MINDMAP_MODE_DEFAULT,
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
@@ -30,6 +31,7 @@ export default function() {
         y: 0
     };
 	
+    let _selectedNode = null;
     let _inputAction = null;
     let _actions = {
         addNode: null,
@@ -223,29 +225,34 @@ export default function() {
                 }
             })
             */
+            
+            const node = _context.bodyToNodeMapping[hits[0].id];
+            
+            if (_inputAction.totalDeltaMagnitude <= 10) {
+                if (_selectedNode !== node) {
+                    _selectedNode = node;
 
-            // if (_inputAction.totalDeltaMagnitude <= 10) {
-                // const node = _context.bodyToNodeMapping[hits[0].id];
-                
-                // if (_actions.openNode) {
-                    // _actions.openNode(node.id);
-                // }
-            // }
-
+                } else if (_actions.openNode) {
+                    _actions.openNode(node.id);
+                }
+            }
         } else {
-            if (_inputAction.totalDeltaMagnitude <= 10 && result.duration >= 0.25) {
-                if (_actions.addNode) {
-                    _actions.addNode({
-                        title: "",
-                        type: NODE_TYPE_UNDEFINED,
-                        imgURL: null,
-                        x: pos.x,
-                        y: pos.y
-                    });
+            if (_inputAction.totalDeltaMagnitude <= 10) {
+                _selectedNode = null;
+
+                if (result.duration >= 0.25) {
+                    if (_actions.addNode) {
+                        _actions.addNode({
+                            title: "",
+                            type: NODE_TYPE_UNDEFINED,
+                            imgURL: null,
+                            x: pos.x,
+                            y: pos.y
+                        });
+                    }
                 }
             }
         }
-
         _inputAction = null
     }
 
@@ -283,11 +290,11 @@ export default function() {
 
             const diff = Vector.sub(anchor, body.position);
 
-            if (Vector.magnitude(diff) > radius * 1.5) {
+            //if (Vector.magnitude(diff) > radius * 1.5) {
                 const vel = Vector.mult(diff, 1/1000);
 
                 Body.applyForce(body, Vector.create(0, 0), vel);
-            }
+            //}
         });
 
         // update physics
@@ -306,12 +313,18 @@ export default function() {
             drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
         });
 		
+        // draw non-selected node(s)
         _context.nodes.forEach(node => {
-            drawNode(draw, node);
+            if (node !== _selectedNode) {
+                drawNode(draw, node, false);
+            }
         });
 
-		
-		
+        // draw selected node(s)
+        if (_selectedNode !== null) {
+            drawNode(draw, _selectedNode, true);
+        }
+
 		drawFPS(draw, _fps);
     }
 
@@ -376,12 +389,18 @@ function drawLine(draw, line, bodies, parentNode, childNode) {
 	);
 }
 
-function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
+function drawNode(draw, { type, imgURL, title, body, radius, hidden}, isSelected = false) {
     if (hidden) {
         return;
     }
     const { x, y } = body.position;
 
+    // draw selection highlight
+    if (isSelected) {
+        draw.circle({x, y, r: radius + MINDMAP_NODE_HIGHLIGHT_MARGIN, color: "red"});
+    }
+
+    // draw node graphic
     switch (type) {
     case NODE_TYPE_TEXT:
         draw.circle({x, y, r: radius,
@@ -399,14 +418,6 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
         break; 
     }
 
-    // draw the first title letter inside the circle, if no image is present
-    /*
-    if (!imgURL) {
-        const content = title.charAt(0).toUpperCase();
-        draw.text({text: content, x, y, baseline: "middle", align: "center", color: "white"});
-    }
-    */
-    
     // draw the title
     if (title.length > 10) {
         title = title.substring(0, 7);
@@ -414,112 +425,3 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
     }
     draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
 }
-
-
-
-
-/*
-function createPath(startBounds, endBounds, bodies) {
-	let startPoint = pointOnBounds(startBounds, Vector.create(Math.cos(a), Math.sin(a)));
-	let endPoint = pointOnBounds(endBounds, Vector.create(Math.cos(a), Math.sin(a));
-	createSubPath(starPoint, endPoint, bodies);
-}
-
-function createSubPath(startPoint, endPoint, bodies) {
-	path = [startPoint.x, starPoint.y];
-	do {
-		let collisions = Query.ray(bodies, startPoint, endPoint);
-		for(var i = 0; i < collisions.length; ++i) {
-			bounds = collisions[i].body.bounds;
-			if(	bounds.min.x <= startPoint.x && 
-				starPoint.x <= bounds.max.x && 
-				bounds.min.y <= startPoint.y &&
-				starPoint.y <= bounds.max.y ) 
-			{
-				collisions.remove(i);
-			}
-		}
-	} while(collisions.length !== 0);
-	
-	path.concat([endPoint.y, endPoint.y]);
-	return path;
-}
-
-function isNotInsideBounds(value) {
-	
-}
-
-
-function calcExtents(bounds) {
-	const extX = (bounds.max.x - bounds.min.x) / 2;
-	const extY = (bounds.max.y - bounds.min.y) / 2;
-	return Vector.create(extX, extY);
-}
-
-function pointOnBounds(bounds, aDirection)
-{
-     aDirection = Vector.normalise(aDirection);
-     var e = calcExtents(bounds);
-     var v = aDirection;
-     var y = e.x * v.y / v.x;
-     if (Math.abs(y) < e.y)
-         return Vector.create(e.x, y);
-     return Vector.create(e.y * v.x / v.y + 1, e.y + 1);
-}
-
-
-
-
-
-function createPath(bodies, sx, sy, ex, ey) {
-	const startPoint = Vector.create(sx, sy);
-	const endPoint = Vector.create(ex, ey);
-	//const rayWidth = 6;
-	//Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
-	const collisions = Query.ray(bodies, startPoint, endPoint);
-	if(collisions.length === 0) {
-		return [sx, sy, ex, ey];
-	}
-
-	let topMostBdy = collisions[0].body;
-	let leftMostBdy = collisions[0].body;
-	let rightMostBdy = collisions[0].body;
-	let bottomMostBdy = collisions[0].body;
-	let bdyBoundsA = null;
-	let bdyBoundsB = null;
-
-	for(let i = 1; i < collisions.length; ++i) {
-		bdyBoundsA = collisions[i].body.bounds;
-		
-		// Check leftMostBdy
-		bdyBoundsB = leftMostBdy.bounds;
-		if(bdyBoundsA.min.x < bdyBoundsB.min.x) {
-			leftMostBdy = collisions[i].body;
-		}
-		// Check topMostBdy
-		bdyBoundsB = topMostBdy.bounds;
-		if(bdyBoundsA.min.y < bdyBoundsB.min.y) {
-			topMostBdy = collisions[i].body;
-		}
-		
-		// Check rightMostBdy
-		bdyBoundsB = rightMostBdy.bounds;
-		if(bdyBoundsA.max.x > bdyBoundsB.max.x) {
-			rightMostBdy = collisions[i].body;
-		}
-		
-		// Check bottomMostBdy
-		bdyBoundsB = bottomMostBdy.bounds;
-		if(bdyBoundsA.max.y > bdyBoundsB.max.y) {
-			bottomMostBdy = collisions[i].body;
-		}
-	}
-	
-	let point1 = {x:sx, y:sy};
-	let point2 = {x:ex, y:ey};
-	
-	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
-}
-*/
-
-
