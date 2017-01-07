@@ -1,6 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
+import { findPath } from "../utils/algorithm-utils";
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -301,13 +302,15 @@ export default function() {
 
         const draw = createRenderer(ctx, { camera: _camera });
 
+		_context.lines.forEach(line => {
+            drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
+        });
+		
         _context.nodes.forEach(node => {
             drawNode(draw, node);
         });
 
-		_context.lines.forEach(line => {
-            drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
-        });
+		
 		
 		drawFPS(draw, _fps);
     }
@@ -369,13 +372,7 @@ function findAnchors(parentAnchor, childAnchor) {
 function drawLine(draw, line, bodies, parentNode, childNode) {
 	const anchors = findAnchors(parentNode.anchor, childNode.anchor);
 	draw.curve(
-		createPath(
-			bodies, 
-			anchors.parentAnchor.x,
-			anchors.parentAnchor.y,
-			anchors.childAnchor.x,
-			anchors.childAnchor.y
-		)
+		findPath(bodies, parentNode.body, childNode.body)
 	);
 }
 
@@ -419,27 +416,55 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden }) {
 }
 
 
-function createPath(startBounds, endBounds) {
-	const startPoint = Vector.create();
-	
-	const collisions = Query.ray(bodies, startPoint, endPoint);
+
+
+/*
+function createPath(startBounds, endBounds, bodies) {
+	let startPoint = pointOnBounds(startBounds, Vector.create(Math.cos(a), Math.sin(a)));
+	let endPoint = pointOnBounds(endBounds, Vector.create(Math.cos(a), Math.sin(a));
+	createSubPath(starPoint, endPoint, bodies);
 }
 
-function PointOnBounds(bounds, aDirection)
+function createSubPath(startPoint, endPoint, bodies) {
+	path = [startPoint.x, starPoint.y];
+	do {
+		let collisions = Query.ray(bodies, startPoint, endPoint);
+		for(var i = 0; i < collisions.length; ++i) {
+			bounds = collisions[i].body.bounds;
+			if(	bounds.min.x <= startPoint.x && 
+				starPoint.x <= bounds.max.x && 
+				bounds.min.y <= startPoint.y &&
+				starPoint.y <= bounds.max.y ) 
+			{
+				collisions.remove(i);
+			}
+		}
+	} while(collisions.length !== 0);
+	
+	path.concat([endPoint.y, endPoint.y]);
+	return path;
+}
+
+function isNotInsideBounds(value) {
+	
+}
+
+
+function calcExtents(bounds) {
+	const extX = (bounds.max.x - bounds.min.x) / 2;
+	const extY = (bounds.max.y - bounds.min.y) / 2;
+	return Vector.create(extX, extY);
+}
+
+function pointOnBounds(bounds, aDirection)
 {
      aDirection = Vector.normalise(aDirection);
-     var e = bounds.max;
+     var e = calcExtents(bounds);
      var v = aDirection;
      var y = e.x * v.y / v.x;
      if (Math.abs(y) < e.y)
          return Vector.create(e.x, y);
-     return Vector.create(e.y * v.x / v.y, e.y);
-}
- 
-function PointOnBounds(bounds, aAngle)
-{
-     a = Math.radians(aAngle);
-     return PointOnBounds(bounds, Vector.create(Math.cos(a), Math.sin(a)));
+     return Vector.create(e.y * v.x / v.y + 1, e.y + 1);
 }
 
 
@@ -495,3 +520,6 @@ function createPath(bodies, sx, sy, ex, ey) {
 	
 	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
+*/
+
+
