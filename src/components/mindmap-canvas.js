@@ -1,6 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
+import { findPath } from "../utils/algorithm-utils";
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -300,11 +301,10 @@ export default function() {
 
         const draw = createRenderer(ctx, { camera: _camera });
 
-         // draw lines
 		_context.lines.forEach(line => {
             drawLine(draw, line, _context.engine.world.bodies, _context.nodes.get(line.parentId), _context.nodes.get(line.childId));
         });
-
+		
         // draw non-selected node(s)
         _context.nodes.forEach(node => {
             if (node !== _selectedNode) {
@@ -378,13 +378,7 @@ function findAnchors(parentAnchor, childAnchor) {
 function drawLine(draw, line, bodies, parentNode, childNode) {
 	const anchors = findAnchors(parentNode.anchor, childNode.anchor);
 	draw.curve(
-		createPath(
-			bodies, 
-			anchors.parentAnchor.x,
-			anchors.parentAnchor.y,
-			anchors.childAnchor.x,
-			anchors.childAnchor.y
-		)
+		findPath(bodies, parentNode.body, childNode.body)
 	);
 }
 
@@ -423,82 +417,4 @@ function drawNode(draw, { type, imgURL, title, body, radius, hidden}, isSelected
 		title += "...";
     }
     draw.text({text: title, x, y: y + radius * 2, baseline: "middle", align: "center"});
-}
-
-
-function createPath(startBounds, endBounds) {
-	const startPoint = Vector.create();
-	
-	const collisions = Query.ray(bodies, startPoint, endPoint);
-}
-
-function PointOnBounds(bounds, aDirection)
-{
-     aDirection = Vector.normalise(aDirection);
-     var e = bounds.max;
-     var v = aDirection;
-     var y = e.x * v.y / v.x;
-     if (Math.abs(y) < e.y)
-         return Vector.create(e.x, y);
-     return Vector.create(e.y * v.x / v.y, e.y);
-}
- 
-function PointOnBounds(bounds, aAngle)
-{
-     a = Math.radians(aAngle);
-     return PointOnBounds(bounds, Vector.create(Math.cos(a), Math.sin(a)));
-}
-
-
-
-
-
-function createPath(bodies, sx, sy, ex, ey) {
-	const startPoint = Vector.create(sx, sy);
-	const endPoint = Vector.create(ex, ey);
-	//const rayWidth = 6;
-	//Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
-	const collisions = Query.ray(bodies, startPoint, endPoint);
-	if(collisions.length === 0) {
-		return [sx, sy, ex, ey];
-	}
-
-	let topMostBdy = collisions[0].body;
-	let leftMostBdy = collisions[0].body;
-	let rightMostBdy = collisions[0].body;
-	let bottomMostBdy = collisions[0].body;
-	let bdyBoundsA = null;
-	let bdyBoundsB = null;
-
-	for(let i = 1; i < collisions.length; ++i) {
-		bdyBoundsA = collisions[i].body.bounds;
-		
-		// Check leftMostBdy
-		bdyBoundsB = leftMostBdy.bounds;
-		if(bdyBoundsA.min.x < bdyBoundsB.min.x) {
-			leftMostBdy = collisions[i].body;
-		}
-		// Check topMostBdy
-		bdyBoundsB = topMostBdy.bounds;
-		if(bdyBoundsA.min.y < bdyBoundsB.min.y) {
-			topMostBdy = collisions[i].body;
-		}
-		
-		// Check rightMostBdy
-		bdyBoundsB = rightMostBdy.bounds;
-		if(bdyBoundsA.max.x > bdyBoundsB.max.x) {
-			rightMostBdy = collisions[i].body;
-		}
-		
-		// Check bottomMostBdy
-		bdyBoundsB = bottomMostBdy.bounds;
-		if(bdyBoundsA.max.y > bdyBoundsB.max.y) {
-			bottomMostBdy = collisions[i].body;
-		}
-	}
-	
-	let point1 = {x:sx, y:sy};
-	let point2 = {x:ex, y:ey};
-	
-	return [sx, sy, point1.x, point1.y, point2.x, point2.y, ex, ey];
 }
