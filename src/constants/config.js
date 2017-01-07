@@ -6,4 +6,3 @@ export const MINDMAP_MODE_LINE_EDIT = "MINDMAP_MODE_LINE_EDIT";
 
 export const LONGPRESS_TIMEOUT = 0.5;
 export const PRESS_DELTA_THRESHOLD = 10; // pixels
-export const DOUBLE_INPUT_TIMEOUT = 0.5;

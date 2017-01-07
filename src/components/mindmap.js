@@ -19,7 +19,7 @@ const MindMap = createClass({
         this.mindmap = null;
 
         this.longPressTimeout = null;
-        this.lastInputAction = null;
+        this.prevInputAction = null;
         this.inputAction = null;
 
         return {
@@ -158,7 +158,7 @@ const MindMap = createClass({
         }, LONGPRESS_TIMEOUT * 1000);
 
         this.inputAction = createAction(calculatePosition(this.canvas, clientX, clientY));
-        this.inputAction.data = this.mindmap.onInputStart(this.inputAction);
+        this.inputAction.data = this.mindmap.onInputStart(this.inputAction, this.prevInputAction);
     },
 
     handleInputEnd: function({ clientX, clientY }) {
@@ -167,7 +167,9 @@ const MindMap = createClass({
         }
         updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
 
-        this.mindmap.onInputEnd(this.inputAction);
+        this.mindmap.onInputEnd(this.inputAction, this.prevInputAction);
+
+        this.prevInputAction = this.inputAction;
         this.inputAction = null;
     },
 
@@ -177,7 +179,7 @@ const MindMap = createClass({
         }
         updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
 
-        const nextData = this.mindmap.onInputMove(this.inputAction);
+        const nextData = this.mindmap.onInputMove(this.inputAction, this.prevInputAction);
         if (nextData !== undefined) {
             this.inputAction.data = nextData;
         }
