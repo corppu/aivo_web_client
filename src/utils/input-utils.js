@@ -2,33 +2,39 @@ import { Vector } from "matter-js"
 
 import { getTimestamp } from "../utils/time-utils"
 
-export function createAction(position, data = null) {
+export function createAction(position) {
     return {
         startPosition: position,
+        endPosition: position,
         startTime: getTimestamp(),
+        duration: 0,
 
-        lastPosition: position,
-        lastDelta: {
-            x: 0,
-            y: 0
-        },
+        lastDelta: { x: 0, y: 0},
         lastDeltaMagnitude: 0,
 
+        delta: { x: 0, y: 0 },
+        deltaMagnitude: 0,
         totalDeltaMagnitude: 0,
 
-        data
+        data: null
     };
 }
 
 export function updateAction(action, position) {
-    const { lastPosition } = action;
+    const { startTime, startPosition, endPosition } = action;
+    action.duration = getTimestamp(startTime);
 
-    action.lastDelta = Vector.sub(lastPosition, position);
+    action.lastDelta = Vector.sub(endPosition, position);
     action.lastDeltaMagnitude = Vector.magnitude(action.lastDelta);
+    
+    action.endPosition = position;
 
+    action.delta = Vector.sub(position, startPosition);
+    action.deltaMagnitude = Vector.magnitude(action.delta);
     action.totalDeltaMagnitude += action.lastDeltaMagnitude;
 }
 
+/*
 export function actionResult(action, endPosition) {
     const { startPosition, startTime } = action;
 
@@ -42,3 +48,4 @@ export function actionResult(action, endPosition) {
         duration
     };
 }
+*/

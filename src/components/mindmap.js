@@ -3,9 +3,13 @@ import React, { createClass } from "react";
 import createMindmap from "./mindmap-canvas";
 import MindMapToolbar from "./mindmap-toolbar";
 
+import { createAction, updateAction } from "../utils/input-utils";
+
 const MindMap = createClass({
     getInitialState: function() {
         const { innerWidth, innerHeight } = window;
+
+        this.inputAction = null;
 
         return {
             width: innerWidth,
@@ -93,56 +97,59 @@ const MindMap = createClass({
     },
 
 	handleTouchStart: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputStart({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }		
+        this.handleInputStart(e.changedTouches[0]);
 	},
 	
 	handleTouchEnd: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
+		this.handleInputEnd(e.changedTouches[0]);        
 	},
 	
 	handleTouchMove: function(e) {
-		const { clientX, clientY } = e.changedTouches[0];
-        if (this.mindmap) {
-            this.mindmap.onInputMove({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }	
+		this.handleInputMove(e.changedTouches[0]);      
 	},
 	
     handleMouseStart: function(e) {
-		const { clientX, clientY } = e;
-        if (this.mindmap) {
-            this.mindmap.onInputStart({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
+		this.handleInputStart(e);
     },
 
     handleMouseEnd: function(e) {
-		const { clientX, clientY } = e;
-        if (this.mindmap) {
-            this.mindmap.onInputEnd({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
-        }
+		this.handleInputEnd(e);
     },
 
     handleMouseMove: function(e) {
-		const { clientX, clientY } = e;
-        if (this.mindmap) {
-            this.mindmap.onInputMove({
-                position: calculatePosition(this.canvas, clientX, clientY)
-            });
+		this.handleInputMove(e);
+    },
+
+    handleInputStart: function({ clientX, clientY }) {
+        if (!this.mindmap || !this.mindmap.onInputStart) {
+            return;
+        }
+        if (this.inputAction) {
+            this.handleInputEnd( { x: clientX, y: clientY });
+        }
+        this.inputAction = createAction(calculatePosition(this.canvas, clientX, clientY));
+        this.inputAction.data = this.mindmap.onInputStart(this.inputAction);
+    },
+
+    handleInputEnd: function({ clientX, clientY }) {
+        if (!this.mindmap || !this.mindmap.onInputEnd || !this.inputAction) {
+            return;
+        }
+        updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
+
+        this.mindmap.onInputEnd(this.inputAction);
+        this.inputAction = null;
+    },
+
+    handleInputMove: function({ clientX, clientY }) {
+        if (!this.mindmap || !this.mindmap.onInputMove || !this.inputAction) {
+            return;
+        }
+        updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
+
+        const nextData = this.mindmap.onInputMove(this.inputAction);
+        if (nextData !== undefined) {
+            this.inputAction.data = nextData;
         }
     },
 

@@ -14,8 +14,7 @@ import {
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
 
-import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
-import { createAction, updateAction, actionResult } from "../utils/input-utils";
+import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
 
 export default function() {
@@ -31,7 +30,6 @@ export default function() {
     };
 	
     let _selectedNode = null;
-    let _inputAction = null;
     let _actions = {
         addNode: null,
 		addLine: null,
@@ -199,20 +197,14 @@ export default function() {
         }
     }
 	
-    function onInputStart(e) {
-        const pos = transformToCamera(_camera, e.position);
+    function onInputStart(action) {
+        const pos = translateToCamera(_camera, action.startPosition);
 
-        _inputAction = createAction(pos, queryNodeAtPoint(_context, pos));
+        return queryNodeAtPoint(_context, pos);
     }
 
-    function onInputEnd(e) {
-        if (!_inputAction) {
-            return;
-        }
-        const pos = transformToCamera(_camera, e.position);
-
-        updateAction(_inputAction, pos);
-        const result = actionResult(_inputAction, pos);
+    function onInputEnd(action) {
+        const pos = translateToCamera(_camera, action.endPosition);
 	        
         const hits = Query.point(_context.engine.world.bodies, pos);
         if (hits.length > 0) {
@@ -227,7 +219,7 @@ export default function() {
             
             const node = _context.bodyToNodeMapping[hits[0].id];
             
-            if (_inputAction.totalDeltaMagnitude <= 10) {
+            if (action.totalDeltaMagnitude <= 10) {
                 if (_selectedNode !== node) {
                     _selectedNode = node;
 
@@ -236,10 +228,10 @@ export default function() {
                 }
             }
         } else {
-            if (_inputAction.totalDeltaMagnitude <= 10) {
+            if (action.totalDeltaMagnitude <= 10) {
                 _selectedNode = null;
 
-                if (result.duration >= 0.25) {
+                if (action.duration >= 0.25) {
                     if (_actions.addNode) {
                         _actions.addNode({
                             title: "",
@@ -252,20 +244,14 @@ export default function() {
                 }
             }
         }
-        _inputAction = null
     }
 
-    function onInputMove(e) {
-        if (!_inputAction) {
-            return;
-        }
-        const pos = transformToCamera(_camera, e.position);
+    function onInputMove(action) {
+        const pos = translateToCamera(_camera, action.endPosition);
 
-        updateAction(_inputAction, pos);
-
-        if (_inputAction.data) {
+        if (action.data) {
             if (_actions.updateNode) {
-                const { id, type, title, text, imgURL } = _inputAction.data;
+                const { id, type, title, text, imgURL } = action.data;
               
                 _actions.updateNode(id, {
                     type: type || NODE_TYPE_UNDEFINED,
@@ -276,8 +262,10 @@ export default function() {
                     imgURL: imgURL || null
                 });
             }
+            return action.data;
+
         } else {
-            Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+            Object.assign(_camera, Vector.add(_camera, action.lastDelta));
         }
     }
 
