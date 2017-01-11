@@ -34,6 +34,8 @@ export default function() {
     };
 	
     let _selectedNode = null;
+	let _selectedPin = null;
+	
     let _inputAction = null;
     let _actions = {
         addNode: null,
@@ -68,15 +70,18 @@ export default function() {
     function updateProps(props) {
         _actions.addNode = props.tryAddNode;
 		_actions.addLine = props.tryAddLine;
+		_actions.addPin = props.tryAddPin;
         _actions.updateNode = props.tryUpdateNode;
 		_actions.updateLine = props.tryUpdateLine;
+		_actions.updatePin = props.tryUpdatePin;
         _actions.removeNode = props.tryRemoveNode;
 		_actions.removeLine = props.tryRemoveLine;
+		_actions.removePin = props.tryRemovePin;
         _actions.openNode = props.openNode;
-        
+		
         let propsNodes = new Map(props.nodes);
 		let propsLines = new Map(props.lines);
-
+		let propsPins = new Map(props.pins);
 		
         // match existing nodes to props (update old ones)
         _context.nodes.forEach((node, id) => {
@@ -89,12 +94,17 @@ export default function() {
                 _context.bodyToNodeMapping.delete(body.id);
                 World.remove(_context.engine.world, body);
 
+				if(_selectedNode.id === id) {
+					_selectedNode = null;
+				}
+				
                 console.log(`removed node ${id}`);
                 return;
             }
             propsNodes.delete(id);
 			
             Object.assign(node, {
+				id,
                 type: propsNode.get("type"),
                 anchor: {
                     x: propsNode.get("x"),
@@ -102,11 +112,14 @@ export default function() {
                 },
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
-                imgURL: propsNode.get("imgURL")
+                imgURL: propsNode.get("imgURL"),
+				lines: propsNode.get("lines")
             });
         });
 
-        // match existing lines to props (update old ones)
+        
+		
+		// match existing lines to props (update old ones)
           _context.lines.forEach((line, id) => {
             const propsLine = propsLines.get(id);
 
@@ -120,30 +133,54 @@ export default function() {
                 console.log(`removed line ${id}`);
                 return;
             }
-            propsNodes.delete(id);
+            propsLines.delete(id);
 
             return Object.assign(line, {
-
+				id,
 				parentType: propsLine.get("parentType"),
 				parentId: propsLine.get("parentId"),
 				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId"),
-				
-				// sx: propsLine.get("sx"),
-				// sy: propsLine.get("sy"),
-				// ex: propsLine.get("ex"),
-				// ey: propsLine.get("ey"),				
-				// cp1x: propsLine.get("cp1x"),
-				// cp1y: propsLine.get("cp1y"), 
-				// cp2x: propsLine.get("cp2x"), 
-				// cp2y: propsLine.get("cp2y"),
-				
                 title: propsLine.get("title")
             });
         });		
 		
+		
+		
+		
+		// match existing pins to props (update old ones)
+        _context.pins.forEach((pin, id) => {
+            const propsPin = propsPins.get(id);
+
+             if (!propsPin) {
+                 const { body } = pin;
+
+                _context.pins.delete(id)
+                //_context.bodyToNodeMapping.delete(body.id);
+                //World.remove(_context.engine.world, body);
+
+                console.log(`removed pin ${id}`);
+                return;
+            }
+            propsPins.delete(id);
+			//		lines: {lineIdToPin: parentId}
+
+            Object.assign(pin, {
+				id,
+				anchor: {
+                    x: propsPin.get("x"),
+                    y: propsPin.get("y")
+                },
+				lines: propsPin.get("lines")
+            });
+        });
+		
+		
+		
+		
+		
 		// remove null lines (were removed from props)
-        _context.lines = _context.lines.filter(line => line !== null);
+        //_context.lines = _context.lines.filter(line => line !== null);
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach((propsNode, id) => {
@@ -157,48 +194,68 @@ export default function() {
                 mass: 5
             });
             const node = {
-                id,
+				id,
                 type: propsNode.get("type"),
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
 				imgURL: propsNode.get("imgURL"),
+				lines: propsNode.get("lines"),
+
                 radius,
                 anchor,
                 body
             }		
-            _context.nodes.set(node.id, node);
+            _context.nodes.set(id, node);
             _context.bodyToNodeMapping[body.id] = node;
             World.add(_context.engine.world, body);
 
-            console.log("added node ${id}");
+            console.log(`added node ${id}`);
         })
 		
 		 // add new Lines (were in props and not in state)
         propsLines.forEach((propsLine, id) => {
 			const line = {
 				id,
-				
 				parentType: propsLine.get("parentType"),
 				parentId: propsLine.get("parentId"),
 				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId"),
-				
-				// sx: propsLine.get("sx"),
-				// sy: propsLine.get("sy"),
-				// ex: propsLine.get("ex"),
-				// ey: propsLine.get("ey"),
-				// cp1x: propsLine.get("cp1x"),
-				// cp1y: propsLine.get("cp1y"), 
-				// cp2x: propsLine.get("cp2x"), 
-				// cp2y: propsLine.get("cp2y"),
-				
                 title: propsLine.get("title")
             };
 			
-		   _context.lines.push(line);
-			console.log("added line ${id}");
+		   _context.lines.set(id, line);
+			console.log(`added line ${id}`);
 		});
 
+		
+		
+		// add new pins (were in props and not in state)
+        propsPins.forEach((propsPin, id) => {
+            const radius = MINDMAP_PIN_RADIUS;
+            const anchor = {
+                x: propsPin.get("x"),
+                y: propsPin.get("y")
+            };
+            const body = Bodies.circle(anchor.x, anchor.y, radius, {
+                frictionAir: 1,
+                mass: 5
+            });
+            const pin = {
+				id,
+				lines: propsPin.get("lines"),
+
+                radius,
+                anchor,
+                body
+            }		
+            _context.pins.set(id, pin);
+            //_context.bodyToNodeMapping[body.id] = node;
+            //World.add(_context.engine.world, body);
+
+            console.log(`added pin ${id}`);
+        })
+		
+		
         // search filtering
         if (props.searchFilter && props.searchFilter !== _searchFilter) {
             _searchFilter = props.searchFilter;
@@ -224,29 +281,39 @@ export default function() {
 	        
         const hits = Query.point(_context.engine.world.bodies, pos);
         if (hits.length > 0) {
-            /*
-            hits.forEach(body => {
-                const node = _bodyToNodeMapping[body.id];
-                if (_actions.removeNode) {
-                    _actions.removeNode(node.id)
-                }
-            })
-            */
+            
+            // hits.forEach(body => {
+                // const node = _bodyToNodeMapping[body.id];
+                // if (_actions.removeNode) {
+                    // _actions.removeNode(node.id)
+                // }
+            // })
+            
             
             const node = _context.bodyToNodeMapping[hits[0].id];
             
             if (_inputAction.totalDeltaMagnitude <= 10) {
                 if (_selectedNode !== node) {
                     _selectedNode = node;
-
-                } else if (_actions.openNode) {
-                    _actions.openNode(node.id);
+                } else if (_actions.removeNode) {
+                    //_actions.openNode(node.id);
+					if(node.lines) {
+						var keys = Object.keys(node.lines);
+						for(var i = 0; i < keys.length; ++i) {
+							var lineId = node.lines.get(keys[i]);
+							console.log("action remove line: " + lineId);
+							_actions.removeLine(lineId);
+						}
+					}
+					_actions.removeNode(node.id);
                 }
             }
         } else {
             if (_inputAction.totalDeltaMagnitude <= 10) {
-                _selectedNode = null;
+                //_selectedNode = null;
 
+				
+				
                 if (result.duration >= 0.25) {
                     if (_actions.addNode) {
                         _actions.addNode({
@@ -257,7 +324,12 @@ export default function() {
                             y: pos.y
                         });
                     }
-                }
+                } else if(_actions.addPin) {
+					_actions.addPin({
+						x: pos.x,
+                        y: pos.y
+					});
+				}
             }
         }
         _inputAction = null
@@ -397,6 +469,7 @@ function findAnchors(parentAnchor, childAnchor) {
 
 function drawLine(draw, line, bodies, parentNode, childNode) {
 	//const anchors = findAnchors(parentNode.anchor, childNode.anchor);
+	if(!parentNode || !childNode) return;
 	draw.curve(
 		findPath(bodies, parentNode.body, childNode.body)
 	);

@@ -11,5 +11,5 @@ export const UPDATE_NODE = "UPDATE_NODE";
 export const REMOVE_NODE = "REMOVE_NODE";
 export const UPDATE_LINE = "UPDATE_LINE";
 export const REMOVE_LINE = "REMOVE_LINE";
-export const UPDATE_PINT = "UPDATE_PIN";
+export const UPDATE_PIN = "UPDATE_PIN";
 export const REMOVE_PIN = "REMOVE_PIN";

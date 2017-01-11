@@ -134,8 +134,11 @@ function createHomeBoard() {
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: parentX,
-		y: parentY,
-		lines: {lineId: childId}
+		y: parentY
+	};
+
+	updates["/boards/" + boardId + "/nodes/" + parentId + "/lines/"] = {
+		[lineId] : lineId
 	};
 	
 	updates["/nodes/" + parentId] = {
@@ -151,7 +154,10 @@ function createHomeBoard() {
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: childX,
 		y: childY,
-		lines: {lineId: parentId}
+	};
+	
+	updates["/boards/" + boardId + "/nodes/" + childId + "/lines/"] = {
+		[lineId] : lineId
 	};
 	
 	updates["/nodes/" + childId] = {
@@ -170,29 +176,17 @@ function createHomeBoard() {
 		parentType: "node",
 		parentId: parentId,
 		childType: "node",
-		childId: childId//,
-		
-		// sx: parentX,
-		// sy: parentY + 60, // The bottom anchor point: (centerY + height / 2 + bottomTextHeight)
-		// ex: childX,
-		// ey: childY - 20, // The top anchor point: (centerY - height / 2) 
-		// cp1x: 550,
-		// cp1y: 500, 
-		// cp2x: 450, 
-		// cp2y: 750,
-		
-		// title: "insert verb"
+		childId: childId
     };
 	
-
 	updates["/boards/" + boardId + "/pins/" + pinId] = {
-		// title: "child example",
-		// type: NODE_TYPE_UNDEFINED,
-		// imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: 800,
-		y: 800,
-		lines: {lineIdToPin: parentId}
+		y: 800
 	};	
+
+	updates["/boards/" + boardId + "/pins/" + pinId + "/lines/"] = {
+		[lineIdToPin] : lineIdToPin
+	};
 	
 	updates["/boards/" + boardId + "/lines/" + lineIdToPin] = {
 		parentType: "node",
@@ -610,7 +604,9 @@ export function removeNode(boardId, nodeId) {
 		console.warn("User is not authenticated!");
 		return;
 	}
+	
     _storeAdapter.removeNode(nodeId);
+	
     firebase.database().ref("/nodes/" + nodeId).remove(function(error) {
 		if(error) {
 			console.warn(error);
@@ -636,6 +632,7 @@ export function createLine(boardId, lineData, lineId = null) {
 		console.warn("User is not authenticated!");
 		return;
 	}
+	
 	if(!lineId) {
 		lineId = firebase.database().ref("/boards/" + boardId).child("lines").push().key;
 	}
@@ -713,6 +710,7 @@ export function addPin(boardId, pinData, pinId = null) {
 		console.warn("User is not authenticated!");
 		return;
 	}
+	
 	if(!pinId) {
 		pinId = firebase.database().ref().child("pins").push().key;
 	}

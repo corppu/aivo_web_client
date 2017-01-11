@@ -30,6 +30,7 @@ function mergeProps(stateProps, dispatchProps) {
         nodes,
 		lines,
 		pins,
+		
         children,
 
         tryAddNode,
