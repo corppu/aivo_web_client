@@ -16,8 +16,7 @@ import {
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
 
-import { clear, createRenderer, transformToCamera } from "../utils/canvas-utils";
-import { createAction, updateAction, actionResult } from "../utils/input-utils";
+import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
 
 export default function() {
@@ -35,8 +34,8 @@ export default function() {
 	
     let _selectedNode = null;
 	let _selectedPin = null;
-	
     let _inputAction = null;
+
     let _actions = {
         addNode: null,
 		addLine: null,
@@ -113,11 +112,11 @@ export default function() {
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
                 imgURL: propsNode.get("imgURL"),
-				lines: propsNode.get("lines")
+				lines: propsNode.get("lines").toObject()
             });
         });
 
-        
+
 		
 		// match existing lines to props (update old ones)
           _context.lines.forEach((line, id) => {
@@ -171,10 +170,10 @@ export default function() {
                     x: propsPin.get("x"),
                     y: propsPin.get("y")
                 },
-				lines: propsPin.get("lines")
+				lines: propsPin.get("lines").toObject()
             });
         });
-		
+2		
 		
 		
 		
@@ -264,88 +263,59 @@ export default function() {
         }
     }
 	
-    function onInputStart(e) {
-        const pos = transformToCamera(_camera, e.position);
+    function onInputStart(action) {
+        const pos = translateToCamera(_camera, action.startPosition);
 
-        _inputAction = createAction(pos, queryNodeAtPoint(_context, pos));
+        return queryNodeAtPoint(_context, pos);
     }
 
-    function onInputEnd(e) {
-        if (!_inputAction) {
-            return;
-        }
-        const pos = transformToCamera(_camera, e.position);
-
-        updateAction(_inputAction, pos);
-        const result = actionResult(_inputAction, pos);
-	        
+    function onInputEnd(action) {
+        const pos = translateToCamera(_camera, action.endPosition);
+	    
         const hits = Query.point(_context.engine.world.bodies, pos);
         if (hits.length > 0) {
-            
-            // hits.forEach(body => {
-                // const node = _bodyToNodeMapping[body.id];
-                // if (_actions.removeNode) {
-                    // _actions.removeNode(node.id)
-                // }
-            // })
-            
-            
             const node = _context.bodyToNodeMapping[hits[0].id];
-            
-            if (_inputAction.totalDeltaMagnitude <= 10) {
-                if (_selectedNode !== node) {
+            if (action.totalDeltaMagnitude <= 10) {
+                if (_selectedNode === null) {
                     _selectedNode = node;
-                } else if (_actions.removeNode) {
-                    //_actions.openNode(node.id);
+                } 
+				
+				else if(_selectedNode === node && _actions.removeNode) {
+					
 					if(node.lines) {
 						var keys = Object.keys(node.lines);
+						var nodeData;
+						var lineData;
 						for(var i = 0; i < keys.length; ++i) {
-							var lineId = node.lines.get(keys[i]);
-							console.log("action remove line: " + lineId);
+							var lineId = node.lines[keys[i]];
+							
+							lineData = _context.lines.get(lineId);
+							if(lineData.childId !== node.id) {
+								nodeData = _context.nodes.get(lineData.childId);
+							} else {
+								nodeData = _context.nodes.get(lineData.parentId);
+							}
+							
+							delete nodeData.lines[lineId];
+							_actions.updateNode(nodeData.id, nodeData);
+							
 							_actions.removeLine(lineId);
 						}
 					}
+					
 					_actions.removeNode(node.id);
-                }
-            }
-        } else {
-            if (_inputAction.totalDeltaMagnitude <= 10) {
-                //_selectedNode = null;
-
-				
-				
-                if (result.duration >= 0.25) {
-                    if (_actions.addNode) {
-                        _actions.addNode({
-                            title: "",
-                            type: NODE_TYPE_UNDEFINED,
-                            imgURL: null,
-                            x: pos.x,
-                            y: pos.y
-                        });
-                    }
-                } else if(_actions.addPin) {
-					_actions.addPin({
-						x: pos.x,
-                        y: pos.y
-					});
 				}
-            }
-        }
-        _inputAction = null
+			} // action.totalDeltaMagnitude <= 10
+		}
     }
+	
 
-    function onInputMove(e) {
-        if (!_inputAction) {
-            return;
-        }
-        const pos = transformToCamera(_camera, e.position);
+    function onInputMove(action) {
+        const pos = translateToCamera(_camera, action.endPosition);
 
-        updateAction(_inputAction, pos);
-
-        if (_inputAction.data) {
+        if (action.data) {
             if (_actions.updateNode) {
-                const { id, type, title, text, imgURL } = _inputAction.data;
+                const { id, type, title, text, imgURL, lines } = action.data;
               
                 _actions.updateNode(id, {
                     type: type || NODE_TYPE_UNDEFINED,
@@ -353,12 +323,17 @@ export default function() {
                     y: pos.y,
                     title,
                     text: text || null,
-                    imgURL: imgURL || null
+                    imgURL: imgURL || null,
+					lines: lines || null
                 });
             }
         } else {
-            Object.assign(_camera, Vector.add(_camera, _inputAction.lastDelta));
+            Object.assign(_camera, Vector.add(_camera, action.lastDelta));
         }
+    }
+
+    function onLongPress(action) {
+        console.log(action);
     }
 
     function update() {
@@ -418,6 +393,7 @@ export default function() {
         onInputStart,
         onInputEnd,
         onInputMove,
+        onLongPress,
         update,
         render
     };

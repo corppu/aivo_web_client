@@ -268,7 +268,7 @@ export function createRenderer(ctx, {camera = {x: 0, y: 0}} = {}) {
     };
 }
 
-export function transformToCamera(camera, position) {
+export function translateToCamera(camera, position) {
     return {
         x: position.x + camera.x,
         y: position.y + camera.y,
