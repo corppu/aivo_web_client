@@ -22,6 +22,8 @@ export default function(store) {
 	}
 	
 	function updateNode(id, data) {
+		if(data.lines) console.log(data.lines);
+		var lines = {keyVal: "valVal"};
         store.dispatch(mindmapActions.updateNode(id, data))
     }
 

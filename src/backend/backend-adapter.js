@@ -7,7 +7,12 @@ import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
     NODE_TYPE_TEXT
+	TYPE_NODE,
+	TYPE_LINE,
+	TYPE_NONE,
+	TYPE_PIN
 } from "../constants/types";
+
 
 /** JUST FOR DEBUGGING HERE **/
 function logUserData(user) {
@@ -128,18 +133,21 @@ function createHomeBoard() {
 		followers: 0
 	};
 	
+	var parentLineData = {}; 
+	parentLineData[lineId] = lineId;
 	
 	updates["/boards/" + boardId + "/nodes/" + parentId] = {
 		title: "parent example",
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: parentX,
-		y: parentY
+		y: parentY,
+		lines: parentLineData
 	};
 
-	updates["/boards/" + boardId + "/nodes/" + parentId + "/lines/"] = {
-		[lineId] : lineId
-	};
+	// updates["/boards/" + boardId + "/nodes/" + parentId + "/lines/"] = {
+		// [lineId] : lineId
+	// };
 	
 	updates["/nodes/" + parentId] = {
 		title: "parent example",
@@ -148,17 +156,21 @@ function createHomeBoard() {
 		followers: 0
 	};
 
+	var childLineData = {}; 
+	childLineData[lineId] = lineId;
 	updates["/boards/" + boardId + "/nodes/" + childId] = {
 		title: "child example",
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: childX,
 		y: childY,
+		lines: childLineData
 	};
+
 	
-	updates["/boards/" + boardId + "/nodes/" + childId + "/lines/"] = {
-		[lineId] : lineId
-	};
+	// updates["/boards/" + boardId + "/nodes/" + childId + "/lines/"] = {
+		// [lineId] : lineId
+	// };
 	
 	updates["/nodes/" + childId] = {
 		title: "child example",
@@ -167,8 +179,8 @@ function createHomeBoard() {
 		followers: 0
 	};
 	
-	updates["/users/" + userId + "/nodes/" + parentId] = true;
-	updates["/users/" + userId + "/nodes/" + childId] = true;
+	//updates["/users/" + userId + "/nodes/" + parentId] = true;
+	//updates["/users/" + userId + "/nodes/" + childId] = true;
 	updates["/users/" + userId + "/home"] = boardId;
 	updates["/users/"+ userId + "/boards/" + boardId] = true;
 	
@@ -179,14 +191,17 @@ function createHomeBoard() {
 		childId: childId
     };
 	
+	var pinLineData = {}; 
+	pinLineData[lineIdToPin] = lineIdToPin;
 	updates["/boards/" + boardId + "/pins/" + pinId] = {
 		x: 800,
-		y: 800
+		y: 800,
+		lines: pinLineData
 	};	
 
-	updates["/boards/" + boardId + "/pins/" + pinId + "/lines/"] = {
-		[lineIdToPin] : lineIdToPin
-	};
+	// updates["/boards/" + boardId + "/pins/" + pinId + "/lines/"] = {
+		// [lineIdToPin] : lineIdToPin
+	// };
 	
 	updates["/boards/" + boardId + "/lines/" + lineIdToPin] = {
 		parentType: "node",
@@ -360,7 +375,8 @@ export function openBoard(boardId, sessionId) {
 	var updates = {};
 	updates["/sessions/"+sessionId] = {
 		userId: user.uid,
-		boardId: boardId
+		boardId: boardId,
+		startedAt: firebase.database.ServerValue.TIMESTAMP
 	};
 	firebase.database().ref().update(updates, function(error){
 		if(error) {
@@ -385,7 +401,8 @@ export function openNode(nodeId, sessionId, boardId) {
 	updates["/sessions/"+sessionId] = {
 		userId: user.uid,
 		nodeId: nodeId,
-		boardId: boardId
+		boardId: boardId,
+		startedAt: firebase.database.ServerValue.TIMESTAMP
 	};
 	firebase.database().ref().update(updates, function(error){
 		if(error) {
@@ -661,25 +678,6 @@ export function updateLine(boardId, lineId, lineData) {
 		}
 	});
 }
-	
-export function removeLine(boardId, lineId) {
-	console.log("Trying to remove line: " + lineId);
-	var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	_storeAdapter.removeLine(lineId);
-	firebase.database().ref("/boards/" + boardId + "/lines/" + lineId).remove(function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error);
-		} else {
-			console.log("Line " + lineId + " is succesfully removed");
-		}
-	});
-}
-
 
 
 export function updatePin(boardId, pinId, pinData) {
@@ -735,5 +733,235 @@ export function removePin(boardId, pinId) {
 		} else {
 			console.log("Pin " + pinId + " is succesfully removed from board " + boardId);
 		}
-	});
+	});	
 }
+
+export function createLine(
+	boardId,
+	parentId = null,
+	parentType = null,
+	childId = null,
+	childType = null,
+	lineId = null
+) {
+	const ERROR_START = "removeLine was called with";
+	
+	const BOARD_URL = "/boards/" + boardId;
+	const USER_URL = "/user/" + firebase.currentUser.uid;
+	
+	const USER_NODES_URL = USER_URL + "/nodes/";
+	const NODES_URL = "/nodes/";
+	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
+	
+	const BOARD_LINES_URL = BOARD_URL + "/lines/";
+	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
+	const BOARD_PINS_URL = BOARD_URL + "/pins/";
+	
+	var updates = {};
+	
+	if(!lineId) {
+		lineId = firebase.database(BOARD_LINES_URL).push().key;
+	}
+	
+	updates[BOARD_LINES_URL + lineId] = {
+		parentType,
+		parentId,
+		childType,
+		childId
+	};
+	
+	
+	if(parentId && parentType === TYPE_NODE) {
+		updates[BOARD_NODES_URL + parentId + "/lines/" + lineId] = lineId;
+	}
+	
+	else if(parentId && parentType === TYPE_PIN) {
+		updates[BOARD_PINS_URL + parentId + "/lines/" + lineId] = lineId
+	}
+	
+	else if(parentId && parentType) {
+		console.warn(ERROR_START + " errornous parentType: " + parentType);
+		return;
+	}
+	
+	else {
+		console.warn(ERROR_START + "out parentId or parentType");
+		return;
+	}
+	
+	if(childId && childType === TYPE_NODE) {
+		updates[BOARD_NODES_URL + childId + "/lines/" + lineId] = lineId;
+	}
+	
+	else if(childId && childType === TYPE_PIN) {
+		updates[BOARD_PINS_URL + childId + "/lines/" + lineId] = lineId;
+	}
+	
+	// Create new pin, because there was no pin at first...
+	else if(typeof childId === "number" && typeof childType === "number") {
+		var pinLineData = {};
+		pinLineData[lineId] = lineId;
+		var pinId = firebase.database(BOARD_PINS_URL).push().key;
+		updates[BOARD_PINS_URL + pinId] = = {
+			x: childType, // childType is the x
+			y: childId, // childId is the y
+			lines: pinLineData
+		}; 
+	}
+	
+	else if(childId && !childType) {
+		console.warn(ERROR_START + " childId, but without childType");
+		return;
+	}
+
+	else if{childId && childType) {
+		console.warn(ERROR_START + " errornous childType: " + childType);
+		return;
+	}
+	
+	
+	console.log("Trying to update " + updates.toString());
+	
+	//_storeAdapter.update(updates);
+	
+	firebase.database().update(
+		updates,
+		function(error) {
+			if(error) {
+				console.warn(error);
+				_storeAdapter.error(error);
+			}
+			else {
+				console.log("Successfully updated " + updates.toString());
+			}
+		}
+	);
+}
+
+export function removeLine(
+	boardId,
+	lineId,
+	parentId = null,
+	parentType = null,
+	removeFirst = false,
+	childId = null,
+	childType = null,
+	removeSecond = false
+) {
+	const ERROR_START = "removeLine was called with";
+	
+	const BOARD_URL = "/boards/" + boardId;
+	const USER_URL = "/user/" + firebase.currentUser.uid;
+	
+	const USER_NODES_URL = USER_URL + "/nodes/";
+	const NODES_URL = "/nodes/";
+	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
+	
+	const BOARD_LINES_URL = BOARD_URL + "/lines/";
+	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
+	const BOARD_PINS_URL = BOARD_URL + "/pins/";
+	
+	var updates = {};
+	
+	if(lineId) {
+		updates[BOARD_LINES_URL + lineId] = null;
+	}
+	else {
+		console.warn(ERROR_START + "errornous lineId parameter");
+		return;
+	}
+	
+	if(parentId && parentType === TYPE_NODE) {
+		if(removeFirst === true) {
+			updates[NODES_URL + parentId] = null;
+			updates[USER_NODES_URL + parentId] = null;
+			updates[BOARD_NODES_URL + parentId] = null;
+		}
+		else if(removeFirst === false) {
+			updates[BOARD_NODES_URL + parentId + "/lines/" + lineId] = null;
+		}
+		else {
+			console.warn(ERROR_START + "errornous removeFirst parameter");
+			return;
+		}
+	}
+	
+	else if(parentId && parentType === TYPE_PIN) {
+		if(removeFirst === true) {
+			updates[BOARD_PINS_URL + parentId] = null;
+		}
+		else if(removeFirst === false) {
+			updates[BOARD_PINS_URL + parentId + "/lines/" + lineId] = null;
+		}
+		else {
+			console.warn(ERROR_START + " errornous removeFirst parameter or without it");
+			return;
+		}
+	}
+	
+	else if(parentId && parentType) {
+		console.warn(ERROR_START + " errornous parentType: " + parentType);
+		return;
+	}
+	
+	else {
+		console.warn(ERROR_START + "out parentId or parentType");
+		return;
+	}
+	
+	if(childId && childType === TYPE_NODE) {
+		if(removeSecond === true) {
+			updates[NODES_URL + childId] = null;
+			updates[USER_NODES_URL + childId] = null;
+			updates[BOARD_NODES_URL + childId] = null;
+		}
+		else if(removeSecond === false) {
+			updates[BOARD_NODES_URL + childId + "/lines/" + lineId] = null;
+		}
+		else {
+			console.warn(ERROR_START + " errornous removeSecond parameter or without it");
+			return;
+		}
+	}
+	
+	else if(childId && childType === TYPE_PIN) {
+		if(removeSecond === true) {
+			updates[BOARD_PINS_URL + childId] = null;
+		}
+		else if(removeSecond === false) {
+			updates[BOARD_PINS_URL + childId + "/lines/" + lineId] = null;
+		}
+		else {
+			console.warn(ERROR_START + " errornous removeSecond parameter or without it");
+			return;
+		}
+	}
+	
+	else if(childId && childType) {
+		console.warn(ERROR_START + " errornous childType: " + childType);
+		return;
+	}
+	
+	else if(childId && !childType) {
+		console.warn(ERROR_START + " childId, but without childType");
+		return;
+	}
+	
+	console.log("Trying to remove " + updates.toString());
+	
+	firebase.database().update(
+		updates,
+		function(error) {
+			if(error) {
+				console.warn(error);
+				_storeAdapter.error(error);
+			}
+			else {
+				console.log("Successfully removed " + updates.toString());
+			}
+		}
+	);
+}
+
+
+
