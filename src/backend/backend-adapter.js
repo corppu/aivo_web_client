@@ -6,7 +6,7 @@ let _storeAdapter = null;
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
-    NODE_TYPE_TEXT
+    NODE_TYPE_TEXT,
 	TYPE_NODE,
 	TYPE_LINE,
 	TYPE_NONE,
@@ -138,6 +138,8 @@ function createHomeBoard() {
 	
 	updates["/boards/" + boardId + "/nodes/" + parentId] = {
 		title: "parent example",
+		primaryType : TYPE_NODE,
+		id : parentId,
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: parentX,
@@ -160,6 +162,8 @@ function createHomeBoard() {
 	childLineData[lineId] = lineId;
 	updates["/boards/" + boardId + "/nodes/" + childId] = {
 		title: "child example",
+		primaryType : TYPE_NODE,
+		id : childId,
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: childX,
@@ -185,6 +189,8 @@ function createHomeBoard() {
 	updates["/users/"+ userId + "/boards/" + boardId] = true;
 	
 	updates["/boards/" + boardId + "/lines/" + lineId] = {
+		primaryType : TYPE_LINE,
+		id : lineId,
 		parentType: "node",
 		parentId: parentId,
 		childType: "node",
@@ -194,6 +200,8 @@ function createHomeBoard() {
 	var pinLineData = {}; 
 	pinLineData[lineIdToPin] = lineIdToPin;
 	updates["/boards/" + boardId + "/pins/" + pinId] = {
+		primaryType : TYPE_PIN, 
+		id : pinId,
 		x: 800,
 		y: 800,
 		lines: pinLineData
@@ -204,6 +212,8 @@ function createHomeBoard() {
 	// };
 	
 	updates["/boards/" + boardId + "/lines/" + lineIdToPin] = {
+		primaryType : TYPE_LINE,
+		id : lineIdToPin,
 		parentType: "node",
 		parentId: parentId,
 		childType: "pin",
@@ -292,32 +302,6 @@ export function signInWithEmail(email, password, sessionId = null) {
         console.warn(error);
 		_storeAdapter.error(error.code);
     });
-}
-
-function presenceMachine() {
-	// since I can connect from multiple devices or browser tabs, we store each connection instance separately
-	// any time that connectionsRef"s value is null (i.e. has no children) I am offline
-	var myConnectionsRef = firebase.database().ref("users/"+_currentUserId+"/connections");
-
-	// stores the timestamp of my last disconnect (the last time I was seen online)
-	var lastOnlineRef = firebase.database().ref("users/"+_currentUserId+"/lastOnline");
-
-	var connectedRef = firebase.database().ref(".info/connected");
-	connectedRef.on("value", function(snap) {
-	if (snap.val() === true) {
-    // We"re connected (or reconnected)! Do anything here that should happen only if online (or on reconnect)
-
-    // add this device to my connections list
-    // this value could contain info about the device or a timestamp too
-    var con = myConnectionsRef.push(true);
-
-    // when I disconnect, remove this device
-    con.onDisconnect().remove();
-
-    // when I disconnect, update the last time I was seen online
-	lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
-	}
-	});
 }
 
 
@@ -575,393 +559,188 @@ export function signOut() {
     firebase.auth().signOut();
 }
 
-export function updateNode(boardId, nodeId, nodeData) {
-	
-    var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	_storeAdapter.updateNode(nodeId, nodeData);
 
-	var updates = {}
-	updates["/boards/" + boardId + "/nodes/" + nodeId] = nodeData;
-	
-    updates["/nodes/" + nodeId] = {
-		title: nodeData.title
-	};
-	
-	firebase.database().ref().update(updates, function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error.code);
-		}
-	});
-}
-
-
-export function addNode(boardId, nodeData, nodeId = null) {
-	console.log("Trying to add node to the board: " + boardId);
-    var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	if(!nodeId) {
-		nodeId = firebase.database().ref().child("nodes").push().key;
-	}
-	
-	updateNode(boardId, nodeId, nodeData);
-}
-
-export function removeNode(boardId, nodeId) {
-	console.log("Trying to remove node:" + nodeId);
-	var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	
-    _storeAdapter.removeNode(nodeId);
-	
-    firebase.database().ref("/nodes/" + nodeId).remove(function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error);
-		} else {
-			console.log("Node " + nodeId + " is succesfully removed");
-		}
-	});
-	firebase.database().ref("/boards/" + boardId + "/nodes/" + nodeId).remove(function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error);
-		} else {
-			console.log("Node " + nodeId + " is succesfully removed from board " + boardId);
-		}
-	});
-}
-
-export function createLine(boardId, lineData, lineId = null) {
-	console.log("Trying to add line to the board: " + boardId);
-    var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	
-	if(!lineId) {
-		lineId = firebase.database().ref("/boards/" + boardId).child("lines").push().key;
-	}
-		
-		
-	updateLine(boardId, lineId, lineData);
-}
-
-export function updateLine(boardId, lineId, lineData) {
-	
-    var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	_storeAdapter.updateNode(nodeId, nodeData);
-
-	var updates = {}
-	updates["/boards/" + boardId + "/lines/" + lineId] = lineData;
-	
-
-	firebase.database().ref().update(updates, function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error.code);
-		}
-	});
-}
-
-
-export function updatePin(boardId, pinId, pinData) {
-	
-    var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	_storeAdapter.updatePin(pinId, pinData);
-
-	var updates = {}
-	updates["/boards/" + boardId + "/pins/" + pinId] = pinData;
-	
-	firebase.database().ref().update(updates, function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error.code);
-		}
-	});
-}
-
-
-export function addPin(boardId, pinData, pinId = null) {
-	console.log("Trying to add pin to the board: " + boardId);
-    var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-	
-	if(!pinId) {
-		pinId = firebase.database().ref().child("pins").push().key;
-	}
-	
-	updatePin(boardId, pinId, pinData);
-}
-
-export function removePin(boardId, pinId) {
-	console.log("Trying to remove pin:" + pinId);
-	var user = firebase.auth().currentUser;
-	if(!user) {
-		console.warn("User is not authenticated!");
-		return;
-	}
-    _storeAdapter.removePin(pinId);
-   
-   
-	firebase.database().ref("/boards/" + boardId + "/pins/" + pinId).remove(function(error) {
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error);
-		} else {
-			console.log("Pin " + pinId + " is succesfully removed from board " + boardId);
-		}
-	});	
-}
-
-export function createLine(
+export function createObject(
 	boardId,
-	parentId = null,
-	parentType = null,
-	childId = null,
-	childType = null,
-	lineId = null
+	object,
+	parent = null
 ) {
-	const ERROR_START = "removeLine was called with";
-	
-	const BOARD_URL = "/boards/" + boardId;
-	const USER_URL = "/user/" + firebase.currentUser.uid;
-	
-	const USER_NODES_URL = USER_URL + "/nodes/";
-	const NODES_URL = "/nodes/";
-	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
-	
-	const BOARD_LINES_URL = BOARD_URL + "/lines/";
-	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
-	const BOARD_PINS_URL = BOARD_URL + "/pins/";
-	
-	var updates = {};
-	
-	if(!lineId) {
-		lineId = firebase.database(BOARD_LINES_URL).push().key;
-	}
-	
-	updates[BOARD_LINES_URL + lineId] = {
-		parentType,
-		parentId,
-		childType,
-		childId
-	};
-	
-	
-	if(parentId && parentType === TYPE_NODE) {
-		updates[BOARD_NODES_URL + parentId + "/lines/" + lineId] = lineId;
-	}
-	
-	else if(parentId && parentType === TYPE_PIN) {
-		updates[BOARD_PINS_URL + parentId + "/lines/" + lineId] = lineId
-	}
-	
-	else if(parentId && parentType) {
-		console.warn(ERROR_START + " errornous parentType: " + parentType);
-		return;
-	}
-	
-	else {
-		console.warn(ERROR_START + "out parentId or parentType");
-		return;
-	}
-	
-	if(childId && childType === TYPE_NODE) {
-		updates[BOARD_NODES_URL + childId + "/lines/" + lineId] = lineId;
-	}
-	
-	else if(childId && childType === TYPE_PIN) {
-		updates[BOARD_PINS_URL + childId + "/lines/" + lineId] = lineId;
-	}
-	
-	// Create new pin, because there was no pin at first...
-	else if(typeof childId === "number" && typeof childType === "number") {
-		var pinLineData = {};
-		pinLineData[lineId] = lineId;
-		var pinId = firebase.database(BOARD_PINS_URL).push().key;
-		updates[BOARD_PINS_URL + pinId] = = {
-			x: childType, // childType is the x
-			y: childId, // childId is the y
-			lines: pinLineData
-		}; 
-	}
-	
-	else if(childId && !childType) {
-		console.warn(ERROR_START + " childId, but without childType");
-		return;
+	if( !object.id ) {
+		object.id = firebase.database( BOARD_PATH + primaryType + "s/" ).push().key;
 	}
 
-	else if{childId && childType) {
-		console.warn(ERROR_START + " errornous childType: " + childType);
+	var updates = { };
+	var line = null;
+	const BOARD_PATH = "/boards/" + boardId + "/";
+	
+	if( parent && validateObject( parent ) ) {
+				
+		line = {
+			primaryType : TYPE_LINE,
+			id : firebase.database( BOARD_PATH + TYPE_LINE + "s/" ).push().key,
+			parentType : parent.primaryType,
+			parentId : parent.id,
+			childType : object.type,
+			childId : object.id
+		};
+		
+		updates[ BOARD_PATH + TYPE_LINE + "s/" + line.id ] = line;
+		
+		object.lines = {
+			[ line.id ] : line.id
+		};
+		
+		updates[ BOARD_PATH + parent.primaryType+ "s/" + parent.id + "/" + TYPE_LINE + "s/" + line.id ] = line.id;
+	}
+	else if ( parent ) {
 		return;
 	}
 	
+	updates[ BOARD_PATH + object.primaryType + "s/" + object.id ] = object;
 	
-	console.log("Trying to update " + updates.toString());
+	// TODO: Implement
+	//_storeAdapter.createObject( object, parent, line );
 	
-	//_storeAdapter.update(updates);
-	
-	firebase.database().update(
-		updates,
-		function(error) {
-			if(error) {
-				console.warn(error);
-				_storeAdapter.error(error);
-			}
-			else {
-				console.log("Successfully updated " + updates.toString());
-			}
+	firebase.database().update( updates ).then(
+		() => {
+			console.log( "Successfully updated " + updates.toString() );
+		},
+		
+		error => {
+			console.warn( error );
+			_storeAdapter.error( error.id );
 		}
 	);
 }
 
-export function removeLine(
+
+export function removeObject(
 	boardId,
-	lineId,
-	parentId = null,
-	parentType = null,
-	removeFirst = false,
-	childId = null,
-	childType = null,
-	removeSecond = false
+	object,
+	lineMap
 ) {
-	const ERROR_START = "removeLine was called with";
+	var updates = { };
+	const BOARD_PATH = "/boards/" + boardId + "/";
+	var primaryType = object.primaryType;
+	var id = object.id;
+	var lines = object.lines;
 	
-	const BOARD_URL = "/boards/" + boardId;
-	const USER_URL = "/user/" + firebase.currentUser.uid;
-	
-	const USER_NODES_URL = USER_URL + "/nodes/";
-	const NODES_URL = "/nodes/";
-	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
-	
-	const BOARD_LINES_URL = BOARD_URL + "/lines/";
-	const BOARD_NODES_URL = BOARD_URL + "/nodes/";
-	const BOARD_PINS_URL = BOARD_URL + "/pins/";
-	
-	var updates = {};
-	
-	if(lineId) {
-		updates[BOARD_LINES_URL + lineId] = null;
+	if( primaryType === TYPE_NODE || primaryType === TYPE_PIN ) {
+		
+		if( lines ) {
+		
+			for( lineId in lines ) {
+			
+				var lineData = lineMap[ lineId ];
+				var otherId;
+				var otherType;
+				
+				if( lineData.parentId === id ) {
+					otherId = lineData.childId;
+					otherType = lineData.childType;
+				} 
+				else {
+					otherId = lineData.parentId;
+					otherType = lineData.parentType;
+				}
+				
+				updates[ BOARD_PATH + otherType + "s/" + otherId + "/" + TYPE_LINE + "s/" + lineId ] = null;
+				updates[ BOARD_PATH + TYPE_LINE + "s/" + lineId ] = null;
+			}
+		}
+	}
+	else if( primaryType === TYPE_LINE ) {
+		updates[ BOARD_PATH + object.parentType + "s/" + object.parentId + "/" + TYPE_LINE + "s/" + id ] = null;
+		updates[ BOARD_PATH + object.childType + "s/" + object.childId + "/" + TYPE_LINE + "s/" + id ] = null;
 	}
 	else {
-		console.warn(ERROR_START + "errornous lineId parameter");
+		console.warn( "primaryType is unknown" );
 		return;
 	}
 	
-	if(parentId && parentType === TYPE_NODE) {
-		if(removeFirst === true) {
-			updates[NODES_URL + parentId] = null;
-			updates[USER_NODES_URL + parentId] = null;
-			updates[BOARD_NODES_URL + parentId] = null;
-		}
-		else if(removeFirst === false) {
-			updates[BOARD_NODES_URL + parentId + "/lines/" + lineId] = null;
-		}
-		else {
-			console.warn(ERROR_START + "errornous removeFirst parameter");
-			return;
-		}
-	}
+	updates[ BOARD_PATH + primaryType + "s/" + id ] = null;
 	
-	else if(parentId && parentType === TYPE_PIN) {
-		if(removeFirst === true) {
-			updates[BOARD_PINS_URL + parentId] = null;
-		}
-		else if(removeFirst === false) {
-			updates[BOARD_PINS_URL + parentId + "/lines/" + lineId] = null;
-		}
-		else {
-			console.warn(ERROR_START + " errornous removeFirst parameter or without it");
-			return;
-		}
-	}
-	
-	else if(parentId && parentType) {
-		console.warn(ERROR_START + " errornous parentType: " + parentType);
-		return;
-	}
-	
-	else {
-		console.warn(ERROR_START + "out parentId or parentType");
-		return;
-	}
-	
-	if(childId && childType === TYPE_NODE) {
-		if(removeSecond === true) {
-			updates[NODES_URL + childId] = null;
-			updates[USER_NODES_URL + childId] = null;
-			updates[BOARD_NODES_URL + childId] = null;
-		}
-		else if(removeSecond === false) {
-			updates[BOARD_NODES_URL + childId + "/lines/" + lineId] = null;
-		}
-		else {
-			console.warn(ERROR_START + " errornous removeSecond parameter or without it");
-			return;
-		}
-	}
-	
-	else if(childId && childType === TYPE_PIN) {
-		if(removeSecond === true) {
-			updates[BOARD_PINS_URL + childId] = null;
-		}
-		else if(removeSecond === false) {
-			updates[BOARD_PINS_URL + childId + "/lines/" + lineId] = null;
-		}
-		else {
-			console.warn(ERROR_START + " errornous removeSecond parameter or without it");
-			return;
-		}
-	}
-	
-	else if(childId && childType) {
-		console.warn(ERROR_START + " errornous childType: " + childType);
-		return;
-	}
-	
-	else if(childId && !childType) {
-		console.warn(ERROR_START + " childId, but without childType");
-		return;
-	}
-	
-	console.log("Trying to remove " + updates.toString());
-	
-	firebase.database().update(
-		updates,
-		function(error) {
-			if(error) {
-				console.warn(error);
-				_storeAdapter.error(error);
-			}
-			else {
-				console.log("Successfully removed " + updates.toString());
-			}
+	firebase.database().update( updates ).then(
+		() => {
+			console.log( "Successfully updated " + updates.toString() );
+			
+			// TODO: implement?
+			// _storeAdapter.removeObject( object, lineMap ); 
+		},
+		
+		error => {
+			console.warn(error);
+			_storeAdapter.error(error.id);
 		}
 	);
 }
 
 
 
+export function moveObject(
+	boardId,
+	object
+) {
+	const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
+	
+	var updates = { };
+	updates[ "/x" ] = object.x;
+	updates[ "/y" ] = object.y;
+	firebase.database( PATH ).update(
+		updates
+	).then(
+		() => {
+			console.log( "Successfully updated " + updates.toString() );
+			// TODO: Implement?
+			//_storeAdapter.moveObject( object ); 
+		},
+		
+		error => {
+			console.warn(error);
+			_storeAdapter.error(error.id);
+		}
+	);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function validateObject(object) {
+	return (
+		object.primaryType &&
+		object.id &&
+		( 	
+			(
+				(	
+					object.primaryType === TYPE_NODE ||
+					object.primaryType === TYPE_PIN
+				) &&
+				typeof object.x === "number" &&
+				typeof object.y === "number"
+			) ||
+			(
+				object.primaryType === TYPE_LINE &&
+				object.parentId &&
+				object.parentType &&
+				(
+					object.parentType === TYPE_NODE ||
+					object.parentType === TYPE_PIN
+				) &&
+				object.childType &&
+				(
+					object.childType === TYPE_NODE ||
+					object.childType === TYPE_PIN
+				)
+			)
+		)
+	)	
+}

@@ -10,6 +10,59 @@ import {
 
 import * as backendAdapter from "../backend/backend-adapter";
 
+
+export function tryCreateObject(
+	object,
+	parent = null
+) {
+	return function (dispatch, getState) {
+        const { mindmap } = getState();
+
+        const boardID = mindmap.get("boardID");
+        if (!boardID) {
+            return;
+        }
+        backendAdapter.createObject(boardID, object, parent);
+    };
+}
+
+export function createObject(
+	object,
+	lineMap
+) {
+	//return { type: CREATE_OBJECT, id, data };
+}
+
+export function tryRemoveObject(
+	object,
+	lineMap
+) {
+	return function (dispatch, getState) {
+        const { mindmap } = getState();
+
+        const boardID = mindmap.get("boardID");
+        if (!boardID) {
+            return;
+        }
+        backendAdapter.removeObject(boardID, object, lineMap);
+    };
+}
+
+export function tryMoveObject(
+	object
+) {
+	return function (dispatch, getState) {
+        const { mindmap } = getState();
+
+        const boardID = mindmap.get("boardID");
+        if (!boardID) {
+            return;
+        }
+        backendAdapter.moveObject(boardID, object);
+    };
+}
+
+
 export function tryAddNode(data) {
     return function (dispatch, getState) {
         const { mindmap } = getState();
@@ -18,7 +71,7 @@ export function tryAddNode(data) {
         if (!boardID) {
             return;
         }
-        backendAdapter.addNode(boardID, data);
+        //backendAdapter.addNode(boardID, data);
     }
 }
 
@@ -30,7 +83,7 @@ export function tryAddLine(data) {
         if (!boardID) {
             return;
         }
-        backendAdapter.addLine(boardID, data);
+        //backendAdapter.addLine(boardID, data);
     }
 }
 
@@ -42,7 +95,7 @@ export function tryAddPin(data) {
         if (!boardID) {
             return;
         }
-        backendAdapter.addPin(boardID, data);
+        //backendAdapter.addPin(boardID, data);
     }
 }
 
@@ -54,7 +107,7 @@ export function tryUpdateNode(id, data) {
         if (!boardID) {
             return;
         }
-        backendAdapter.updateNode(boardID, id, data);
+        //backendAdapter.updateNode(boardID, id, data);
     }
 }
 
@@ -66,7 +119,7 @@ export function tryUpdateLine(id, data) {
         if (!boardID) {
             return;
         }
-        backendAdapter.updateLine(boardID, id, data);
+        //backendAdapter.updateLine(boardID, id, data);
     }
 }
 
@@ -78,7 +131,7 @@ export function tryUpdatePin(id, data) {
         if (!boardID) {
             return;
         }
-        backendAdapter.updatePin(boardID, id, data);
+        //backendAdapter.updatePin(boardID, id, data);
     }
 }
 
@@ -90,7 +143,7 @@ export function tryRemoveNode(id) {
         if (!boardID) {
             return;
         }
-        backendAdapter.removeNode(boardID, id);
+        //backendAdapter.removeNode(boardID, id);
     }
 }
 
@@ -102,7 +155,7 @@ export function tryRemoveLine(id) {
         if (!boardID) {
             return;
         }
-        backendAdapter.removeLine(boardID, id);
+       // backendAdapter.removeLine(boardID, id);
     }
 }
 
@@ -114,7 +167,7 @@ export function tryRemovePin(id) {
         if (!boardID) {
             return;
         }
-        backendAdapter.removePin(boardID, id);
+        //backendAdapter.removePin(boardID, id);
     }
 }
 

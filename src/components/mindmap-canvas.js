@@ -215,11 +215,12 @@ export default function() {
         propsLines.forEach((propsLine, id) => {
 			const line = {
 				id,
+				primaryType: propsLine.get("primaryType"),
 				parentType: propsLine.get("parentType"),
 				parentId: propsLine.get("parentId"),
 				childType: propsLine.get("childType"),
-				childId: propsLine.get("childId"),
-                title: propsLine.get("title")
+				childId: propsLine.get("childId")
+                // title: propsLine.get("title")
             };
 			
 		   _context.lines.set(id, line);
@@ -264,72 +265,62 @@ export default function() {
     }
 	
     function onInputStart(action) {
-        const pos = translateToCamera(_camera, action.startPosition);
+        // const pos = translateToCamera(_camera, action.startPosition);
 
-        return queryNodeAtPoint(_context, pos);
+        // return queryNodeAtPoint(_context, pos);
     }
 
     function onInputEnd(action) {
-        const pos = translateToCamera(_camera, action.endPosition);
+        // const pos = translateToCamera(_camera, action.endPosition);
 	    
-        const hits = Query.point(_context.engine.world.bodies, pos);
-        if (hits.length > 0) {
-            const node = _context.bodyToNodeMapping[hits[0].id];
-            if (action.totalDeltaMagnitude <= 10) {
-                if (_selectedNode === null) {
-                    _selectedNode = node;
-                } 
+        // const hits = Query.point(_context.engine.world.bodies, pos);
+        // if (hits.length > 0) {
+            // const node = _context.bodyToNodeMapping[hits[0].id];
+            // if (action.totalDeltaMagnitude <= 10) {
+                // if (_selectedNode === null) {
+                    // _selectedNode = node;
+                // } 
 				
-				else if(_selectedNode === node && _actions.removeNode) {
+				// else if(_selectedNode === node && _actions.removeNode) {
 					
-					if(node.lines) {
-						var keys = Object.keys(node.lines);
-						var nodeData;
-						var lineData;
-						for(var i = 0; i < keys.length; ++i) {
-							var lineId = node.lines[keys[i]];
-							
-							lineData = _context.lines.get(lineId);
-							if(lineData.childId !== node.id) {
-								nodeData = _context.nodes.get(lineData.childId);
-							} else {
-								nodeData = _context.nodes.get(lineData.parentId);
-							}
-							
-							delete nodeData.lines[lineId];
-							_actions.updateNode(nodeData.id, nodeData);
-							
-							_actions.removeLine(lineId);
-						}
-					}
+					// if(node.lines) {
+						// var keys = Object.keys(node.lines);
+						// var nodeData;
+						// var lineData;
+						// for(var i = 0; i < keys.length; ++i) {
+							// var lineId = node.lines[keys[i]];
+							// lineData = _context.lines.get(lineId);
+							// _actions.removeLine(lineData);
+						// }
+					// }
 					
-					_actions.removeNode(node.id);
-				}
-			} // action.totalDeltaMagnitude <= 10
-		}
+					// _actions.removeNode(node.id);
+				// }
+			// } // action.totalDeltaMagnitude <= 10
+		// }
     }
 	
 
     function onInputMove(action) {
-        const pos = translateToCamera(_camera, action.endPosition);
+        // const pos = translateToCamera(_camera, action.endPosition);
 
-        if (action.data) {
-            if (_actions.updateNode) {
-                const { id, type, title, text, imgURL, lines } = action.data;
+        // if (action.data) {
+            // if (_actions.updateNode) {
+                // const { id, type, title, text, imgURL, lines } = action.data;
               
-                _actions.updateNode(id, {
-                    type: type || NODE_TYPE_UNDEFINED,
-                    x: pos.x,
-                    y: pos.y,
-                    title,
-                    text: text || null,
-                    imgURL: imgURL || null,
-					lines: lines || null
-                });
-            }
-        } else {
-            Object.assign(_camera, Vector.add(_camera, action.lastDelta));
-        }
+                // _actions.updateNode(id, {
+                    // type: type || NODE_TYPE_UNDEFINED,
+                    // x: pos.x,
+                    // y: pos.y,
+                    // title,
+                    // text: text || null,
+                    // imgURL: imgURL || null,
+					// lines: lines || null
+                // });
+            // }
+        // } else {
+            // Object.assign(_camera, Vector.add(_camera, action.lastDelta));
+        // }
     }
 
     function onLongPress(action) {
