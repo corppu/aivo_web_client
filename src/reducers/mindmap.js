@@ -2,101 +2,87 @@ import { fromJS, Map } from "immutable";
 
 import {
     UPDATE_BOARD,
-    UPDATE_NODE,
-	UPDATE_LINE,
-	UPDATE_PIN,
-    REMOVE_NODE,
-	REMOVE_LINE,
-	REMOVE_PIN,
+	REMOVE_BOARD,
+	
+	UPDATE_OBJECT,
+	REMOVE_OBJECT,
+	
     LIST_UPDATE,
     LIST_REMOVE
 } from "../constants/action-types";
 
 const initialState = fromJS({
-    boardID: null,
+    
+	boardID: null,
     boardData: null,
-    nodes: {},
+    
+	nodes: {},
 	lines: {},
 	pins: {},
+	
     boards: {}
 });
 
-export default function(state = initialState, action) {
+export default function( state = initialState, action ) {
 
-    //console.log(action);
-
-    switch (action.type) {
+    switch ( action.type ) {
     case UPDATE_BOARD:
     {
-        const { id, data } = action;
+        const { data } = action;
 
-        if (id !== state.get("boardID")) {
-            state = state.set("nodes", Map());
+        if (data.id !== state.get( "boardID" ) ) {
+			
+            state = state
+				.set( "nodes", Map() )
+				.set( "lines", Map() )
+				.set( "pins", Map() );
         }
+		
         return state
-            .set("boardID", id)
-            .set("boardData", data);
+            .set( "boardID", data.id )
+            .set( "boardData", data );
     }
-    case UPDATE_NODE:
+    
+	
+	case UPDATE_OBJECT:
     {
-        const { id, data } = action;
+        const { data } = action;
 
-        return state.updateIn(["nodes", id], node => {
-            const immutableData = fromJS(data);
+		return state.updateIn( 
+			
+			[ data.primaryType + "s", data.id ], 
+			
+			prop => {
+				const immutableData = fromJS( data );
 
-            return node ? node.merge(immutableData) : immutableData;
-        });
+				return prop ? prop.merge( immutableData ) : immutableData;
+			}
+		);
     }
-	case UPDATE_LINE:
-	{
-		const { id, data } = action;
-		
-		return state.updateIn(["lines", id], line => {
-			const immutableData = fromJS(data);
 
-            return line ? line.merge(immutableData) : immutableData;
-		});
-	}
-	case UPDATE_PIN:
-	{
-		const { id, data } = action;
-		
-		return state.updateIn(["pins", id], pin => {
-			const immutableData = fromJS(data);
-
-            return pin ? pin.merge(immutableData) : immutableData;
-		});
-	}
-    case REMOVE_NODE:
+	
+    case REMOVE_OBJECT:
     {
-        const { id } = action;
+        const { data } = action;
 
-        return state.deleteIn(["nodes", id]);
+        return state.deleteIn( [ data.primaryType + "s", data.id ] );
     }
-	case REMOVE_LINE:
-	{
-		const { id } = action;
-
-        return state.deleteIn(["lines", id]);
-	}
-	case REMOVE_PIN:
-    {
-        const { id } = action;
-
-        return state.deleteIn(["pins", id]);
-    }
+	
+	
     case LIST_UPDATE:
     {
-        const { id, data } = action;
+        const { data } = action;
 
-        return state.setIn(["boards", id], data);
+        return state.setIn( [ "boards", data.id ], data );
     }
+	
     case LIST_REMOVE:
     {
-        const { id } = action;
+        const { data } = action;
 
-        return state.deleteIn(["boards", id]);
+        return state.deleteIn( [ "boards", data.id ] );
     }
+	
     default:
         return state;
     }

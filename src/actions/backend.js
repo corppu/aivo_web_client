@@ -64,10 +64,10 @@ export function error(err) {
     return { type: BACKEND_ERROR, err };
 }
 
-export function listUpdate(id, data) {
-    return { type: LIST_UPDATE, id, data };
+export function listUpdate(data) {
+    return { type: LIST_UPDATE, data };
 }
 
-export function listRemove(id) {
-    return { type: LIST_REMOVE, id };
+export function listRemove(data) {
+    return { type: LIST_REMOVE, data };
 }

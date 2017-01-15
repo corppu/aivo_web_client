@@ -1,59 +1,41 @@
-import * as backendActions from "../actions/backend"
-import * as mindmapActions from "../actions/mindmap"
+import * as backendActions from "../actions/backend";
+import * as mindmapActions from "../actions/mindmap";
 
-export default function(store) {
+export default function( store ) {
 
     // backend actions
-    function userSignedIn(data) {
-        store.dispatch(backendActions.login(data))
+    function userSignedIn( data ) {
+        store.dispatch( backendActions.login( data ) );
     }
 
     function userSignedOut() {
-        store.dispatch(backendActions.logout())
+        store.dispatch( backendActions.logout() );
     }
 
-    function error(err) {
-        store.dispatch(backendActions.error(err))
+    function error( err ) {
+        store.dispatch( backendActions.error( err ) );
     }
 
     // mindmap actions
-    function updateBoard(id, data) {
-		store.dispatch(mindmapActions.updateBoard(id, data))
+    function updateBoard( data ) {
+		store.dispatch( mindmapActions.updateBoard( data ) );
 	}
 	
-	function updateNode(id, data) {
-		if(data.lines) console.log(data.lines);
-		var lines = {keyVal: "valVal"};
-        store.dispatch(mindmapActions.updateNode(id, data))
+	function updateObject( data ) {
+        store.dispatch( mindmapActions.updateObject( data ) );
     }
 
-    function removeNode(id) {
-        store.dispatch(mindmapActions.removeNode(id))
-    }
-
-	function updateLine(id, data) {
-        store.dispatch(mindmapActions.updateLine(id, data))
-    }
-
-    function removeLine(id) {
-        store.dispatch(mindmapActions.removeLine(id))
-    }
-	
-	function updatePin(id, data) {
-        store.dispatch(mindmapActions.updatePin(id, data))
-    }
-
-    function removePin(id) {
-        store.dispatch(mindmapActions.removePin(id))
+    function removeObject( data ) {
+        store.dispatch( mindmapActions.removeObject( data ) );
     }
 	
 	// list actions
-	function updateListItem(id, data) {
-		store.dispatch(backendActions.listUpdate(id, data));
+	function updateListItem( data ) {
+		store.dispatch( backendActions.listUpdate( data ) );
 	}
 	
-	function removeListItem(id) {
-		store.dispatch(backendActions.listRemove(id));
+	function removeListItem( data ) {
+		store.dispatch( backendActions.listRemove( data ) );
 	}
 	
     return {
@@ -61,18 +43,12 @@ export default function(store) {
         userSignedOut,
         error,
 
-		updateBoard,
-		
-        updateNode,
-        removeNode,
-		
-		updateLine,
-		removeLine,
-
-		updatePin,
-		removePin,		
+		updateBoard,	
+	
+		updateObject,
+		removeObject,
 	
 		updateListItem,
 		removeListItem
-    }
+    };
 }

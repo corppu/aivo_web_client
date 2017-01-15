@@ -6,8 +6,13 @@ import { findPath } from "../utils/algorithm-utils";
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
-    NODE_TYPE_TEXT
+    NODE_TYPE_TEXT,
+	TYPE_NODE,
+	TYPE_LINE,
+	TYPE_NONE,
+	TYPE_PIN
 } from "../constants/types";
+
 import {
 	MINDMAP_PIN_RADIUS,
 	MINDMAP_NODE_RADIUS,
@@ -37,16 +42,12 @@ export default function() {
     let _inputAction = null;
 
     let _actions = {
-        addNode: null,
-		addLine: null,
-		addPin: null,
-        updateNode: null,
-		updateLine: null,
-		updatePin: null,
-        removeNode: null,
-		removeLine: null,
-		removePin: null,
-        openNode: null
+        createObject: null,
+        updateObject: null,
+		moveObject: null,
+		removeObject: null,
+        openNode: null//,
+		//openNodeBoard: null
     };
 
     let _searchFilter = "";
@@ -66,21 +67,16 @@ export default function() {
         _fps = Math.round(1/delta);
 	}
 	
-    function updateProps(props) {
-        _actions.addNode = props.tryAddNode;
-		_actions.addLine = props.tryAddLine;
-		_actions.addPin = props.tryAddPin;
-        _actions.updateNode = props.tryUpdateNode;
-		_actions.updateLine = props.tryUpdateLine;
-		_actions.updatePin = props.tryUpdatePin;
-        _actions.removeNode = props.tryRemoveNode;
-		_actions.removeLine = props.tryRemoveLine;
-		_actions.removePin = props.tryRemovePin;
+    function updateProps( props ) {
+        _actions.createObject = props.tryCreateObject;
+        _actions.updateObject = props.tryUpdateObject;
+        _actions.removeObject = props.tryRemoveObject;
         _actions.openNode = props.openNode;
+		//_actions.openNodeBoard = props.openNodeBoard;
 		
-        let propsNodes = new Map(props.nodes);
-		let propsLines = new Map(props.lines);
-		let propsPins = new Map(props.pins);
+        let propsNodes = new Map( props.nodes );
+		let propsLines = new Map( props.lines );
+		let propsPins = new Map( props.pins );
 		
         // match existing nodes to props (update old ones)
         _context.nodes.forEach((node, id) => {
@@ -109,6 +105,8 @@ export default function() {
                     x: propsNode.get("x"),
                     y: propsNode.get("y")
                 },
+				// x : propsNode.get("x"),
+				// y : propsNode.get("y"),
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
                 imgURL: propsNode.get("imgURL"),

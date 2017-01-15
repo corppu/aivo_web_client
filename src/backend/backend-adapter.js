@@ -2,7 +2,6 @@ import firebase from "firebase";
 let _storeAdapter = null;
 
 // TODO: Start using chained promises for error handling on multi database call operations: https://firebase.googleblog.com/2016/01/keeping-our-promises-and-callbacks_76.html
-// TODO: Start using context with listeners in order to separate the listeners from each other, because currently boardlist and board views use the same listener...
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
@@ -126,6 +125,7 @@ function createHomeBoard() {
 	let updates = {};
 	
 	updates["/boards/" + boardId + "/meta"] = {
+		id: boardId,
 		parentBoard: boardId, // Recursively is parent of itself, as is home/root...
 		title: "home",
 		imgURL: "http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/blue-jelly-icons-business/078551-blue-jelly-icon-business-home4.png",
@@ -414,7 +414,7 @@ const B_FAKE_CONTEXT = new Object();
 const B_META_VALUE = function(boardId) 
 {
 	return function(data) {
-		_storeAdapter.updateBoard(boardId, data.val());
+		_storeAdapter.updateBoard(data.val());
 	}
 }
 
@@ -430,43 +430,43 @@ function attachBoardListeners(boardId) {
 	var nodesRef = firebase.database().ref("boards/" + boardId + "/nodes");
 	
 	nodesRef.on("child_added", function(data) {
-		_storeAdapter.updateNode(data.key, data.val());
+		_storeAdapter.updateObject(data.val());
 	});
 	
 	nodesRef.on("child_changed", function(data) {
-		_storeAdapter.updateNode(data.key, data.val());
+		_storeAdapter.updateObject(data.val());
 	});
 	
 	nodesRef.on("child_removed", function(data) {
-		_storeAdapter.removeNode(data.key, data.val());
+		_storeAdapter.removeObject(data.val());
 	});
 
 	var pinsRef = firebase.database().ref("boards/" + boardId + "/pins");
 	
 	pinsRef.on("child_added", function(data) {
-		_storeAdapter.updatePin(data.key, data.val());
+		_storeAdapter.updateObject(data.val());
 	});
 	
 	pinsRef.on("child_changed", function(data) {
-		_storeAdapter.updatePin(data.key, data.val());
+		_storeAdapter.updateObject(data.val());
 	});
 	
 	pinsRef.on("child_removed", function(data) {
-		_storeAdapter.removePin(data.key, data.val());
+		_storeAdapter.removeObject(data.val());
 	});
 	
 	var linesRef = firebase.database().ref("boards/" + boardId + "/lines");
 	
 	linesRef.on("child_added", function(data) {
-		_storeAdapter.updateLine(data.key, data.val());
+		_storeAdapter.updateObject(data.val());
 	});
 	
 	linesRef.on("child_changed", function(data) {
-		_storeAdapter.updateLine(data.key, data.val());
+		_storeAdapter.updateObject(data.val());
 	});
 	
 	linesRef.on("child_removed", function(data) {
-		_storeAdapter.removeLine(data.key, data.val());
+		_storeAdapter.removeObject(data.val());
 	});
 }
 
@@ -486,7 +486,7 @@ const L_FAKE_CONTEXT = new Object();
 const L_META_VALUE = function(boardId)
 {
 	return function(data) {
-		_storeAdapter.updateListItem(boardId, data.val());
+		_storeAdapter.updateListItem(data.val());
 	}
 }
 
@@ -511,7 +511,7 @@ const L_BOARD_REMOVED = function(data)
 		L_META_VALUE(boardId),
 		L_FAKE_CONTEXT
 	);
-	_storeAdapter.removeListItem(boardId);
+	_storeAdapter.removeListItem(data.val());
 }
 
 export function openBoardList() {

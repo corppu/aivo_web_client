@@ -7,9 +7,7 @@ export const LIST_UPDATE = "LIST_UPDATE";
 export const LIST_REMOVE = "LIST_REMOVE";
 
 export const UPDATE_BOARD = "UPDATE_BOARD";
-export const UPDATE_NODE = "UPDATE_NODE";
-export const REMOVE_NODE = "REMOVE_NODE";
-export const UPDATE_LINE = "UPDATE_LINE";
-export const REMOVE_LINE = "REMOVE_LINE";
-export const UPDATE_PIN = "UPDATE_PIN";
-export const REMOVE_PIN = "REMOVE_PIN";
+export const REMOVE_BOARD = "REMOVE_BOARD";
+
+export const UPDATE_OBJECT = "UPDATE_OBJECT";
+export const REMOVE_OBJECT = "REMOVE_OBJECT";
