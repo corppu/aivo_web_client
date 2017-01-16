@@ -44,7 +44,7 @@ export default function() {
     let _actions = {
         createObject: null,
         updateObject: null,
-		moveObject: null,
+		// moveObject: null,
 		removeObject: null,
         openNode: null//,
 		//openNodeBoard: null
@@ -70,7 +70,9 @@ export default function() {
     function updateProps( props ) {
         _actions.createObject = props.tryCreateObject;
         _actions.updateObject = props.tryUpdateObject;
+	
         _actions.removeObject = props.tryRemoveObject;
+		// _actions.moveObject = props.tryMoveObject;
         _actions.openNode = props.openNode;
 		//_actions.openNodeBoard = props.openNodeBoard;
 		
@@ -100,13 +102,14 @@ export default function() {
 			
             Object.assign(node, {
 				id,
+				primaryType: propsNode.get("primaryType"),
                 type: propsNode.get("type"),
                 anchor: {
                     x: propsNode.get("x"),
                     y: propsNode.get("y")
                 },
-				// x : propsNode.get("x"),
-				// y : propsNode.get("y"),
+				x : propsNode.get("x"),
+				y : propsNode.get("y"),
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
                 imgURL: propsNode.get("imgURL"),
@@ -134,6 +137,7 @@ export default function() {
 
             return Object.assign(line, {
 				id,
+				primaryType: propsLine.get("primaryType"),
 				parentType: propsLine.get("parentType"),
 				parentId: propsLine.get("parentId"),
 				childType: propsLine.get("childType"),
@@ -164,10 +168,13 @@ export default function() {
 
             Object.assign(pin, {
 				id,
+				primaryType: propsPin.get("primaryType"),
 				anchor: {
                     x: propsPin.get("x"),
                     y: propsPin.get("y")
                 },
+				x: propsPin.get("x"),
+				y: propsPin.get("y"),
 				lines: propsPin.get("lines").toObject()
             });
         });
@@ -192,13 +199,15 @@ export default function() {
             });
             const node = {
 				id,
+				primaryType : propsNode.get("primaryType"),
                 type: propsNode.get("type"),
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
 				imgURL: propsNode.get("imgURL"),
 				lines: propsNode.get("lines"),
-
                 radius,
+				x: anchor.x,
+				y: anchor.y,
                 anchor,
                 body
             }		
@@ -240,8 +249,10 @@ export default function() {
             });
             const pin = {
 				id,
-				lines: propsPin.get("lines"),
-
+				primaryType: propsPin.get("primaryType"),
+				lines: propsPin.get("lines").toObject(),
+				x: anchor.x,
+				y: anchor.y,
                 radius,
                 anchor,
                 body
@@ -263,22 +274,27 @@ export default function() {
     }
 	
     function onInputStart(action) {
-        // const pos = translateToCamera(_camera, action.startPosition);
+        const pos = translateToCamera(_camera, action.startPosition);
 
-        // return queryNodeAtPoint(_context, pos);
+        return queryNodeAtPoint(_context, pos);
     }
 
     function onInputEnd(action) {
-        // const pos = translateToCamera(_camera, action.endPosition);
+        const pos = translateToCamera(_camera, action.endPosition);
 	    
-        // const hits = Query.point(_context.engine.world.bodies, pos);
-        // if (hits.length > 0) {
-            // const node = _context.bodyToNodeMapping[hits[0].id];
-            // if (action.totalDeltaMagnitude <= 10) {
-                // if (_selectedNode === null) {
-                    // _selectedNode = node;
-                // } 
-				
+        const hits = Query.point(_context.engine.world.bodies, pos);
+        
+		if (hits.length > 0) {
+             const node = _context.bodyToNodeMapping[hits[0].id];
+             if (action.totalDeltaMagnitude <= 10) {
+                 if (_selectedNode === null || _selectedNode.id !== node.id) {
+                     _selectedNode = node;
+                 } 
+			 }
+		}
+		else if (action.totalDeltaMagnitude <= 10) {
+			 _selectedNode = null;
+		}
 				// else if(_selectedNode === node && _actions.removeNode) {
 					
 					// if(node.lines) {
@@ -300,25 +316,17 @@ export default function() {
 	
 
     function onInputMove(action) {
-        // const pos = translateToCamera(_camera, action.endPosition);
+        const pos = translateToCamera(_camera, action.endPosition);
 
-        // if (action.data) {
-            // if (_actions.updateNode) {
-                // const { id, type, title, text, imgURL, lines } = action.data;
-              
-                // _actions.updateNode(id, {
-                    // type: type || NODE_TYPE_UNDEFINED,
-                    // x: pos.x,
-                    // y: pos.y,
-                    // title,
-                    // text: text || null,
-                    // imgURL: imgURL || null,
-					// lines: lines || null
-                // });
-            // }
-        // } else {
-            // Object.assign(_camera, Vector.add(_camera, action.lastDelta));
-        // }
+        if (action.data) {
+            if (_actions.updateObject) {
+				console.log(action.data);
+			  _actions.updateObject(action.data);
+			}
+         }		 
+		 else {
+             Object.assign(_camera, Vector.add(_camera, action.lastDelta));
+         }
     }
 
     function onLongPress(action) {

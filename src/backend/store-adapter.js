@@ -43,7 +43,7 @@ export default function( store ) {
         userSignedOut,
         error,
 
-		updateBoard,	
+		updateBoard,
 	
 		updateObject,
 		removeObject,

@@ -2,7 +2,7 @@ import { fromJS, Map } from "immutable";
 
 import {
     UPDATE_BOARD,
-	REMOVE_BOARD,
+	// REMOVE_BOARD,
 	
 	UPDATE_OBJECT,
 	REMOVE_OBJECT,
@@ -12,7 +12,7 @@ import {
 } from "../constants/action-types";
 
 const initialState = fromJS({
-    
+	
 	boardID: null,
     boardData: null,
     

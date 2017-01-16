@@ -1,7 +1,8 @@
 import {
     UPDATE_BOARD,
-	REMOVE_BOARD,
+	// REMOVE_BOARD,
 	UPDATE_OBJECT,
+	// MOVE_OBJECT,
 	REMOVE_OBJECT
 } from "../constants/action-types";
 
@@ -39,23 +40,24 @@ export function tryRemoveObject(
     };
 }
 
-export function tryMoveObject(
-	object
-) {
-	return function ( dispatch, getState ) {
-        const { mindmap } = getState();
+// export function tryMoveObject(
+	// object
+// ) {
+	// return function ( dispatch, getState ) {
+        // const { mindmap } = getState();
 
-        const boardID = mindmap.get("boardID");
-        if (!boardID) {
-            return;
-        }
-        backendAdapter.moveObject(boardID, object);
-    };
-}
+        // const boardID = mindmap.get("boardID");
+        // if (!boardID) {
+            // return;
+        // }
+        // backendAdapter.moveObject(boardID, object);
+    // };
+// }
 
 export function tryUpdateObject(
 	object
 ) {
+	console.log(object);
 	return function ( dispatch, getState ) {
         const { mindmap } = getState();
 
@@ -65,7 +67,7 @@ export function tryUpdateObject(
             return;
         }
 		
-        backendAdapter.updateObject( object );
+        backendAdapter.updateObject( boardID, object );
     };
 }
 
@@ -80,4 +82,8 @@ export function updateObject( data ) {
 export function removeObject( data ) {
     return { type: REMOVE_OBJECT, data };
 }
+
+// export function moveObject( data ) {
+    // return { type: MOVE_OBJECT, data };
+// }
 

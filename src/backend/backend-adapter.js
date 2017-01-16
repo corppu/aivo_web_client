@@ -677,22 +677,21 @@ export function removeObject(
 
 
 
-export function moveObject(
+export function updateObject(
 	boardId,
 	object
 ) {
+	console.log(object);
+	_storeAdapter.updateObject( object ); 
 	const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
 	
-	var updates = { };
-	updates[ "/x" ] = object.x;
-	updates[ "/y" ] = object.y;
 	firebase.database( PATH ).update(
-		updates
+		object
 	).then(
 		() => {
 			console.log( "Successfully updated " + updates.toString() );
 			// TODO: Implement?
-			//_storeAdapter.moveObject( object ); 
+			//
 		},
 		
 		error => {
