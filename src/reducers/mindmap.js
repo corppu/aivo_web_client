@@ -5,7 +5,9 @@ import {
 	// REMOVE_BOARD,
 	
 	UPDATE_OBJECT,
+	
 	REMOVE_OBJECT,
+	REMOVE_OBJECTS,
 	
     LIST_UPDATE,
     LIST_REMOVE
@@ -68,6 +70,33 @@ export default function( state = initialState, action ) {
         return state.deleteIn( [ data.primaryType + "s", data.id ] );
     }
 	
+	case REMOVE_OBJECTS:
+	{
+		const { removables, copiesForUpdate } = action;
+		var i = 0;
+		var data;
+		
+		for(; i < removables.length; ++i) {
+			data = removables[ i ];
+			state.deleteIn( [ data.primaryType + "s", data.id ] );
+		}
+		
+		for(i = 0; i < copiesForUpdate.length; ++i) {
+			data = copiesForUpdate[ i ];
+			state.updateIn( 
+				
+				[ data.primaryType + "s", data.id ], 
+				
+				prop => {
+					const immutableData = fromJS( data );
+
+					return prop ? prop.merge( immutableData ) : immutableData;
+				}
+			);
+		}
+		
+		return state;
+	}
 	
     case LIST_UPDATE:
     {

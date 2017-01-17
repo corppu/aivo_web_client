@@ -601,7 +601,7 @@ export function createObject(
 	// TODO: Implement
 	//_storeAdapter.createObject( object, parent, line );
 	
-	firebase.database().update( updates ).then(
+	firebase.database().ref().update( updates ).then(
 		() => {
 			console.log( "Successfully updated " + updates.toString() );
 		},
@@ -617,13 +617,17 @@ export function createObject(
 export function removeObject(
 	boardId,
 	object,
-	lineMap
+	lineMap,
+	nodeMap,
+	pinMap
 ) {
 	var updates = { };
 	const BOARD_PATH = "/boards/" + boardId + "/";
 	var primaryType = object.primaryType;
 	var id = object.id;
 	var lines = object.lines;
+	var objectsToRemove = [ object ];
+	var objectsToUpdate = [];
 	
 	if( primaryType === TYPE_NODE || primaryType === TYPE_PIN ) {
 		
@@ -644,6 +648,7 @@ export function removeObject(
 					otherType = lineData.parentType;
 				}
 				
+				// Firebase updates:
 				updates[ BOARD_PATH + otherType + "s/" + otherId + "/" + TYPE_LINE + "s/" + lineId ] = null;
 				updates[ BOARD_PATH + TYPE_LINE + "s/" + lineId ] = null;
 			}
@@ -660,12 +665,11 @@ export function removeObject(
 	
 	updates[ BOARD_PATH + primaryType + "s/" + id ] = null;
 	
-	firebase.database().update( updates ).then(
+	firebase.database().ref().update( updates ).then(
 		() => {
 			console.log( "Successfully updated " + updates.toString() );
 			
-			// TODO: implement?
-			// _storeAdapter.removeObject( object, lineMap ); 
+			_storeAdapter.removeObject( objectsToRemove, objectsToUpdate ); 
 		},
 		
 		error => {
@@ -681,13 +685,13 @@ export function updateObject(
 	boardId,
 	object
 ) {
-	console.log(object);
-	_storeAdapter.updateObject( object ); 
+	console.log( object );
+	_storeAdapter.updateObject( object );
+
+	var updates = { };
 	const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
-	
-	firebase.database( PATH ).update(
-		object
-	).then(
+	updates[ PATH ] = object;
+	firebase.database().ref().update( updates ).then(
 		() => {
 			console.log( "Successfully updated " + updates.toString() );
 			// TODO: Implement?
@@ -705,7 +709,37 @@ export function updateObject(
 
 
 
-
+function removeObjects(
+	boardId,
+	removables,
+	objectsToUpdate
+) {
+	const BOARD_PATH = "/boards/" + boardId + "/";
+	
+	var updates = { };
+	var value;
+	var i = 0;
+	for( ; i < removables.length; ++i ) {
+		value = removables[ i ];
+		updates[ BOARD_PATH + value.primaryType + "s/" + value.id] = null;
+	}
+	
+	for( i = 0; i < objectsToUpdate.length; ++i ) {
+		value = objectsToUpdate[ i ];
+		updates[ BOARD_PATH + value.primaryType + "s/" + value.id] = value;
+	}
+	
+	firebase.database().ref().update( updates ).then(
+		() => {
+			console.log( "Successfully updated " + updates.toString() );
+		},
+		
+		error => {
+			console.warn(error);
+			_storeAdapter.error(error.id);
+		}
+	);
+}	
 
 
 

@@ -113,8 +113,12 @@ export default function() {
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
                 imgURL: propsNode.get("imgURL"),
-				lines: propsNode.get("lines").toObject()
             });
+			
+			var tempLines = propsNode.get("lines");
+			if(tempLines) {
+				node.lines = tempLines.toObject();
+			}
         });
 
 
@@ -175,8 +179,12 @@ export default function() {
                 },
 				x: propsPin.get("x"),
 				y: propsPin.get("y"),
-				lines: propsPin.get("lines").toObject()
+				//lines: propsPin.get("lines").toObject()
             });
+			var tempLines = propsPin.get("lines");
+			if(tempLines) {
+				pin.lines = tempLines.toObject();
+			}
         });
 2		
 		
@@ -204,13 +212,18 @@ export default function() {
                 title: propsNode.get("title"),
                 text: propsNode.get("text"),
 				imgURL: propsNode.get("imgURL"),
-				lines: propsNode.get("lines"),
+				//lines: propsNode.get("lines"),
                 radius,
 				x: anchor.x,
 				y: anchor.y,
                 anchor,
                 body
-            }		
+            };
+			
+			var tempLines = propsNode.get("lines");
+			if(tempLines) {
+				node.lines = tempLines.toObject();
+			}
             _context.nodes.set(id, node);
             _context.bodyToNodeMapping[body.id] = node;
             World.add(_context.engine.world, body);
@@ -250,13 +263,18 @@ export default function() {
             const pin = {
 				id,
 				primaryType: propsPin.get("primaryType"),
-				lines: propsPin.get("lines").toObject(),
+				//lines: propsPin.get("lines").toObject(),
 				x: anchor.x,
 				y: anchor.y,
                 radius,
                 anchor,
                 body
-            }		
+            };
+			
+			var tempLines = propsPin.get("lines");
+			if(tempLines) {
+				pin.lines = tempLines.toObject();
+			}
             _context.pins.set(id, pin);
             //_context.bodyToNodeMapping[body.id] = node;
             //World.add(_context.engine.world, body);
@@ -289,30 +307,20 @@ export default function() {
              if (action.totalDeltaMagnitude <= 10) {
                  if (_selectedNode === null || _selectedNode.id !== node.id) {
                      _selectedNode = node;
-                 } 
+                 }
+				 else {
+					 _actions.removeObject( node, _context.lines, _context.nodes, _context.pins );
+					 _selectedNode = null;
+					 actions.data = null;
+				 }
 			 }
 		}
 		else if (action.totalDeltaMagnitude <= 10) {
 			 _selectedNode = null;
+			 action.data = null;
 		}
-				// else if(_selectedNode === node && _actions.removeNode) {
-					
-					// if(node.lines) {
-						// var keys = Object.keys(node.lines);
-						// var nodeData;
-						// var lineData;
-						// for(var i = 0; i < keys.length; ++i) {
-							// var lineId = node.lines[keys[i]];
-							// lineData = _context.lines.get(lineId);
-							// _actions.removeLine(lineData);
-						// }
-					// }
-					
-					// _actions.removeNode(node.id);
-				// }
-			// } // action.totalDeltaMagnitude <= 10
-		// }
-    }
+		
+	}
 	
 
     function onInputMove(action) {
@@ -320,6 +328,8 @@ export default function() {
 
         if (action.data) {
             if (_actions.updateObject) {
+				action.data.x = pos.x;
+				action.data.y = pos.y;
 				console.log(action.data);
 			  _actions.updateObject(action.data);
 			}
