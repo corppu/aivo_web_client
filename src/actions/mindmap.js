@@ -23,7 +23,8 @@ import * as backendAdapter from "../backend/backend-adapter";
 
 export function tryCreateObject(
 	object,
-	parent = null
+	parent = null,
+	line = null
 ) {
 	return function ( dispatch, getState ) {
         const { mindmap } = getState();
@@ -32,7 +33,33 @@ export function tryCreateObject(
         if (!boardID) {
             return;
         }
-        backendAdapter.createObject( boardID, object, parent );
+		
+		var parentCopy = { };
+			Object.assign(
+				parentCopy,
+				{
+					id : parent.id,
+					primaryType : parent.primaryType,
+					x : parent.x,
+					y : parent.y,
+					lines : parent.lines
+				}
+			);
+			
+			
+			if( parent.primaryType === TYPE_NODE ) {
+				Object.assign(
+					parentCopy,
+					{
+						title : parent.title || null,
+						type : parent.type || NODE_TYPE_UNDEFINED,
+						text: parent.text || null,
+						imgURL: parent.imgURL || null,
+					}
+				);
+			}
+		
+        backendAdapter.createObject( boardID, object, parentCopy, line );
     };
 }
 
@@ -177,6 +204,10 @@ export function updateBoard( data ) {
 
 export function updateObject( data ) {
     return { type: UPDATE_OBJECT, data };
+}
+
+export function createObject( data, parentData, lineData ) {
+	return { type: CREATE_OBJECT, data, parentData, lineData };
 }
 
 export function removeObjects( removables, copiesForUpdate ) {

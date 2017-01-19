@@ -345,7 +345,18 @@ export default function() {
     function onLongPress(action) {
         console.log(action);
 		 const pos = translateToCamera(_camera, action.endPosition);
-		_actions.createObject({primaryType: TYPE_NODE, x: pos.x, y: pos.y});
+		 if(action.data) {
+			 _actions.createObject( 
+				{
+					primaryType: TYPE_NODE,
+					x: pos.x, 
+					y: pos.y
+				},
+				
+				action.data
+			);
+		 }
+		else _actions.createObject({primaryType: TYPE_NODE, x: pos.x, y: pos.y});
     }
 
     function update() {

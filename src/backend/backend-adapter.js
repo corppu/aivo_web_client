@@ -563,26 +563,27 @@ export function signOut() {
 export function createObject(
 	boardId,
 	object,
-	parent = null
+	parent = null,
+	line = null
 ) {
 	if( !object.id ) {
 		object.id = firebase.database().ref( BOARD_PATH + object.primaryType + "s/" ).push().key;
 	}
 
 	var updates = { };
-	var line = null;
 	const BOARD_PATH = "/boards/" + boardId + "/";
 	
 	if( parent && validateObject( parent ) ) {
-				
-		line = {
+
+		if(!line) line = {};
+		Object.assign(line, {
 			primaryType : TYPE_LINE,
-			id : firebase.database( BOARD_PATH + TYPE_LINE + "s/" ).push().key,
+			id : firebase.database().ref(BOARD_PATH + TYPE_LINE + "s/" ).push().key,
 			parentType : parent.primaryType,
 			parentId : parent.id,
-			childType : object.type,
+			childType : object.primaryType,
 			childId : object.id
-		};
+		});
 		
 		updates[ BOARD_PATH + TYPE_LINE + "s/" + line.id ] = line;
 		
@@ -590,7 +591,13 @@ export function createObject(
 			[ line.id ] : line.id
 		};
 		
+		Object.assign(parent, {
+			[ line.id ] : line.id
+		});
+		
 		updates[ BOARD_PATH + parent.primaryType+ "s/" + parent.id + "/" + TYPE_LINE + "s/" + line.id ] = line.id;
+		
+		console.log("ASDASD");
 	}
 	else if ( parent ) {
 		return;
@@ -598,8 +605,13 @@ export function createObject(
 	
 	updates[ BOARD_PATH + object.primaryType + "s/" + object.id ] = object;
 	
-	// TODO: Implement
+	
 	//_storeAdapter.createObject( object, parent, line );
+	if(parent && line) {
+		_storeAdapter.updateObject(line);
+		_storeAdapter.updateObject(parent);
+	}
+	_storeAdapter.updateObject(object);
 	
 	firebase.database().ref().update( updates ).then(
 		() => {
