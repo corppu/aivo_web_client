@@ -91,7 +91,7 @@ export default function() {
                 _context.bodyToNodeMapping.delete(body.id);
                 World.remove(_context.engine.world, body);
 
-				if(_selectedNode.id === id) {
+				if(_selectedNode && _selectedNode.id === id) {
 					_selectedNode = null;
 				}
 				
@@ -110,15 +110,16 @@ export default function() {
                 },
 				x : propsNode.get("x"),
 				y : propsNode.get("y"),
-                title: propsNode.get("title"),
-                text: propsNode.get("text"),
-                imgURL: propsNode.get("imgURL"),
+                title: propsNode.get("title") || "",
+                text: propsNode.get("text") || "",
+                imgURL: propsNode.get("imgURL") || "",
             });
 			
 			var tempLines = propsNode.get("lines");
 			if(tempLines) {
 				node.lines = tempLines.toObject();
 			}
+			console.log("updated  -> " + node);
         });
 
 
@@ -139,14 +140,15 @@ export default function() {
             }
             propsLines.delete(id);
 
+			console.log("updated -> " + line);
+
             return Object.assign(line, {
 				id,
 				primaryType: propsLine.get("primaryType"),
 				parentType: propsLine.get("parentType"),
 				parentId: propsLine.get("parentId"),
 				childType: propsLine.get("childType"),
-				childId: propsLine.get("childId"),
-                title: propsLine.get("title")
+				childId: propsLine.get("childId")
             });
         });		
 		
@@ -178,13 +180,13 @@ export default function() {
                     y: propsPin.get("y")
                 },
 				x: propsPin.get("x"),
-				y: propsPin.get("y"),
-				//lines: propsPin.get("lines").toObject()
+				y: propsPin.get("y")
             });
 			var tempLines = propsPin.get("lines");
 			if(tempLines) {
 				pin.lines = tempLines.toObject();
 			}
+			console.log(pin);
         });
 2		
 		
@@ -209,10 +211,9 @@ export default function() {
 				id,
 				primaryType : propsNode.get("primaryType"),
                 type: propsNode.get("type"),
-                title: propsNode.get("title"),
-                text: propsNode.get("text"),
-				imgURL: propsNode.get("imgURL"),
-				//lines: propsNode.get("lines"),
+                title: propsNode.get("title") || "",
+                text: propsNode.get("text") || "",
+				imgURL: propsNode.get("imgURL") || "",
                 radius,
 				x: anchor.x,
 				y: anchor.y,
@@ -224,6 +225,9 @@ export default function() {
 			if(tempLines) {
 				node.lines = tempLines.toObject();
 			}
+			
+			console.log(node);
+			
             _context.nodes.set(id, node);
             _context.bodyToNodeMapping[body.id] = node;
             World.add(_context.engine.world, body);
@@ -240,9 +244,8 @@ export default function() {
 				parentId: propsLine.get("parentId"),
 				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId")
-                // title: propsLine.get("title")
             };
-			
+			console.log(line);
 		   _context.lines.set(id, line);
 			console.log(`added line ${id}`);
 		});
@@ -263,7 +266,6 @@ export default function() {
             const pin = {
 				id,
 				primaryType: propsPin.get("primaryType"),
-				//lines: propsPin.get("lines").toObject(),
 				x: anchor.x,
 				y: anchor.y,
                 radius,
@@ -311,7 +313,7 @@ export default function() {
 				 else {
 					 _actions.removeObject( node, _context.lines, _context.nodes, _context.pins );
 					 _selectedNode = null;
-					 actions.data = null;
+					 action.data = null;
 				 }
 			 }
 		}
@@ -320,6 +322,7 @@ export default function() {
 			 action.data = null;
 		}
 		
+		action.data = null;
 	}
 	
 
@@ -331,9 +334,9 @@ export default function() {
 				action.data.x = pos.x;
 				action.data.y = pos.y;
 				console.log(action.data);
-			  _actions.updateObject(action.data);
+			   _actions.updateObject(action.data);
 			}
-         }		 
+         }
 		 else {
              Object.assign(_camera, Vector.add(_camera, action.lastDelta));
          }
@@ -341,6 +344,8 @@ export default function() {
 
     function onLongPress(action) {
         console.log(action);
+		 const pos = translateToCamera(_camera, action.endPosition);
+		_actions.createObject({primaryType: TYPE_NODE, x: pos.x, y: pos.y});
     }
 
     function update() {

@@ -135,7 +135,7 @@ function createHomeBoard() {
 	
 	var parentLineData = {}; 
 	parentLineData[lineId] = lineId;
-	
+	parentLineData[lineIdToPin] = lineIdToPin;
 	updates["/boards/" + boardId + "/nodes/" + parentId] = {
 		title: "parent example",
 		primaryType : TYPE_NODE,
@@ -566,7 +566,7 @@ export function createObject(
 	parent = null
 ) {
 	if( !object.id ) {
-		object.id = firebase.database( BOARD_PATH + primaryType + "s/" ).push().key;
+		object.id = firebase.database().ref( BOARD_PATH + object.primaryType + "s/" ).push().key;
 	}
 
 	var updates = { };
@@ -614,80 +614,13 @@ export function createObject(
 }
 
 
-export function removeObject(
-	boardId,
-	object,
-	lineMap,
-	nodeMap,
-	pinMap
-) {
-	var updates = { };
-	const BOARD_PATH = "/boards/" + boardId + "/";
-	var primaryType = object.primaryType;
-	var id = object.id;
-	var lines = object.lines;
-	var objectsToRemove = [ object ];
-	var objectsToUpdate = [];
-	
-	if( primaryType === TYPE_NODE || primaryType === TYPE_PIN ) {
-		
-		if( lines ) {
-		
-			for( lineId in lines ) {
-			
-				var lineData = lineMap[ lineId ];
-				var otherId;
-				var otherType;
-				
-				if( lineData.parentId === id ) {
-					otherId = lineData.childId;
-					otherType = lineData.childType;
-				} 
-				else {
-					otherId = lineData.parentId;
-					otherType = lineData.parentType;
-				}
-				
-				// Firebase updates:
-				updates[ BOARD_PATH + otherType + "s/" + otherId + "/" + TYPE_LINE + "s/" + lineId ] = null;
-				updates[ BOARD_PATH + TYPE_LINE + "s/" + lineId ] = null;
-			}
-		}
-	}
-	else if( primaryType === TYPE_LINE ) {
-		updates[ BOARD_PATH + object.parentType + "s/" + object.parentId + "/" + TYPE_LINE + "s/" + id ] = null;
-		updates[ BOARD_PATH + object.childType + "s/" + object.childId + "/" + TYPE_LINE + "s/" + id ] = null;
-	}
-	else {
-		console.warn( "primaryType is unknown" );
-		return;
-	}
-	
-	updates[ BOARD_PATH + primaryType + "s/" + id ] = null;
-	
-	firebase.database().ref().update( updates ).then(
-		() => {
-			console.log( "Successfully updated " + updates.toString() );
-			
-			_storeAdapter.removeObject( objectsToRemove, objectsToUpdate ); 
-		},
-		
-		error => {
-			console.warn(error);
-			_storeAdapter.error(error.id);
-		}
-	);
-}
-
-
-
 export function updateObject(
 	boardId,
 	object
 ) {
-	console.log( object );
-	_storeAdapter.updateObject( object );
-
+	if( !object || !validateObject(object) ) {
+		throw("object value was null or undefined");
+	}
 	var updates = { };
 	const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
 	updates[ PATH ] = object;
@@ -707,12 +640,10 @@ export function updateObject(
 
 
 
-
-
-function removeObjects(
+export function removeObjects(
 	boardId,
 	removables,
-	objectsToUpdate
+	copiesForUpdate
 ) {
 	const BOARD_PATH = "/boards/" + boardId + "/";
 	
@@ -721,17 +652,25 @@ function removeObjects(
 	var i = 0;
 	for( ; i < removables.length; ++i ) {
 		value = removables[ i ];
-		updates[ BOARD_PATH + value.primaryType + "s/" + value.id] = null;
+		if( !value ) {
+			throw("removable value was null or undefined");
+		}
+		updates[ BOARD_PATH + value.primaryType + "s/" + value.id ] = null;
+		console.log(value);
 	}
 	
-	for( i = 0; i < objectsToUpdate.length; ++i ) {
-		value = objectsToUpdate[ i ];
-		updates[ BOARD_PATH + value.primaryType + "s/" + value.id] = value;
+	for( i = 0; i < copiesForUpdate.length; ++i ) {
+		value = copiesForUpdate[ i ];
+		if( !value ) {
+			throw("copiesForUpdate value was null or undefined");
+		}
+		updates[ BOARD_PATH + value.primaryType + "s/" + value.id ] = value;
+		console.log(value);
 	}
 	
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully updated " + updates.toString() );
+			console.log( "Successfully updated " + updates );
 		},
 		
 		error => {

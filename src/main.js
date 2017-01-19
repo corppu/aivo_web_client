@@ -32,6 +32,13 @@ const store = createStore(
     )
 );
 
+// var object = {};
+// console.log(object);
+// object.property = "value";
+// console.log(object);
+// console.log(delete object.property);
+// console.log(object);
+
 const storeAdapter = createStoreAdapter(store);
 init(storeAdapter);
 

@@ -69,8 +69,9 @@ export function tryRemoveObject(
 			if( data.lines ) {
 			
 				for( var lineId in data.lines ) {
-					otherData = lineMap.get( lineId );
 					
+					otherData = lineMap.get( lineId );
+										
 					removable = { 
 						primaryType : otherData.primaryType,
 						id : otherData.id
@@ -78,7 +79,7 @@ export function tryRemoveObject(
 					
 					removables.push( removable );
 				
-					if( otherData.parentId === data.parentId ) {
+					if( otherData.parentId === data.id ) {
 						otherData = otherData.childType === TYPE_NODE ? nodeMap.get( otherData.childId ) 
 							: pinMap.get( otherData.childId );
 					}
@@ -86,13 +87,14 @@ export function tryRemoveObject(
 						otherData = otherData.parentType === TYPE_NODE ? nodeMap.get( otherData.parentId ) 
 							: pinMap.get( otherData.parentId );
 					}
-					
+
+
 					otherCopy = { };
 					Object.assign(
 						otherCopy,
 						{
 							id : otherData.id,
-							primaryType : otherData.id,
+							primaryType : otherData.primaryType,
 							x : otherData.x,
 							y : otherData.y,
 							lines : otherData.lines
@@ -101,11 +103,12 @@ export function tryRemoveObject(
 					
 					delete otherCopy.lines[ lineId ];
 					
+					
 					if( otherData.primaryType === TYPE_NODE ) {
 						Object.assign(
 							otherCopy,
 							{
-								title : otherData.title || "",
+								title : otherData.title || null,
 								type : otherData.type || NODE_TYPE_UNDEFINED,
 								text: otherData.text || null,
 								imgURL: otherData.imgURL || null,
