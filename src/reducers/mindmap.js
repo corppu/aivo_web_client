@@ -77,13 +77,11 @@ export default function( state = initialState, action ) {
 		var i = 0;
 		var data;
 		
-		console.log(removables);
 		for(; i < removables.length; ++i) {
 			data = removables[ i ];
 			state.deleteIn( [ data.primaryType + "s", data.id ] );
 		}
 		
-		console.log(copiesForUpdate);
 		for(i = 0; i < copiesForUpdate.length; ++i) {
 			data = copiesForUpdate[ i ];
 			state.updateIn( 

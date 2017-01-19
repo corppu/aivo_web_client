@@ -67,7 +67,7 @@ function loadDefaultBoard() {
 	ref.once("value", function(snapshot) {
 		snapshot.forEach(function(keySnapshot) {
 			var key = keySnapshot.key();
-			console.log("boards/default/"+key);
+			//console.log("boards/default/"+key);
 			if(key === "meta") {
 				//_storeAdapter.updateBoard("default", keySnapshot.data().val();
 			}
@@ -493,7 +493,6 @@ const L_META_VALUE = function(boardId)
 const L_BOARD_ADDED = function(data) 
 {
 	const boardId = data.key;
-	console.log(boardId);
 	let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
 	metaRef.on(
 		"value",
@@ -504,7 +503,6 @@ const L_BOARD_ADDED = function(data)
 const L_BOARD_REMOVED = function(data) 
 {
 	const boardId = data.key;
-	console.log(boardId);
 	let metaRef = firebase.database().ref("boards/"+boardId+"/meta");
 	metaRef.off(
 		"value",
@@ -596,8 +594,6 @@ export function createObject(
 		});
 		
 		updates[ BOARD_PATH + parent.primaryType+ "s/" + parent.id + "/" + TYPE_LINE + "s/" + line.id ] = line.id;
-		
-		console.log("ASDASD");
 	}
 	else if ( parent ) {
 		return;
@@ -615,7 +611,7 @@ export function createObject(
 	
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully updated " + updates.toString() );
+			console.log( "Successfully created object " + object.primaryType + " " + object.id );
 		},
 		
 		error => {
@@ -631,16 +627,14 @@ export function updateObject(
 	object
 ) {
 	if( !object || !validateObject(object) ) {
-		throw("object value was null or undefined");
+		throw("object value was null or undefined or it has invalid properties");
 	}
 	var updates = { };
 	const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
 	updates[ PATH ] = object;
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully updated " + updates.toString() );
-			// TODO: Implement?
-			//
+			console.log( "Successfully updated object " + object.primaryType + " " + object.id );
 		},
 		
 		error => {
@@ -682,7 +676,7 @@ export function removeObjects(
 	
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully updated " + updates );
+			console.log( "Successfully removed object and updated the connections" );
 		},
 		
 		error => {

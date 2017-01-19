@@ -34,7 +34,9 @@ export function tryCreateObject(
             return;
         }
 		
-		var parentCopy = { };
+		var parentCopy = null;
+		if( parent ) {
+			parentCopy = { };
 			Object.assign(
 				parentCopy,
 				{
@@ -58,7 +60,7 @@ export function tryCreateObject(
 					}
 				);
 			}
-		
+		}
         backendAdapter.createObject( boardID, object, parentCopy, line );
     };
 }
@@ -175,7 +177,7 @@ export function tryUpdateObject(
 
         const boardID = mindmap.get("boardID");
         
-		if ( !boardID ) {
+		if ( !boardID  || !data || !data.primaryType ) {
             return;
         }
 		

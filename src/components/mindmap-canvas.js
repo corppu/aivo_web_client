@@ -95,7 +95,7 @@ export default function() {
 					_selectedNode = null;
 				}
 				
-                console.log(`removed node ${id}`);
+                //console.log(`removed node ${id}`);
                 return;
             }
             propsNodes.delete(id);
@@ -119,7 +119,7 @@ export default function() {
 			if(tempLines) {
 				node.lines = tempLines.toObject();
 			}
-			console.log("updated  -> " + node);
+			//console.log("updated  -> " + node);
         });
 
 
@@ -135,12 +135,12 @@ export default function() {
                 // _context.bodyToNodeMapping.delete(body.id);
                 // World.remove(_context.engine.world, body);
 
-                console.log(`removed line ${id}`);
+                //console.log(`removed line ${id}`);
                 return;
             }
             propsLines.delete(id);
 
-			console.log("updated -> " + line);
+			//console.log("updated -> " + line);
 
             return Object.assign(line, {
 				id,
@@ -166,7 +166,7 @@ export default function() {
                 //_context.bodyToNodeMapping.delete(body.id);
                 //World.remove(_context.engine.world, body);
 
-                console.log(`removed pin ${id}`);
+                //console.log(`removed pin ${id}`);
                 return;
             }
             propsPins.delete(id);
@@ -186,7 +186,7 @@ export default function() {
 			if(tempLines) {
 				pin.lines = tempLines.toObject();
 			}
-			console.log(pin);
+			//console.log(pin);
         });
 2		
 		
@@ -226,13 +226,13 @@ export default function() {
 				node.lines = tempLines.toObject();
 			}
 			
-			console.log(node);
+			//console.log(node);
 			
             _context.nodes.set(id, node);
             _context.bodyToNodeMapping[body.id] = node;
             World.add(_context.engine.world, body);
 
-            console.log(`added node ${id}`);
+            //console.log(`added node ${id}`);
         })
 		
 		 // add new Lines (were in props and not in state)
@@ -245,9 +245,9 @@ export default function() {
 				childType: propsLine.get("childType"),
 				childId: propsLine.get("childId")
             };
-			console.log(line);
+			//console.log(line);
 		   _context.lines.set(id, line);
-			console.log(`added line ${id}`);
+			//console.log(`added line ${id}`);
 		});
 
 		
@@ -281,7 +281,7 @@ export default function() {
             //_context.bodyToNodeMapping[body.id] = node;
             //World.add(_context.engine.world, body);
 
-            console.log(`added pin ${id}`);
+            //console.log(`added pin ${id}`);
         })
 		
 		
@@ -333,7 +333,7 @@ export default function() {
             if (_actions.updateObject) {
 				action.data.x = pos.x;
 				action.data.y = pos.y;
-				console.log(action.data);
+				//console.log(action.data);
 			   _actions.updateObject(action.data);
 			}
          }
@@ -343,7 +343,7 @@ export default function() {
     }
 
     function onLongPress(action) {
-        console.log(action);
+        //console.log(action);
 		 const pos = translateToCamera(_camera, action.endPosition);
 		 if(action.data) {
 			 _actions.createObject( 
