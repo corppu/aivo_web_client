@@ -147,8 +147,6 @@ const MindMap = createClass({
             if (!this.mindmap || !this.mindmap.onLongPress || !this.inputAction) {
                 return;
             }
-            updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
-
             if (this.inputAction.deltaMagnitude <= PRESS_DELTA_THRESHOLD) {
                 const nextData = this.mindmap.onLongPress(this.inputAction);
                 if (nextData !== undefined) {
@@ -165,7 +163,8 @@ const MindMap = createClass({
         if (!this.mindmap || !this.mindmap.onInputEnd || !this.inputAction) {
             return;
         }
-        updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
+        this.inputAction = updateAction(this.inputAction,
+                calculatePosition(this.canvas, clientX, clientY));
 
         this.mindmap.onInputEnd(this.inputAction, this.prevInputAction);
 
@@ -177,7 +176,8 @@ const MindMap = createClass({
         if (!this.mindmap || !this.mindmap.onInputMove || !this.inputAction) {
             return;
         }
-        updateAction(this.inputAction, calculatePosition(this.canvas, clientX, clientY));
+        this.inputAction = updateAction(this.inputAction,
+                calculatePosition(this.canvas, clientX, clientY));
 
         const nextData = this.mindmap.onInputMove(this.inputAction, this.prevInputAction);
         if (nextData !== undefined) {
