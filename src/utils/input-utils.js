@@ -21,31 +21,20 @@ export function createAction(position) {
 }
 
 export function updateAction(action, position) {
-    const { startTime, startPosition, endPosition } = action;
-    action.duration = getTimestamp(startTime);
+    const { startTime, startPosition, endPosition, totalDeltaMagnitude } = action;
 
-    action.lastDelta = Vector.sub(endPosition, position);
-    action.lastDeltaMagnitude = Vector.magnitude(action.lastDelta);
-    
-    action.endPosition = position;
+    const delta = Vector.sub(position, startPosition);
 
-    action.delta = Vector.sub(position, startPosition);
-    action.deltaMagnitude = Vector.magnitude(action.delta);
-    action.totalDeltaMagnitude += action.lastDeltaMagnitude;
-}
+    const lastDelta = Vector.sub(endPosition, position);
+    const lastDeltaMagnitude = Vector.magnitude(lastDelta);
 
-/*
-export function actionResult(action, endPosition) {
-    const { startPosition, startTime } = action;
-
-    const delta = Vector.sub(endPosition, startPosition);
-    const deltaMagnitude = Vector.magnitude(delta);
-    const duration = getTimestamp(startTime);
-
-    return {
+    return Object.assign({}, action, {
+        duration: getTimestamp(startTime),
+        endPosition: position,
         delta,
-        deltaMagnitude,
-        duration
-    };
+        deltaMagnitude: Vector.magnitude(delta),
+        totalDeltaMagnitude: totalDeltaMagnitude + lastDeltaMagnitude,
+        lastDelta,
+        lastDeltaMagnitude
+    });
 }
-*/
