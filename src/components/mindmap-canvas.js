@@ -265,7 +265,7 @@ export default function() {
             } );
             const pin = {
 				id,
-				primaryType: propsPin( "primaryType" ),
+				primaryType: propsPin.get( "primaryType" ),
 				x: anchor.x,
 				y: anchor.y,
                 radius,
