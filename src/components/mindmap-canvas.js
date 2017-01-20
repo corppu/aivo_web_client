@@ -188,11 +188,7 @@ export default function() {
 			}
 			//console.log(pin);
         });
-2		
-		
-		
-		
-		
+
 		// remove null lines (were removed from props)
         //_context.lines = _context.lines.filter(line => line !== null);
 
