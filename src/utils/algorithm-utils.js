@@ -1,4 +1,6 @@
-import { Query, Vector } from "matter-js";
+import { Bounds, Query, Vector } from "matter-js";
+
+const DIVIDER_WIDTH = 100;
 
 function centerX(bounds) {
 	return bounds.min.x + (bounds.max.x - bounds.min.x) / 2;
@@ -63,10 +65,10 @@ function boundsDistance(startBounds, endBounds) {
 	return 0;
 }
 
-function compareCollisionsTo(startBody) {
+function compareCollisionsTo( startBounds ) {
 	return function (collisionA, collisionB) {
-		var distA = boundsDistance(startBody.bounds, collisionA.body.bounds);
-		var distB = boundsDistance(startBody.bounds, collisionB.body.bounds);
+		var distA = boundsDistance(startBounds, collisionA.body.bounds);
+		var distB = boundsDistance(startBounds, collisionB.body.bounds);
 		
 		if(distA < distB) 
 			return -1;
@@ -77,6 +79,32 @@ function compareCollisionsTo(startBody) {
 		return 0;
 	}
 }
+// function compareCollisionsTo( startPoint ) {
+	// return function ( collisionA, collisionB ) {
+		
+		// var distA = 
+			// vecDistance(
+					// startPoint, 
+					// Vector.create( centerX( collisionA.body.bounds ), centerY( collisionA.body.bounds ) )
+			// );
+		// var distB = 
+			// vecDistance(
+					// startPoint, 
+					// Vector.create( centerX( collisionB.body.bounds ), centerY( collisionB.body.bounds ) )
+			// );
+			
+		// if( distA < distB ) {
+			// return -1;
+		// }
+
+		// if( distB < distA ) { 
+			// return 1;
+		// }
+		
+		// return 0;
+	// }
+// }
+
 
 
 function halfWidth(bounds) {
@@ -87,32 +115,34 @@ function halfHeight(bounds) {
 	return bounds.max.y - bounds.min.y;
 }
 
-function findControlPoint(startBounds, middleBounds, endBounds) {
-	var left = endBounds.max.x < startBounds.min.x;
-	var right = startBounds.max.x < endBounds.min.x;
-	var top = endBounds.max.y < startBounds.min.y;
-	var bottom = startBounds.max.y < endBounds.min.y;
+// function findControlPoint(startBounds, middleBounds, endBounds, path) {
+	// var left = middleBounds.max.x < startBounds.min.x;
+	// var right = startBounds.max.x < middleBounds.min.x;
+	// var top = middleBounds.max.y < startBounds.min.y;
+	// var bottom = startBounds.max.y < middleBounds.min.y;
 	
-	var point = [centerX(middleBounds), centerY(middleBounds)];
+	// var point = [centerX(middleBounds), centerY(middleBounds)];
 	
-	if(top) {
-		point[0] += halfWidth(middleBounds)
-	}
+	// if(top) {
+		// point[0] += halfWidth(middleBounds)
+	// }
 	
-	if(bottom) {
-		point[0] -= halfWidth(middleBounds)
-	}
+	// if(bottom) {
+		// point[0] -= halfWidth(middleBounds)
+	// }
 	
-	if(right) {
-		point[1] -= halfHeight(middleBounds)
-	}
+	// if(right) {
+		// point[1] -= halfHeight(middleBounds)
+	// }
 	
-	if(left) {
-		point[1] += halfHeight(middleBounds)
-	}
+	// if(left) {
+		// point[1] += halfHeight(middleBounds)
+	// }
 	
-	return point;
-}
+	// var collisions = Query.ray( bodies, middlePoint, endPoint );
+	// collisions.sort( compareCollisionsTo( startBody) );
+	// return path.concat( point );
+// }
 
 
 
@@ -128,21 +158,81 @@ export function findPath(bodies, startBody, endBody) {
 		centerY(endBody.bounds)
 	);
 	
-	var path = [startPoint.x, startPoint.y];
-	var collisions = Query.ray(bodies, startPoint, endPoint);
-
-	collisions.sort(compareCollisionsTo(startBody));
+	var path = [ startPoint.x, startPoint.y ];
 	
-	for(var i = 2; i < collisions.length; ++i) {
-		//path = path.concat([centerX(collisions[i].body.bounds), centerY(collisions[i].body.bounds)])
-		path = path.concat(findControlPoint(collisions[i-2].body.bounds, collisions[i-1].body.bounds, collisions[i].body.bounds));
-	}
+	// for(var i = 2; i < collisions.length; ++i) {
+		// //path = path.concat([centerX(collisions[i].body.bounds), centerY(collisions[i].body.bounds)])
+		// path = path.concat(findControlPoint(collisions[i-2].body.bounds, collisions[i-1].body.bounds, collisions[i].body.bounds));
+	// }
 	
-	path = path.concat([endPoint.x, endPoint.y]);
+	// path = path.concat([endPoint.x, endPoint.y]);
 	
-	if(path.length < 4) {
-		path = [centerX(startBody.bounds), centerY(startBody.bounds), centerX(endBody.bounds), centerY(endBody.bounds)];
-	}
-	
+	// if(path.length < 4) {
+		// path = [centerX(startBody.bounds), centerY(startBody.bounds), centerX(endBody.bounds), centerY(endBody.bounds)];
+	// }
+	n = 0;
+	findWayPoint( bodies, startBody.bounds, startPoint, endPoint, path );
+	path.push( endPoint.x );
+	path.push( endPoint.y );
 	return path;
+}
+
+var n = 0;
+function findWayPoint( bodies, startBounds, startPoint, endPoint, path ) {
+	console.log(++n);
+	var collisions = Query.ray( bodies, startPoint, endPoint, DIVIDER_WIDTH );
+	collisions.sort( compareCollisionsTo( startBounds ) );
+	
+	var shortestPath = [ ];
+	
+	for( var i = 0; i < collisions.length; ++i ) {
+		var middleBounds = collisions[ i ].body.bounds;
+		if( Bounds.contains( middleBounds, startPoint ) ||
+			Bounds.contains( middleBounds, endPoint )
+		) {
+			continue;
+		}
+		
+		var middlePoint = Vector.create(
+			centerX( middleBounds ),
+			centerY( middleBounds )
+		);
+		
+		var testPath = [ ];
+	
+		var left = middlePoint.x < startPoint.x;
+		var right = startPoint.x < middlePoint.x;
+		var top = middlePoint.y < startPoint.y;
+		var bottom = startPoint.y < middlePoint.y;
+		
+		if( right ) {
+			middlePoint.y -= halfHeight( middleBounds );
+		}
+		
+		if( left ) {
+			middlePoint.y -= halfHeight( middleBounds );
+		}
+		
+		if( top ) {
+			middlePoint.x += halfWidth( middleBounds );
+		}
+		
+		if( right ) {
+			middlePoint.x -= halfWidth( middleBounds );
+		}
+		
+		path.push( middlePoint.x );
+		path.push( middlePoint.y );
+	
+		var testPath = [ ];
+		findWayPoint( bodies, startBounds, middlePoint, endPoint, testPath );
+		
+		if( shortestPath.length === 0 || shortestPath.length > testPath.length ) {
+			shortestPath = testPath;
+		}
+	}
+	
+	for( var i = 0; i < shortestPath.length; ++i ) {
+		path.push( shortestPath[ i ] );
+	}
 }

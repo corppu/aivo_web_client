@@ -99,16 +99,19 @@ export function tryRemoveObject(
 	
 		var copiesForUpdate = [ ];
 		
-		if( data.primaryType !== TYPE_LINE && lineMap && nodeMap && pinMap && data.lines ) {
+		if( data && data.primaryType !== TYPE_LINE && lineMap && nodeMap && pinMap && data.lines ) {
 			var otherData;
 			var otherCopy;
 		
 			if( data.lines ) {
-			
 				for( var lineId in data.lines ) {
 					
 					otherData = lineMap.get( lineId );
-										
+					
+					if( !otherData ) {
+						throw( "lineMap does not contain key " + lineId );
+					}
+					
 					removable = { 
 						primaryType : otherData.primaryType,
 						id : otherData.id
@@ -117,57 +120,49 @@ export function tryRemoveObject(
 					removables.push( removable );
 				
 					if( otherData.parentId === data.id ) {
-						otherData = otherData.childType === TYPE_NODE ? nodeMap.get( otherData.childId ) 
-							: pinMap.get( otherData.childId );
-					}
-					else {
-						otherData = otherData.parentType === TYPE_NODE ? nodeMap.get( otherData.parentId ) 
-							: pinMap.get( otherData.parentId );
-					}
-
-
-					if( otherData.primaryType === TYPE_PIN &&  
-						calcSize( otherData.lines ) < 2
-					) {
-						removable = { 
-							primaryType : otherData.primaryType,
-							id : otherData.id
-						};
-						
-						removables.push( removable );
-					} 
-					else {
-						otherCopy = { };
-						Object.assign(
-							otherCopy,
-							{
-								id : otherData.id,
-								primaryType : otherData.primaryType,
-								x : otherData.x,
-								y : otherData.y,
-								lines : otherData.lines
-							}
+						removeLineHelper(
+							otherData.id,
+							otherData.childType === TYPE_NODE ? nodeMap.get( otherData.childId ) 
+								: pinMap.get( otherData.childId ),
+							
+							removables,
+							copiesForUpdate
 						);
-						
-						delete otherCopy.lines[ lineId ];
-						
-						
-						if( otherData.primaryType === TYPE_NODE ) {
-							Object.assign(
-								otherCopy,
-								{
-									title : otherData.title || null,
-									type : otherData.type || NODE_TYPE_UNDEFINED,
-									text: otherData.text || null,
-									imgURL: otherData.imgURL || null,
-								}
-							);
-						}
-						
-						copiesForUpdate.push( otherCopy );
+					}
+					else {
+						removeLineHelper(
+							otherData.id,
+							otherData.parentType === TYPE_NODE ? nodeMap.get( otherData.parentId ) 
+								: pinMap.get( otherData.parentId ),
+							
+							removables,
+							copiesForUpdate
+						);
 					}
 				}
-			}
+			} 
+			
+		} else if ( data.primaryType === TYPE_LINE ) {
+			removeLineHelper( 
+				data.id,
+				data.childType === TYPE_NODE ? nodeMap.get( data.childId ) 
+					: pinMap.get( data.childId ),
+				
+				removables,
+				copiesForUpdate
+			);
+			
+			removeLineHelper(
+				data.id,
+				data.parentType === TYPE_NODE ? nodeMap.get( data.parentId ) 
+					: pinMap.get( data.parentId ),
+							
+				removables,
+				copiesForUpdate
+			);
+		}
+		else {
+			throw( "null or undefined variable" );
 		}
 		
 		dispatch( removeObjects( removables, copiesForUpdate ) );
@@ -175,19 +170,55 @@ export function tryRemoveObject(
     };
 }
 
-// export function tryMoveObject(
-	// object
-// ) {
-	// return function ( dispatch, getState ) {
-        // const { mindmap } = getState();
 
-        // const boardID = mindmap.get("boardID");
-        // if (!boardID) {
-            // return;
-        // }
-        // backendAdapter.moveObject(boardID, object);
-    // };
-// }
+// TODO: Rename?
+function removeLineHelper(
+	lineId,
+	otherData,
+	
+	removables,
+	copiesForUpdate
+) {
+	if( otherData.primaryType === TYPE_PIN &&  
+		calcSize( otherData.lines ) < 2 
+	) { 
+		removables.push( { 
+			primaryType : otherData.primaryType,
+			id : otherData.id
+		} );
+	}
+	
+	else {
+		var otherCopy = { };
+		Object.assign(
+			otherCopy,
+			{
+				id : otherData.id,
+				primaryType : otherData.primaryType,
+				x : otherData.x,
+				y : otherData.y,
+				lines : otherData.lines
+			}
+		);
+		
+		otherCopy.lines[ lineId ] = null;
+		
+		if( otherData.primaryType === TYPE_NODE ) {
+			Object.assign(
+				otherCopy,
+				{
+					title : otherData.title || null,
+					type : otherData.type || NODE_TYPE_UNDEFINED,
+					text: otherData.text || null,
+					imgURL: otherData.imgURL || null,
+				}
+			);
+		}
+		
+		copiesForUpdate.push( otherCopy );
+	}
+}
+
 
 export function tryUpdateObject(
 	data
@@ -211,11 +242,16 @@ export function tryUpdateObject(
 				y : data.y || null,
 				lines : data.lines || null,
 				imgURL : data.imgURL || null,
-				title: data.title || null,
-				type : data.type || null
+				title : data.title || null,
+				type : data.type || null,
+				parentType : data.parentType || null,
+				parentId : data.parentId || null,
+				childType : data.childType || null,
+				childId : data.childId || null,
 			}
 		);
 		
+		dispatch( updateObject( dataCopy ) );
         backendAdapter.updateObject( boardID, dataCopy );
     };
 }
