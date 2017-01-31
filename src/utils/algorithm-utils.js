@@ -1,6 +1,6 @@
 import { Bounds, Query, Vector } from "matter-js";
 
-const DIVIDER_WIDTH = 100;
+const DIVIDER_WIDTH = 40;
 
 function centerX(bounds) {
 	return bounds.min.x + (bounds.max.x - bounds.min.x) / 2;
@@ -108,11 +108,11 @@ function compareCollisionsTo( startBounds ) {
 
 
 function halfWidth(bounds) {
-	return bounds.max.x - bounds.min.x;
+	return (bounds.max.x - bounds.min.x) / 2;
 }
 
 function halfHeight(bounds) {
-	return bounds.max.y - bounds.min.y;
+	return (bounds.max.y - bounds.min.y) / 2;
 }
 
 // function findControlPoint(startBounds, middleBounds, endBounds, path) {
@@ -171,28 +171,57 @@ export function findPath(bodies, startBody, endBody) {
 		// path = [centerX(startBody.bounds), centerY(startBody.bounds), centerX(endBody.bounds), centerY(endBody.bounds)];
 	// }
 	n = 0;
-	findWayPoint( bodies, startBody.bounds, startPoint, endPoint, path );
+	var bodyIdSet = new Set();
+	bodyIdSet.add( startBody.id );
+	bodyIdSet.add( endBody.id );
+	findWayPoint( bodies, startBody.bounds, startPoint, endPoint, path, bodyIdSet );
+	if( path.length === 2 ) {
+		path.push( (endPoint.x + startPoint.x) / 2 );
+		path.push( (endPoint.y + startPoint.y) / 2 );
+		if( startPoint.x < endPoint.x ) {
+			path[2] += 40;
+		}
+		else {
+			path[2] -= 40;
+		}
+		
+		if( startPoint.y < endPoint.y ) {
+			path[3] += 40;
+		}
+		else {
+			path[3] -= 40;
+		}
+	}
 	path.push( endPoint.x );
 	path.push( endPoint.y );
+	
 	return path;
 }
 
 var n = 0;
-function findWayPoint( bodies, startBounds, startPoint, endPoint, path ) {
+function findWayPoint( bodies, startBounds, startPoint, endPoint, path, bodyIdSet ) {
 	console.log(++n);
-	var collisions = Query.ray( bodies, startPoint, endPoint, DIVIDER_WIDTH );
+	var collisions = Query.ray( bodies, startPoint, endPoint );
 	collisions.sort( compareCollisionsTo( startBounds ) );
 	
 	var shortestPath = [ ];
 	
 	for( var i = 0; i < collisions.length; ++i ) {
+		if ( bodyIdSet.has( collisions[ i ].body.id ) )  {
+			continue;
+		} 
+		
 		var middleBounds = collisions[ i ].body.bounds;
+
 		if( Bounds.contains( middleBounds, startPoint ) ||
 			Bounds.contains( middleBounds, endPoint )
 		) {
 			continue;
 		}
 		
+		bodyIdSet.add( collisions[ i ].body.id );
+		
+	
 		var middlePoint = Vector.create(
 			centerX( middleBounds ),
 			centerY( middleBounds )
@@ -205,29 +234,59 @@ function findWayPoint( bodies, startBounds, startPoint, endPoint, path ) {
 		var top = middlePoint.y < startPoint.y;
 		var bottom = startPoint.y < middlePoint.y;
 		
-		if( right ) {
-			middlePoint.y -= halfHeight( middleBounds );
+		if( top && left ) {
+			middlePoint.y += halfHeight( middleBounds );
+			middlePoint.x -= halfWidth( middleBounds );
 		}
 		
-		if( left ) {
+		else if( bottom && left ) {
 			middlePoint.y -= halfHeight( middleBounds );
+			middlePoint.x -= halfWidth( middleBounds );
 		}
 		
-		if( top ) {
+		else if ( top && right ) {
+			middlePoint.y += halfHeight( middleBounds );
 			middlePoint.x += halfWidth( middleBounds );
 		}
 		
-		if( right ) {
+		else if ( bottom && right ) {
+			middlePoint.y -= halfHeight( middleBounds );
+			middlePoint.x += halfWidth( middleBounds );
+		}
+		
+		else if ( top ) {
+			//middlePoint.y += halfHeight( middleBounds );
 			middlePoint.x -= halfWidth( middleBounds );
 		}
+		
+		else if ( bottom ) {
+			//middlePoint.y -= halfHeight( middleBounds );
+			middlePoint.x -= halfWidth( middleBounds );
+		}
+		
+		else if( right ) {
+			middlePoint.y -= halfHeight( middleBounds );
+		}
+		
+		else if( left ) {
+			middlePoint.y -= halfHeight( middleBounds );
+		}
+		
+		// if( top ) {
+			// middlePoint.x += halfWidth( middleBounds );
+		// }
+		
+		// else if( bottom ) {
+			// middlePoint.x += halfWidth( middleBounds );
+		// }
 		
 		path.push( middlePoint.x );
 		path.push( middlePoint.y );
 	
 		var testPath = [ ];
-		findWayPoint( bodies, startBounds, middlePoint, endPoint, testPath );
+		findWayPoint( bodies, startBounds, middlePoint, endPoint, testPath, bodyIdSet );
 		
-		if( shortestPath.length === 0 || shortestPath.length > testPath.length ) {
+		if( testPath.length !== 0 && ( shortestPath.length === 0 || shortestPath.length > testPath.length ) ) {
 			shortestPath = testPath;
 		}
 	}
