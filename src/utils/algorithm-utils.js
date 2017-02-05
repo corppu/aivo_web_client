@@ -1,47 +1,89 @@
 import { Bounds, Query, Vector } from "matter-js";
 
 const DIVIDER_WIDTH = 40;
+let _clusters = new Map();
+let _idCounter = 0;
 
-let clusters = new Map();
-// let cluster = {
-	// id: new Date().now(),
-	// bodies: new Set(),
-	// leftMost: null,
-	// rightMost: null,
-	// topMost: null,
-	// bottomMost: null
-// }
 
-function findClusterEdges( cluster ) {
+function mergeClusters( clusterTo, clusterFrom ) {
+	for( var node in clusterFrom.nodes.values() ) {
+		clusterTo.nodes[ node.body.id ] = node;
+		
+		if( clusterTo.topMost.body.bounds.min.y > node.body.bounds.min.y ) {
+			topMost = node;
+		}
+		
+		if( clusterTo.leftMost.body.bounds.min.x > node.body.bounds.min.x ) {
+			leftMost = node;
+		}
+		
+		if( clusterTo.bottomMost.body.bounds.max.y < node.body.bounds.max.y ) {
+			bottomMost = node;
+		}
+		
+		if( clusterTo.rightMost.body.bounds.max.x < node.body.bounds.max.x ) {
+			rightMost = node;
+		}
+	}
 	
-	
+	_clusters.remove( clusterFrom.id );
 }
 
 
-function onNodeMove( node ) {
+
+export function onNodeMove( node ) {
 	if ( !node.cluster ) {
-		node.cluster = {
-			id: new Date().now,
+		
+		var cluster = {
+			id: _idCounter++,
 			nodes: new Map()
 		};
 		
-		node.cluster.bodies[ node.id ] = node;
-		node.cluster.topMost = node;
-		node.cluster.bottomMost = node;
-		node.cluster.leftMost = node;
-		node.cluster.rightMost = node;
+		cluster.nodes[ node.body.id ] = node;
+		cluster.bodies[ node.body.id ] = node;
+		cluster.topMost = node;
+		cluster.bottomMost = node;
+		cluster.leftMost = node;
+		cluster.rightMost = node;
+		
+		node.cluster = cluster;
+		_clusters[ cluster.id ] = cluster;
 	}
 	
-	
+	var nodeBounds = node.body.bounds;
+	var clusterBounds = null;
+	for ( var cluster in _clusters.values() ) {
+		if ( cluster.id === node.cluster.id ) {
+			continue;
+		}
+		
+		// TODO: use ome divider?
+		clusterBounds = {
+			max : {
+				x: cluster.bottomMost.body.bounds.max.x, 
+				y: cluster.rightMost.body.bounds.max.y
+			},
+			
+			min: {
+				x: cluster.leftMost.body.bounds.min.x,
+				y: cluster.topMost.body.bounds.min.y
+			}
+		};
+		
+		if( Bounds.overlaps( nodeBounds, clusterBounds ) ) {
+			mergeClusters( cluster, node.cluster );
+			node.cluster = cluster;
+		}
+	}
 }
 
-function onNodeRemove( node ) {
+export function onNodeRemove( node ) {
 	if ( !node.cluster ) {
 		throw("something odd is going on as node.cluster is not found on removal");
 	}
 	
 	if( node.cluster.bodies.size == 1 ) {
-		clusters.remove( node.cluster.id );
+		_clusters.remove( node.cluster.id );
 		return;
 	}
 	
@@ -183,16 +225,14 @@ export function findPath( bodies, startBody, endBody ) {
 		centerY(endBody.bounds)
 	);
 	
-	// var alignment = pointAlignment(startPoint, endPoint);
-	//console.log(alignment);
-	// alignment = boundsAlignment(startBody.bounds, endBody.bounds);
-	//console.log(alignment);
-	
 	var path = [ startPoint.x, startPoint.y ];
 
+	
+	// Add the body ids to set in order to avoid never ending loop...
 	var bodyIdSet = new Set();
 	bodyIdSet.add( startBody.id );
 	bodyIdSet.add( endBody.id );
+	
 	findWayPoint( bodies, startBody.bounds, startPoint, endPoint, path, bodyIdSet );
 
 	// Dirty curving the line...:
@@ -245,18 +285,14 @@ function findWayPoint( bodies, startBounds, startPoint, endPoint, path, bodyIdSe
 	var shortestPath = [ ];
 	
 	for( var i = 0; i < collisions.length; ++i ) {
+		// Avoid change to itself and neverending collision
 		if ( bodyIdSet.has( collisions[ i ].body.id ) )  {
 			continue;
 		} 
 		
+		// Choose the collided bounds
 		var middleBounds = collisions[ i ].body.bounds;
-
-		// if( Bounds.contains( middleBounds, startPoint ) ||
-			// Bounds.contains( middleBounds, endPoint )
-		// ) {
-			// continue;
-		// }
-		
+		// Add the body id to set in order to avoid neverending loop
 		bodyIdSet.add( collisions[ i ].body.id );
 		
 	

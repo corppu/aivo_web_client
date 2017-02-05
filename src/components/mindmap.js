@@ -2,6 +2,7 @@ import React, { createClass } from "react";
 
 import createMindmap from "./mindmap-canvas";
 import MindMapToolbar from "./mindmap-toolbar";
+import MindMapNodeToolbar from "./mindmap-node-toolbar";
 
 import { createAction, updateAction } from "../utils/input-utils";
 
@@ -24,7 +25,8 @@ const MindMap = createClass({
 
         return {
             width: innerWidth,
-            height: innerHeight
+            height: innerHeight,
+            selection: null
         };
     },
 
@@ -37,7 +39,9 @@ const MindMap = createClass({
         const ctx = this.canvas.getContext("2d");
         
         this.mindmap = createMindmap();
-        this.mindmap.updateProps(this.props);
+        this.mindmap.updateProps(Object.assign({}, this.props, {
+            updateSelection: this.handleSelectionUpdate
+        }));
 
         const renderLoop = () => {
             if (!this.mindmap) {
@@ -64,17 +68,20 @@ const MindMap = createClass({
         tryOpenBoard();
 
         if (this.mindmap) {
-            this.mindmap.updateProps(nextProps);
+            this.mindmap.updateProps(Object.assign({}, this.props, {
+                updateSelection: this.handleSelectionUpdate
+            }));
         }
     },
     
     render: function() {
         const { children } = this.props;
-        const { width, height } = this.state;
+        const { width, height, selection } = this.state;
 
         return (
 			<div>
 				<MindMapToolbar/>
+                { selection ? <MindMapNodeToolbar {...selection}/> : null }
 				<div
 					style={{
 						position: "fixed",
@@ -183,6 +190,12 @@ const MindMap = createClass({
         if (nextData !== undefined) {
             this.inputAction.data = nextData;
         }
+    },
+
+    handleSelectionUpdate: function(selection) {
+        this.setState({
+            selection
+        });
     },
 
     handleResize: function() {

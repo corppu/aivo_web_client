@@ -76,11 +76,17 @@ function calcSize( obj )
 }
 
 export function tryRemoveObject(
-	data,
-	lineMap = null,
-	nodeMap = null,
-	pinMap = null
+	primaryType,
+	id
+	// data,,
+	// lineMap = null,
+	// nodeMap = null,
+	// pinMap = null
 ) {
+	if ( !( primaryType && id ) ) {
+		throw( "invalid primaryType || id");
+	}
+	
 	return function ( dispatch, getState ) {
 
 		const { mindmap } = getState();
@@ -91,27 +97,34 @@ export function tryRemoveObject(
         }
 	
 		var removable = { 
-			primaryType : data.primaryType,
-			id : data.id
+			primaryType,
+			id
 		};
 		
 		var removables = [ removable ];
-	
 		var copiesForUpdate = [ ];
 		
-		if( data && data.primaryType !== TYPE_LINE && lineMap && nodeMap && pinMap && data.lines ) {
+		if( primaryType !== TYPE_LINE ) {
 			var otherData;
 			var otherCopy;
 		
-			if( data.lines ) {
-				for( var lineId in data.lines ) {
+			var lines = mindmap.get( primaryType + "s" ).get( id ).get( TYPE_LINE + "s" );
+			
+			if( !lines ) {
+				console.log( "NO LINES FOUND FOR " + primaryType + " " + id );
+			}
+			
+			else {
+				lines = lines.toJS();
+				for( var lineId in lines ) {
 					
-					otherData = lineMap.get( lineId );
+					otherData = mindmap.get(TYPE_LINE + "s").get( lineId );
 					
 					if( !otherData ) {
-						throw( "lineMap does not contain key " + lineId );
+						throw( "mindmap does not contain key " + lineId );
 					}
 					
+					otherData = otherData.toJS();
 					removable = { 
 						primaryType : otherData.primaryType,
 						id : otherData.id
@@ -119,11 +132,11 @@ export function tryRemoveObject(
 					
 					removables.push( removable );
 				
-					if( otherData.parentId === data.id ) {
+					if( otherData.parentId === id ) {
 						removeLineHelper(
 							otherData.id,
-							otherData.childType === TYPE_NODE ? nodeMap.get( otherData.childId ) 
-								: pinMap.get( otherData.childId ),
+							otherData.childType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( otherData.childId ).toJS() 
+								: mindmap.get(TYPE_PIN + "s").get( otherData.childId ).toJS(),
 							
 							removables,
 							copiesForUpdate
@@ -132,8 +145,8 @@ export function tryRemoveObject(
 					else {
 						removeLineHelper(
 							otherData.id,
-							otherData.parentType === TYPE_NODE ? nodeMap.get( otherData.parentId ) 
-								: pinMap.get( otherData.parentId ),
+							otherData.parentType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( otherData.parentId ).toJS() 
+								: mindmap.get(TYPE_PIN + "s").get( otherData.parentId ).toJS(),
 							
 							removables,
 							copiesForUpdate
