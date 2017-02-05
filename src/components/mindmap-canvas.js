@@ -37,7 +37,7 @@ export default function() {
         y: 0
     };
 	
-    let _selectedNode = null;
+    let _selectedNodeId = null;
 	let _selectedPin = null;
     let _inputAction = null;
 
@@ -94,8 +94,8 @@ export default function() {
                 _context.bodyToNodeMapping.delete( body.id );
                 World.remove( _context.engine.world, body );
 
-				if( _selectedNode && _selectedNode.id === id ) {
-					_selectedNode = null;
+				if( _selectedNodeId && _selectedNodeId === id ) {
+					_selectedNodeId = null;
 				}
 				
                 //console.log(`removed node ${id}`);
@@ -300,24 +300,24 @@ export default function() {
 
     function onInputEnd( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
-	    
         const hits = Query.point( _context.engine.world.bodies, pos );
         
 		if ( hits.length > 0 ) {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
-                 if ( _selectedNode === null || _selectedNode.id !== node.id ) {
-                     setSelectedNode(node);
+                 if ( _selectedNodeId === null || _selectedNodeId !== node.id ) {
+                     _selectedNodeId = node.id;
                  }
 				 else {
-					 _actions.removeObject( node, _context.lines, _context.nodes, _context.pins );
-					 setSelectedNode(null);
+					 _actions.removeObject( node.primaryType, node.id );
+					 _selectedNodeId = null;
 					 action.data = null;
 				 }
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
-			 setSelectedNode(null);
+			 _selectedNodeId = null;
+
 			 action.data = null;
 		}
 		
@@ -405,14 +405,14 @@ export default function() {
 		
         // draw non-selected node(s)
         _context.nodes.forEach( node => {
-            if ( node !== _selectedNode ) {
+            if ( node.id !== _selectedNodeId ) {
                 drawNode( draw, node, false );
             }
         } );
 
         // draw selected node(s)
-        if ( _selectedNode !== null ) {
-            drawNode( draw, _selectedNode, true );
+        if ( _selectedNodeId !== null ) {
+            drawNode( draw, _context.nodes.get( _selectedNodeId ), true );
         }
 
 		drawFPS( draw, _fps );

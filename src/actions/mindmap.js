@@ -76,11 +76,17 @@ function calcSize( obj )
 }
 
 export function tryRemoveObject(
-	data,
-	lineMap = null,
-	nodeMap = null,
-	pinMap = null
+	primaryType,
+	id
+	// data,,
+	// lineMap = null,
+	// nodeMap = null,
+	// pinMap = null
 ) {
+	if ( !( primaryType && id ) ) {
+		throw( "invalid primaryType || id");
+	}
+	
 	return function ( dispatch, getState ) {
 
 		const { mindmap } = getState();
@@ -91,24 +97,34 @@ export function tryRemoveObject(
         }
 	
 		var removable = { 
-			primaryType : data.primaryType,
-			id : data.id
+			primaryType,
+			id
 		};
 		
 		var removables = [ removable ];
-	
 		var copiesForUpdate = [ ];
 		
-		if( data.primaryType !== TYPE_LINE && lineMap && nodeMap && pinMap && data.lines ) {
+		if( primaryType !== TYPE_LINE ) {
 			var otherData;
 			var otherCopy;
 		
-			if( data.lines ) {
+			var lines = mindmap.get( primaryType + "s" ).get( id ).get( TYPE_LINE + "s" );
 			
-				for( var lineId in data.lines ) {
+			if( !lines ) {
+				console.log( "NO LINES FOUND FOR " + primaryType + " " + id );
+			}
+			
+			else {
+				lines = lines.toJS();
+				for( var lineId in lines ) {
 					
-					otherData = lineMap.get( lineId );
-										
+					otherData = mindmap.get(TYPE_LINE + "s").get( lineId );
+					
+					if( !otherData ) {
+						throw( "mindmap does not contain key " + lineId );
+					}
+					
+					otherData = otherData.toJS();
 					removable = { 
 						primaryType : otherData.primaryType,
 						id : otherData.id
@@ -116,58 +132,50 @@ export function tryRemoveObject(
 					
 					removables.push( removable );
 				
-					if( otherData.parentId === data.id ) {
-						otherData = otherData.childType === TYPE_NODE ? nodeMap.get( otherData.childId ) 
-							: pinMap.get( otherData.childId );
-					}
-					else {
-						otherData = otherData.parentType === TYPE_NODE ? nodeMap.get( otherData.parentId ) 
-							: pinMap.get( otherData.parentId );
-					}
-
-
-					if( otherData.primaryType === TYPE_PIN &&  
-						calcSize( otherData.lines ) < 2
-					) {
-						removable = { 
-							primaryType : otherData.primaryType,
-							id : otherData.id
-						};
-						
-						removables.push( removable );
-					} 
-					else {
-						otherCopy = { };
-						Object.assign(
-							otherCopy,
-							{
-								id : otherData.id,
-								primaryType : otherData.primaryType,
-								x : otherData.x,
-								y : otherData.y,
-								lines : otherData.lines
-							}
+					if( otherData.parentId === id ) {
+						removeLineHelper(
+							otherData.id,
+							otherData.childType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( otherData.childId ).toJS() 
+								: mindmap.get(TYPE_PIN + "s").get( otherData.childId ).toJS(),
+							
+							removables,
+							copiesForUpdate
 						);
-						
-						delete otherCopy.lines[ lineId ];
-						
-						
-						if( otherData.primaryType === TYPE_NODE ) {
-							Object.assign(
-								otherCopy,
-								{
-									title : otherData.title || null,
-									type : otherData.type || NODE_TYPE_UNDEFINED,
-									text: otherData.text || null,
-									imgURL: otherData.imgURL || null,
-								}
-							);
-						}
-						
-						copiesForUpdate.push( otherCopy );
+					}
+					else {
+						removeLineHelper(
+							otherData.id,
+							otherData.parentType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( otherData.parentId ).toJS() 
+								: mindmap.get(TYPE_PIN + "s").get( otherData.parentId ).toJS(),
+							
+							removables,
+							copiesForUpdate
+						);
 					}
 				}
-			}
+			} 
+			
+		} else if ( data.primaryType === TYPE_LINE ) {
+			removeLineHelper( 
+				data.id,
+				data.childType === TYPE_NODE ? nodeMap.get( data.childId ) 
+					: pinMap.get( data.childId ),
+				
+				removables,
+				copiesForUpdate
+			);
+			
+			removeLineHelper(
+				data.id,
+				data.parentType === TYPE_NODE ? nodeMap.get( data.parentId ) 
+					: pinMap.get( data.parentId ),
+							
+				removables,
+				copiesForUpdate
+			);
+		}
+		else {
+			throw( "null or undefined variable" );
 		}
 		
 		dispatch( removeObjects( removables, copiesForUpdate ) );
@@ -175,19 +183,55 @@ export function tryRemoveObject(
     };
 }
 
-// export function tryMoveObject(
-	// object
-// ) {
-	// return function ( dispatch, getState ) {
-        // const { mindmap } = getState();
 
-        // const boardID = mindmap.get("boardID");
-        // if (!boardID) {
-            // return;
-        // }
-        // backendAdapter.moveObject(boardID, object);
-    // };
-// }
+// TODO: Rename?
+function removeLineHelper(
+	lineId,
+	otherData,
+	
+	removables,
+	copiesForUpdate
+) {
+	if( otherData.primaryType === TYPE_PIN &&  
+		calcSize( otherData.lines ) < 2 
+	) { 
+		removables.push( { 
+			primaryType : otherData.primaryType,
+			id : otherData.id
+		} );
+	}
+	
+	else {
+		var otherCopy = { };
+		Object.assign(
+			otherCopy,
+			{
+				id : otherData.id,
+				primaryType : otherData.primaryType,
+				x : otherData.x,
+				y : otherData.y,
+				lines : otherData.lines
+			}
+		);
+		
+		otherCopy.lines[ lineId ] = null;
+		
+		if( otherData.primaryType === TYPE_NODE ) {
+			Object.assign(
+				otherCopy,
+				{
+					title : otherData.title || null,
+					type : otherData.type || NODE_TYPE_UNDEFINED,
+					text: otherData.text || null,
+					imgURL: otherData.imgURL || null,
+				}
+			);
+		}
+		
+		copiesForUpdate.push( otherCopy );
+	}
+}
+
 
 export function tryUpdateObject(
 	data
@@ -211,11 +255,16 @@ export function tryUpdateObject(
 				y : data.y || null,
 				lines : data.lines || null,
 				imgURL : data.imgURL || null,
-				title: data.title || null,
-				type : data.type || null
+				title : data.title || null,
+				type : data.type || null,
+				parentType : data.parentType || null,
+				parentId : data.parentId || null,
+				childType : data.childType || null,
+				childId : data.childId || null,
 			}
 		);
 		
+		dispatch( updateObject( dataCopy ) );
         backendAdapter.updateObject( boardID, dataCopy );
     };
 }
