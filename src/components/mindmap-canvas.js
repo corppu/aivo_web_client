@@ -46,8 +46,9 @@ export default function() {
         updateObject: null,
 		// moveObject: null,
 		removeObject: null,
-        openNode: null//,
+        openNode: null,
 		//openNodeBoard: null
+        updateSelection: null
     };
 
     let _searchFilter = "";
@@ -72,9 +73,11 @@ export default function() {
         _actions.updateObject = props.tryUpdateObject;
 	
         _actions.removeObject = props.tryRemoveObject;
-		// _actions.moveObject = props.tryMoveObject;
+		//_actions.moveObject = props.tryMoveObject;
         _actions.openNode = props.openNode;
 		//_actions.openNodeBoard = props.openNodeBoard;
+
+        _actions.updateSelection = props.updateSelection;
 		
         let propsNodes = new Map( props.nodes );
 		let propsLines = new Map( props.lines );
@@ -304,22 +307,30 @@ export default function() {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
                  if ( _selectedNode === null || _selectedNode.id !== node.id ) {
-                     _selectedNode = node;
+                     setSelectedNode(node);
                  }
 				 else {
 					 _actions.removeObject( node, _context.lines, _context.nodes, _context.pins );
-					 _selectedNode = null;
+					 setSelectedNode(null);
 					 action.data = null;
 				 }
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
-			 _selectedNode = null;
+			 setSelectedNode(null);
 			 action.data = null;
 		}
 		
 		action.data = null;
 	}
+
+    function setSelectedNode(node) {
+        _selectedNode = node;
+        
+        if (_actions.updateSelection) {
+            _actions.updateSelection(node);
+        }
+    }
 	
 
     function onInputMove( action ) {
