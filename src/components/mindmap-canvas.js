@@ -90,7 +90,7 @@ export default function() {
              if ( !propsNode ) {
                  const { body } = node;
 
-                _context.nodes.delete( id )
+                _context.nodes.delete( id );
                 _context.bodyToNodeMapping.delete( body.id );
                 World.remove( _context.engine.world, body );
 
@@ -191,9 +191,6 @@ export default function() {
 			}
 			//console.log(pin);
         } );
-
-		// remove null lines (were removed from props)
-        //_context.lines = _context.lines.filter(line => line !== null);
 
         // add new nodes (were in props and not in state)
         propsNodes.forEach( ( propsNode, id ) => {
