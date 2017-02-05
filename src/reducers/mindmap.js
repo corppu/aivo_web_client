@@ -39,6 +39,9 @@ const initialState = fromJS({
 
 export default function( state = initialState, action ) {
 
+	console.log(action);
+	console.log(state.toJS());
+
     switch ( action.type ) {
     case UPDATE_BOARD:
     {

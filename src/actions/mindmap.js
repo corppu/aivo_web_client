@@ -126,7 +126,9 @@ export function tryRemoveObject(
 					
 					if( !otherData ) {
 						console.log(mindmap.get(TYPE_LINE + "s"));
-						throw( "mindmap does not contain key " + lineId );
+						console.warn( "mindmap does not contain key " + lineId );
+
+						continue;
 					}
 					
 					otherData = otherData.toJS();

@@ -39,7 +39,7 @@ export default function() {
 	
     let _selectedNodeId = null;
 	//let _selectedPin = null;
-    let _inputAction = null;
+    //let _inputAction = null;
 
     let _actions = {
         createObject: null,
@@ -82,6 +82,8 @@ export default function() {
         let propsNodes = new Map( props.nodes );
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
+
+        console.log("D3:", propsNodes.size);
 		
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
@@ -128,7 +130,7 @@ export default function() {
 
 		
 		// match existing lines to props (update old ones)
-          _context.lines.forEach( ( line, id ) => {
+        _context.lines.forEach( ( line, id ) => {
             const propsLine = propsLines.get( id );
 
              if ( !propsLine ) {
@@ -231,7 +233,7 @@ export default function() {
             //console.log(`added node ${id}`);
         } )
 		
-		 // add new Lines (were in props and not in state)
+		// add new Lines (were in props and not in state)
         propsLines.forEach( ( propsLine, id ) => {
 			const line = {
 				id,
@@ -298,7 +300,7 @@ export default function() {
     function onInputEnd( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
         const hits = Query.point( _context.engine.world.bodies, pos );
-        
+
 		if ( hits.length > 0 ) {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
@@ -307,18 +309,13 @@ export default function() {
                  }
 				 else {
 					 _actions.removeObject( node.primaryType, node.id );
-					 setSelectedNode(null);
-					 action.data = null;
+					 setSelectedNode(null);		
 				 }
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
 			 setSelectedNode(null);
-
-			 action.data = null;
 		}
-		
-		action.data = null;
 	}
 
     function setSelectedNode(node) {
@@ -355,6 +352,7 @@ export default function() {
 
     function onLongPress( action ) {
         //console.log(action);
+        
 		 const pos = translateToCamera( _camera, action.endPosition );
 		 if( action.data ) {
 			 _actions.createObject( 
@@ -366,8 +364,10 @@ export default function() {
 				
 				action.data
 			);
-		 }
-		else _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
+		} else {
+            _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
+        }
+        
     }
 
     function update() {

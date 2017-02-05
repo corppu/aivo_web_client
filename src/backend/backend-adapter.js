@@ -677,14 +677,16 @@ export function removeObjects(
 	firebase.database().ref().update( updates ).then(
 		() => {
 			
-			for( var copy in copiesForUpdate ) {
+			/*
+			copiesForUpdate.forEach((copy) => {
 				_storeAdapter.updateObject( copy );
-			}
+			});
 			
-			for( var removable in removables ) {
+			removables.forEach((removable) => {
 				_storeAdapter.removeObject( removable );
-			}
+			})
 			console.log( "Successfully removed object and updated the connections" );
+			*/
 		},
 		
 		error => {
