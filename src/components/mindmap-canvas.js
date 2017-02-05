@@ -38,7 +38,7 @@ export default function() {
     };
 	
     let _selectedNodeId = null;
-	let _selectedPin = null;
+	//let _selectedPin = null;
     let _inputAction = null;
 
     let _actions = {
@@ -94,8 +94,8 @@ export default function() {
                 _context.bodyToNodeMapping.delete( body.id );
                 World.remove( _context.engine.world, body );
 
-				if( _selectedNodeId && _selectedNodeId === id ) {
-					_selectedNodeId = null;
+				if( _selectedNodeId === id ) {
+					setSelectedNode(null);
 				}
 				
                 //console.log(`removed node ${id}`);
@@ -305,18 +305,18 @@ export default function() {
 		if ( hits.length > 0 ) {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
-                 if ( _selectedNodeId === null || _selectedNodeId !== node.id ) {
-                     _selectedNodeId = node.id;
+                 if ( _selectedNodeId !== node.id ) {
+                     setSelectedNode(node);
                  }
 				 else {
 					 _actions.removeObject( node.primaryType, node.id );
-					 _selectedNodeId = null;
+					 setSelectedNode(null);
 					 action.data = null;
 				 }
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
-			 _selectedNodeId = null;
+			 setSelectedNode(null);
 
 			 action.data = null;
 		}
@@ -325,10 +325,17 @@ export default function() {
 	}
 
     function setSelectedNode(node) {
-        _selectedNode = node;
+        _selectedNodeId = node ? node.id : null;
         
         if (_actions.updateSelection) {
-            _actions.updateSelection(node);
+            const selection = node
+                ? {
+                    id: node.id,
+                    primaryType: TYPE_NODE
+                }
+                : null;
+            
+            _actions.updateSelection(selection);
         }
     }
 	
