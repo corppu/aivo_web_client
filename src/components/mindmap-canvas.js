@@ -82,8 +82,6 @@ export default function() {
         let propsNodes = new Map( props.nodes );
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
-
-        console.log("D3:", propsNodes.size);
 		
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
@@ -294,7 +292,8 @@ export default function() {
     function onInputStart( action ) {
         const pos = translateToCamera( _camera, action.startPosition );
 
-        return queryNodeAtPoint( _context, pos );
+        const node = queryNodeAtPoint( _context, pos );
+        return node ? node.id : null;
     }
 
     function onInputEnd( action ) {
@@ -338,6 +337,9 @@ export default function() {
         const pos = translateToCamera( _camera, action.endPosition );
 
         if ( action.data ) {
+
+            // REFACTOR TO WORK WITH NODE ID
+
             // if ( _actions.updateObject ) {
 				// action.data.x = pos.x;
 				// action.data.y = pos.y;
@@ -351,23 +353,9 @@ export default function() {
     }
 
     function onLongPress( action ) {
-        //console.log(action);
-        
-		 const pos = translateToCamera( _camera, action.endPosition );
-		 if( action.data ) {
-			 _actions.createObject( 
-				{
-					primaryType: TYPE_NODE,
-					x: pos.x, 
-					y: pos.y
-				},
-				
-				action.data
-			);
-		} else {
-            _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
-        }
-        
+	    const pos = translateToCamera( _camera, action.endPosition );
+
+        _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
     }
 
     function update() {
