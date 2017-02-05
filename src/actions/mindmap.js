@@ -65,6 +65,15 @@ export function tryCreateObject(
     };
 }
 
+// TODO: change to some utils or smthng
+function calcSize( obj )
+{
+	var size = 0, key;
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) size++;
+	}
+	return size;
+}
 
 export function tryRemoveObject(
 	data,
@@ -91,7 +100,6 @@ export function tryRemoveObject(
 		var copiesForUpdate = [ ];
 		
 		if( data.primaryType !== TYPE_LINE && lineMap && nodeMap && pinMap && data.lines ) {
-			
 			var otherData;
 			var otherCopy;
 		
@@ -118,34 +126,46 @@ export function tryRemoveObject(
 					}
 
 
-					otherCopy = { };
-					Object.assign(
-						otherCopy,
-						{
-							id : otherData.id,
+					if( otherData.primaryType === TYPE_PIN &&  
+						calcSize( otherData.lines ) < 2
+					) {
+						removable = { 
 							primaryType : otherData.primaryType,
-							x : otherData.x,
-							y : otherData.y,
-							lines : otherData.lines
-						}
-					);
-					
-					delete otherCopy.lines[ lineId ];
-					
-					
-					if( otherData.primaryType === TYPE_NODE ) {
+							id : otherData.id
+						};
+						
+						removables.push( removable );
+					} 
+					else {
+						otherCopy = { };
 						Object.assign(
 							otherCopy,
 							{
-								title : otherData.title || null,
-								type : otherData.type || NODE_TYPE_UNDEFINED,
-								text: otherData.text || null,
-								imgURL: otherData.imgURL || null,
+								id : otherData.id,
+								primaryType : otherData.primaryType,
+								x : otherData.x,
+								y : otherData.y,
+								lines : otherData.lines
 							}
 						);
+						
+						delete otherCopy.lines[ lineId ];
+						
+						
+						if( otherData.primaryType === TYPE_NODE ) {
+							Object.assign(
+								otherCopy,
+								{
+									title : otherData.title || null,
+									type : otherData.type || NODE_TYPE_UNDEFINED,
+									text: otherData.text || null,
+									imgURL: otherData.imgURL || null,
+								}
+							);
+						}
+						
+						copiesForUpdate.push( otherCopy );
 					}
-					
-					copiesForUpdate.push( otherCopy );
 				}
 			}
 		}

@@ -2,6 +2,7 @@ import React, { createClass } from "react";
 
 import createMindmap from "./mindmap-canvas";
 import MindMapToolbar from "./mindmap-toolbar";
+import MindMapNodeToolbar from "./mindmap-node-toolbar";
 
 import { createAction, updateAction } from "../utils/input-utils";
 
@@ -75,6 +76,7 @@ const MindMap = createClass({
         return (
 			<div>
 				<MindMapToolbar/>
+				<MindMapNodeToolbar/>
 				<div
 					style={{
 						position: "fixed",
