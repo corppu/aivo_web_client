@@ -13,7 +13,7 @@ const MindMapNodeToolbar = createClass({
     },
 
     render: function() {
-        const { id } = this.props;
+        const { id, primaryType } = this.props;
 
         return (
             <div
@@ -29,7 +29,7 @@ const MindMapNodeToolbar = createClass({
                         padding: "5px 10px",
                         backgroundColor: "#fff"
                     }}>
-                    { id }
+                    { id } | { primaryType }
                 </div>
             </div>
         );
