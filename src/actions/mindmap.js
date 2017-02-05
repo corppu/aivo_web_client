@@ -26,6 +26,7 @@ export function tryCreateObject(
 	parent = null,
 	line = null
 ) {
+	console.log(object);
 	return function ( dispatch, getState ) {
         const { mindmap } = getState();
 
@@ -87,6 +88,9 @@ export function tryRemoveObject(
 		throw( "invalid primaryType || id");
 	}
 	
+	console.log(primaryType);
+	console.log(id);
+	
 	return function ( dispatch, getState ) {
 
 		const { mindmap } = getState();
@@ -121,6 +125,7 @@ export function tryRemoveObject(
 					otherData = mindmap.get(TYPE_LINE + "s").get( lineId );
 					
 					if( !otherData ) {
+						console.log(mindmap.get(TYPE_LINE + "s"));
 						throw( "mindmap does not contain key " + lineId );
 					}
 					
@@ -155,11 +160,13 @@ export function tryRemoveObject(
 				}
 			} 
 			
-		} else if ( data.primaryType === TYPE_LINE ) {
+		} else if ( primaryType === TYPE_LINE ) {
+			
+			var data = mindmap.get(TYPE_LINE + "s")
 			removeLineHelper( 
 				data.id,
-				data.childType === TYPE_NODE ? nodeMap.get( data.childId ) 
-					: pinMap.get( data.childId ),
+				data.childType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( data.childId ).toJS() 
+					: mindmap.get(TYPE_PIN + "s").get( data.childId ).toJS(),
 				
 				removables,
 				copiesForUpdate
@@ -167,8 +174,8 @@ export function tryRemoveObject(
 			
 			removeLineHelper(
 				data.id,
-				data.parentType === TYPE_NODE ? nodeMap.get( data.parentId ) 
-					: pinMap.get( data.parentId ),
+				data.parentType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( data.parentId ).toJS() 
+					: mindmap.get(TYPE_PIN + "s").get( data.parentId ).toJS(),
 							
 				removables,
 				copiesForUpdate
@@ -177,9 +184,11 @@ export function tryRemoveObject(
 		else {
 			throw( "null or undefined variable" );
 		}
-		
-		dispatch( removeObjects( removables, copiesForUpdate ) );
         backendAdapter.removeObjects( boardID, removables, copiesForUpdate );
+		
+		// console.log(removables);
+		// console.log(copiesForUpdate);
+		//dispatch( removeObjects( removables, copiesForUpdate ) );
     };
 }
 
@@ -227,6 +236,12 @@ function removeLineHelper(
 				}
 			);
 		}
+		
+		console.log("ALKUPERÄINEN");
+		console.log(otherData);
+		console.log("KOPIO");
+		console.log(otherCopy);
+		
 		
 		copiesForUpdate.push( otherCopy );
 	}

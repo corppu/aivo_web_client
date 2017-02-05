@@ -337,12 +337,12 @@ export default function() {
         const pos = translateToCamera( _camera, action.endPosition );
 
         if ( action.data ) {
-            if ( _actions.updateObject ) {
-				action.data.x = pos.x;
-				action.data.y = pos.y;
-				//console.log(action.data);
-			   _actions.updateObject( action.data );
-			}
+            // if ( _actions.updateObject ) {
+				// action.data.x = pos.x;
+				// action.data.y = pos.y;
+				// //console.log(action.data);
+			   // _actions.updateObject( action.data );
+			// }
          }
 		 else {
              Object.assign( _camera, Vector.add( _camera, action.lastDelta ) );

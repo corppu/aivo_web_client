@@ -68,6 +68,7 @@ const MindMap = createClass({
         tryOpenBoard();
 
         if (this.mindmap) {
+			console.log("HEPHEPHEPHEPPHEPHEP");
             this.mindmap.updateProps(Object.assign({}, this.props, {
                 updateSelection: this.handleSelectionUpdate
             }));
