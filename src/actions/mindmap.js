@@ -88,9 +88,11 @@ export function tryRemoveObject(
 		throw( "invalid primaryType || id");
 	}
 	
+	/*
 	console.log(primaryType);
 	console.log(id);
-	
+	*/
+
 	return function ( dispatch, getState ) {
 
 		const { mindmap } = getState();
