@@ -6,6 +6,7 @@ export const BACKEND_ERROR = "BACKEND_ERROR";
 export const LIST_UPDATE = "LIST_UPDATE";
 export const LIST_REMOVE = "LIST_REMOVE";
 
+export const INIT_BOARD = "INIT_BOARD";
 export const UPDATE_BOARD = "UPDATE_BOARD";
 // export const REMOVE_BOARD = "REMOVE_BOARD";
 

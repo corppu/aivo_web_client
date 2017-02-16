@@ -1,7 +1,8 @@
-import { fromJS, Map } from "immutable";
+import * as immutable from "immutable";
 
 
 import {
+	INIT_BOARD,
     UPDATE_BOARD,
 	// REMOVE_BOARD,
 	
@@ -25,7 +26,7 @@ function clean(obj) {
 }
 
 
-const initialState = fromJS({
+const initialState = immutable.fromJS({
 	
 	boardID: null,
     boardData: null,
@@ -37,6 +38,28 @@ const initialState = fromJS({
     boards: {}
 });
 
+
+
+function mapData( data ) {
+	/*console.log( data );
+	var dataMap = new Map();
+	var obj = null;
+	
+	for ( var propName in data ) {
+		obj = data[ propName ];
+		console.log( obj.id );
+		dataMap.set( obj.id, obj );
+	}
+	
+	console.log(dataMap);
+	return immutable.fromJS( dataMap );
+	*/
+	
+	return new immutable.Map( immutable.fromJS( data ) );
+}
+
+
+
 export default function( state = initialState, action ) {
 
 	/*
@@ -45,17 +68,32 @@ export default function( state = initialState, action ) {
 	*/
 
     switch ( action.type ) {
-    case UPDATE_BOARD:
+    
+	case INIT_BOARD:
+	{
+		const { data } = action;
+		console.log( data );
+		state = state
+			.set( "nodes", mapData( data.nodes ) )
+			.set( "lines", mapData( data.lines ) )
+			.set( "pins", mapData( data.pins ) )
+            .set( "boardID", immutable.fromJS( data.meta.id ) )
+            .set( "boardData", immutable.fromJS( data.meta ) );
+		
+		return state;
+	}
+	
+	case UPDATE_BOARD:
     {
         const { data } = action;
-		clean( data );
-        if (data.id !== state.get( "boardID" ) ) {
+		// clean( data );
+        // if (data.id !== state.get( "boardID" ) ) {
 			
-            state = state
-				.set( "nodes", Map() )
-				.set( "lines", Map() )
-				.set( "pins", Map() );
-        }
+            // state = state
+				// .set( "nodes", Immutable,Map() )
+				// .set( "lines", immutable.Map() )
+				// .set( "pins", immutable.Map() );
+        // }
 		
         return state
             .set( "boardID", data.id )
@@ -73,9 +111,10 @@ export default function( state = initialState, action ) {
 			[ data.primaryType + "s", data.id ], 
 			
 			prop => {
-				const immutableData = fromJS( data );
+				const immutableData = immutable.fromJS( data );
 
-				return prop ? prop.merge( immutableData ) : immutableData;
+				return immutableData;
+				// return prop ? prop.merge( immutableData ) : immutableData;
 			}
 		);
     }
@@ -112,7 +151,7 @@ export default function( state = initialState, action ) {
 				[ data.primaryType + "s", data.id ], 
 				
 				prop => {
-					const immutableData = fromJS( data );
+					const immutableData = immutable.fromJS( data );
 
 					return prop ? prop.merge( immutableData ) : immutableData;
 				}

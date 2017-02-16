@@ -18,19 +18,19 @@ function logUserData(user) {
 	if (user != null) {
 		
 	//Get a user"s profile
-	console.log("Printing all user information below:");
-	console.log("	Firebase project-specific UID: "+user.uid);
-	console.log("	Name: "+user.displayName);
-	console.log("	Email: "+user.email);
-	console.log("	Photo URL: "+user.photoURL);
+	// console.log("Printing all user information below:");
+	// console.log("	Firebase project-specific UID: "+user.uid);
+	// console.log("	Name: "+user.displayName);
+	// console.log("	Email: "+user.email);
+	// console.log("	Photo URL: "+user.photoURL);
 
     //Get a user"s provider-specific profile information
 	user.providerData.forEach(function (profile) {
-    console.log("	Sign-in provider: "+profile.providerId);
-    console.log("  		Provider-specific UID: "+profile.uid);
-    console.log("  		Name: "+profile.displayName);
-    console.log("  		Email: "+profile.email);
-    console.log("  		Photo URL: "+profile.photoURL);
+    // console.log("	Sign-in provider: "+profile.providerId);
+    // console.log("  		Provider-specific UID: "+profile.uid);
+    // console.log("  		Name: "+profile.displayName);
+    // console.log("  		Email: "+profile.email);
+    // console.log("  		Photo URL: "+profile.photoURL);
 	});
 	}  else {
 		console.warn("Printing user information failed due invalid currentUser.");
@@ -67,7 +67,7 @@ function loadDefaultBoard() {
 	ref.once("value", function(snapshot) {
 		snapshot.forEach(function(keySnapshot) {
 			var key = keySnapshot.key();
-			//console.log("boards/default/"+key);
+			//// console.log("boards/default/"+key);
 			if(key === "meta") {
 				//_storeAdapter.updateBoard("default", keySnapshot.data().val();
 			}
@@ -99,7 +99,7 @@ function attachAuthChangedListener() {
 		//_storeAdapter.userSignedIn(createUserData("default", user));
 	} else {
 		// No user is signed in.
-		console.log("Currently no user is signed in.");
+		// console.log("Currently no user is signed in.");
 		_storeAdapter.userSignedOut();
 		//detachBoardListeners();
 	}
@@ -109,7 +109,7 @@ function attachAuthChangedListener() {
 // A function that creates the home board after user has signed up...
 // or user try to open home board, but it does not exist.
 function createHomeBoard() {
-	console.log("Trying to create home board");
+	// console.log("Trying to create home board");
 	const userId = firebase.auth().currentUser.uid;
 	const parentId = firebase.database().ref("nodes").push().key;
 	const childId = firebase.database().ref("nodes").push().key;
@@ -227,7 +227,7 @@ function createHomeBoard() {
 				console.warn(error);
 				_storeAdapter.error(error.code);
 			} else {
-				console.log("Home board " + boardId + " created succesfully");
+				// console.log("Home board " + boardId + " created succesfully");
 			}
 		}
 	);
@@ -236,14 +236,14 @@ function createHomeBoard() {
 // Is called after user has signed in....
 // if home board does not exist, createHomeBoard function is called once...
 export function openHomeBoard() {
-	console.log("Trying to open home board...");
+	// console.log("Trying to open home board...");
 	firebase.database().ref("/users/" + firebase.auth().currentUser.uid + "/home").once("value").then(
 		function(snapshot) {
 		
 				const boardId = snapshot.val();
 				
 				if(boardId) {
-					console.log("Homeboards id is: " + boardId);
+					// console.log("Homeboards id is: " + boardId);
 					openBoard(boardId);
 				} else {
 					console.warn("Home board does not exist, trying to create one...");
@@ -310,7 +310,7 @@ export function signInWithEmail(email, password, sessionId = null) {
 	Jälkiehto: Avaa uuden taulun tai kutsuu virhefunktioo.
 **/
 export function createBoard(boardData, boardId = null) {
-	console.log("Trying to create board");
+	// console.log("Trying to create board");
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -334,7 +334,7 @@ export function createBoard(boardData, boardId = null) {
 						_storeAdapter.error(error);
 					}
 					else {
-						console.log("Board " + boardId + " created succesfully");
+						// console.log("Board " + boardId + " created succesfully");
 					}
 				}
 			);
@@ -349,7 +349,7 @@ export function removeBoard(boardId) {
 
 
 export function openBoard(boardId, sessionId) {
-	console.log("Trying to open board: " + boardId);
+	// console.log("Trying to open board: " + boardId);
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -368,13 +368,30 @@ export function openBoard(boardId, sessionId) {
 			_storeAdapter.error(error.code);
 		}
 		else {
-			attachBoardListeners(boardId);
+			initBoard( boardId );
+			attachBoardListeners( boardId );
 		}
 	});
 }
 
+function initBoard( boardId ) {
+	firebase.database().ref( "boards/" + boardId ).once(
+		"value", 
+		snapshot => {
+			if( !snapshot.val( ) ) {
+				console.warn("Board " + boardId + " not found");
+				_storeAdapter.error("Board not found");
+			}
+			else {
+				_storeAdapter.initBoard( snapshot.val( ) );
+				// attachBoardListeners(boardId);
+			}
+		}
+	);
+}
+
 export function openNode(nodeId, sessionId, boardId) {
-	console.log("Trying to open node: " + nodeId);
+	// console.log("Trying to open node: " + nodeId);
 	var user = firebase.auth().currentUser;
 	if(!user) {
 		console.warn("User is not authenticated!");
@@ -604,14 +621,14 @@ export function createObject(
 	
 	//_storeAdapter.createObject( object, parent, line );
 	if(parent && line) {
-		_storeAdapter.updateObject(line);
-		_storeAdapter.updateObject(parent);
+		// _storeAdapter.updateObject(line);
+		// _storeAdapter.updateObject(parent);
 	}
-	_storeAdapter.updateObject(object);
+	// _storeAdapter.updateObject(object);
 	
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully created object " + object.primaryType + " " + object.id );
+			// console.log( "Successfully created object " + object.primaryType + " " + object.id );
 		},
 		
 		error => {
@@ -634,7 +651,7 @@ export function updateObject(
 	updates[ PATH ] = object;
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully updated object " + object.primaryType + " " + object.id );
+			// console.log( "Successfully updated object " + object.primaryType + " " + object.id );
 		},
 		
 		error => {
@@ -662,7 +679,7 @@ export function removeObjects(
 			throw("removable value was null or undefined");
 		}
 		updates[ BOARD_PATH + value.primaryType + "s/" + value.id ] = null;
-		console.log(value);
+		// console.log(value);
 	}
 	
 	for( i = 0; i < copiesForUpdate.length; ++i ) {
@@ -671,7 +688,7 @@ export function removeObjects(
 			throw("copiesForUpdate value was null or undefined");
 		}
 		updates[ BOARD_PATH + value.primaryType + "s/" + value.id ] = value;
-		console.log(value);
+		// console.log(value);
 	}
 	
 	firebase.database().ref().update( updates ).then(
@@ -685,7 +702,7 @@ export function removeObjects(
 			removables.forEach((removable) => {
 				_storeAdapter.removeObject( removable );
 			})
-			console.log( "Successfully removed object and updated the connections" );
+			// console.log( "Successfully removed object and updated the connections" );
 			*/
 		},
 		

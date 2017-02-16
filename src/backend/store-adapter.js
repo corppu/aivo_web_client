@@ -17,7 +17,11 @@ export default function( store ) {
     }
 
     // mindmap actions
-    function updateBoard( data ) {
+	function initBoard( data ) {
+		store.dispatch( mindmapActions.initBoard( data ) );
+	}
+	
+	function updateBoard( data ) {
 		store.dispatch( mindmapActions.updateBoard( data ) );
 	}
 	
@@ -47,6 +51,7 @@ export default function( store ) {
         userSignedOut,
         error,
 
+		initBoard,
 		updateBoard,
 	
 		updateObject,

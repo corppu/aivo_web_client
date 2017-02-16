@@ -1,4 +1,5 @@
 import {
+	INIT_BOARD,
     UPDATE_BOARD,
 	// REMOVE_BOARD,
 	UPDATE_OBJECT,
@@ -45,7 +46,7 @@ export function tryCreateObject(
 					primaryType : parent.primaryType,
 					x : parent.x,
 					y : parent.y,
-					lines : parent.lines
+					lines : Object.assign( { }, parent.lines )
 				}
 			);
 			
@@ -102,12 +103,13 @@ export function tryRemoveObject(
             return;
         }
 	
+		// Push the object to removables array....
 		var removable = { 
 			primaryType,
 			id
 		};
-		
 		var removables = [ removable ];
+		
 		var copiesForUpdate = [ ];
 		
 		if( primaryType !== TYPE_LINE ) {
@@ -122,8 +124,8 @@ export function tryRemoveObject(
 			
 			else {
 				lines = lines.toJS();
+				// Loop through the lines that are connected to the object...
 				for( var lineId in lines ) {
-					
 					otherData = mindmap.get(TYPE_LINE + "s").get( lineId );
 					
 					if( !otherData ) {
@@ -133,14 +135,15 @@ export function tryRemoveObject(
 						continue;
 					}
 					
+					// Push the line to removables array...
 					otherData = otherData.toJS();
 					removable = { 
 						primaryType : otherData.primaryType,
 						id : otherData.id
 					};
-					
 					removables.push( removable );
 				
+					// The object is assigned as parent in the line...
 					if( otherData.parentId === id ) {
 						removeLineHelper(
 							otherData.id,
@@ -151,7 +154,7 @@ export function tryRemoveObject(
 							copiesForUpdate
 						);
 					}
-					else {
+					else { // The object is assigned as child in the line...
 						removeLineHelper(
 							otherData.id,
 							otherData.parentType === TYPE_NODE ? mindmap.get(TYPE_NODE + "s").get( otherData.parentId ).toJS() 
@@ -223,7 +226,7 @@ function removeLineHelper(
 				primaryType : otherData.primaryType,
 				x : otherData.x,
 				y : otherData.y,
-				lines : otherData.lines
+				lines : Object.assign( { }, otherData.lines )
 			}
 		);
 		
@@ -242,9 +245,9 @@ function removeLineHelper(
 		}
 		
 		console.log("ALKUPERÄINEN");
-		console.log(otherData);
+		console.log(otherData.lines);
 		console.log("KOPIO");
-		console.log(otherCopy);
+		console.log(otherCopy.lines);
 		
 		
 		copiesForUpdate.push( otherCopy );
@@ -288,6 +291,10 @@ export function tryUpdateObject(
     };
 }
 
+export function initBoard( data ) {
+	return { type: INIT_BOARD, data };
+}
+
 export function updateBoard( data ) {
     return { type: UPDATE_BOARD, data };
 }
@@ -307,7 +314,6 @@ export function removeObjects( removables, copiesForUpdate ) {
 export function removeObject( data ) {
     return { type: REMOVE_OBJECT, data };
 }
-
 // export function moveObject( data ) {
     // return { type: MOVE_OBJECT, data };
 // }

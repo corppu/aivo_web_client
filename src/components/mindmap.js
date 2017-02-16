@@ -1,5 +1,9 @@
 import React, { createClass } from "react";
 
+import firebase from "firebase";
+
+var _inited = false;
+
 import createMindmap from "./mindmap-canvas";
 import MindMapToolbar from "./mindmap-toolbar";
 import MindMapNodeToolbar from "../containers/mindmap-node-toolbar";
@@ -67,11 +71,15 @@ const MindMap = createClass({
         const { tryOpenBoard } = nextProps;
         tryOpenBoard();
 
-        if (this.mindmap) {
-            this.mindmap.updateProps(Object.assign({}, nextProps, {
+		if ( _inited && this.mindmap ) {
+            this.mindmap.updateProps( Object.assign( { }, nextProps, {
                 updateSelection: this.handleSelectionUpdate
-            }));
+            } ) );
         }
+		else if( !_inited && this.mindmap && nextProps.nodes ) {
+			this.mindmap.initProps(Object.assign( { }, nextProps ) );
+			_inited = true;
+		}
     },
     
     render: function() {

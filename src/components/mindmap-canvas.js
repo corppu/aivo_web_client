@@ -1,16 +1,18 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { findPath } from "../utils/algorithm-utils";
+import { init, buildPath, buildCluster, onNodeMove, onNodeRemove } from "../utils/algorithm-utils";
 
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_IMAGE,
     NODE_TYPE_TEXT,
+	NODE_TYPE_CLUSTER,
 	TYPE_NODE,
 	TYPE_LINE,
 	TYPE_NONE,
-	TYPE_PIN
+	TYPE_PIN,
+	TYPE_CLUSTER
 } from "../constants/types";
 
 import {
@@ -27,6 +29,7 @@ import { flagHidden } from "../utils/node-utils";
 export default function() {
     let _context = {
         engine: Engine.create(),
+		clusterNodes: new Map(),
         nodes: new Map(),
         lines: new Map(),
 		pins: new Map(),
@@ -37,7 +40,8 @@ export default function() {
         y: 0
     };
 	
-    let _selectedNodeId = null;
+	let _selectedType = null;
+    let _selectedId = null;
 	//let _selectedPin = null;
     //let _inputAction = null;
 
@@ -68,10 +72,102 @@ export default function() {
         _fps = Math.round(1/delta);
 	}
 	
+	function initProps( props ) {
+		_actions.createObject = props.tryCreateObject;
+		_actions.updateObject = props.tryUpdateObject;
+        _actions.removeObject = props.tryRemoveObject;
+		_actions.openNode = props.openNode;
+
+		new Map( props.nodes ).forEach( ( propsNode, id ) => {
+            const radius = MINDMAP_NODE_RADIUS;
+            const anchor = {
+                x: propsNode.get( "x" ),
+                y: propsNode.get( "y" )
+            };
+            const body = Bodies.circle( anchor.x, anchor.y, radius, {
+                frictionAir: 1,
+                mass: 5
+            } );
+            const node = {
+				id,
+				primaryType : propsNode.get( "primaryType" ),
+                type: propsNode.get( "type" ),
+                title: propsNode.get( "title" ) || "",
+                text: propsNode.get( "text" ) || "",
+				imgURL: propsNode.get( "imgURL" ) || "",
+                radius,
+				x: anchor.x,
+				y: anchor.y,
+                anchor,
+                body
+            };
+			
+			var tempLines = propsNode.get( "lines" );
+			if( tempLines ) {
+				node.lines = tempLines.toObject();
+			} else {
+				node.lines = { };
+			}
+			
+            _context.nodes.set( id, node );
+			if( node.type === NODE_TYPE_CLUSTER ) {
+				_context.clusterNodes.set( id, node );
+			}
+            _context.bodyToNodeMapping[ body.id ] = node;
+			
+            World.add( _context.engine.world, body );		
+		} );
+		
+		
+		new Map( props.pins ).forEach( ( propsPin, id ) => {
+            const radius = MINDMAP_PIN_RADIUS;
+            const anchor = {
+                x: propsPin.get("x"),
+                y: propsPin.get("y")
+            };
+            const body = Bodies.circle( anchor.x, anchor.y, radius, {
+                frictionAir: 1,
+                mass: 5
+            } );
+            const pin = {
+				id,
+				primaryType: propsPin.get( "primaryType" ),
+				x: anchor.x,
+				y: anchor.y,
+                radius,
+                anchor,
+                body
+            };
+			
+			var tempLines = propsPin.get( "lines" );
+			if ( tempLines ) {
+				pin.lines = tempLines.toObject();
+			} else {
+				pin.lines = { };
+			}
+            _context.pins.set( id, pin );
+        } );
+		
+		
+		new Map( props.lines ).forEach( ( propsLine, id ) => {
+			const line = {
+				id,
+				primaryType: propsLine.get( "primaryType" ),
+				parentType: propsLine.get( "parentType" ),
+				parentId: propsLine.get( "parentId" ),
+				childType: propsLine.get( "childType" ),
+				childId: propsLine.get( "childId" )
+            };
+			
+		   _context.lines.set( id, line );
+		} );
+		
+		init( _context.engine.world.bodies, _context.nodes, _context.clusterNodes, _context.pins, _context.lines );
+	}
+	
     function updateProps( props ) {
         _actions.createObject = props.tryCreateObject;
         _actions.updateObject = props.tryUpdateObject;
-	
         _actions.removeObject = props.tryRemoveObject;
 		//_actions.moveObject = props.tryMoveObject;
         _actions.openNode = props.openNode;
@@ -82,6 +178,38 @@ export default function() {
         let propsNodes = new Map( props.nodes );
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
+
+
+
+		// match existing lines to props (update old ones)
+        _context.lines.forEach( ( line, id ) => {
+            const propsLine = propsLines.get( id );
+
+             if ( !propsLine ) {
+                // const { body } = line;
+
+                _context.lines.delete( id )
+                // _context.bodyToNodeMapping.delete(body.id);
+                // World.remove(_context.engine.world, body);
+
+                //console.log(`removed line ${id}`);
+                return;
+            }
+            propsLines.delete( id );
+
+			//console.log("updated -> " + line);
+
+            Object.assign( line, {
+				id,
+				primaryType: propsLine.get( "primaryType" ),
+				parentType: propsLine.get( "parentType" ),
+				parentId: propsLine.get( "parentId" ),
+				childType: propsLine.get( "childType" ),
+				childId: propsLine.get( "childId" )
+            } );
+			buildPath( line );
+			return line;
+        } );
 		
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
@@ -90,11 +218,20 @@ export default function() {
              if ( !propsNode ) {
                  const { body } = node;
 
+				 onNodeRemove( node );
                 _context.nodes.delete( id );
+				if( node.type === NODE_TYPE_CLUSTER ) {
+					_context.clusterNodes.delete( id );
+				}
                 _context.bodyToNodeMapping.delete( body.id );
-                World.remove( _context.engine.world, body );
+				
+				if( node.type === NODE_TYPE_CLUSTER ) {
+					clusterNodes.delete( id );
+				}
+				
+				World.remove( _context.engine.world, body );
 
-				if( _selectedNodeId === id ) {
+				if( _selectedId === id && _selectedType === TYPE_NODE ) {
 					setSelectedNode(null);
 				}
 				
@@ -118,46 +255,20 @@ export default function() {
                 imgURL: propsNode.get( "imgURL" ) || "",
             });
 			
+			
 			var tempLines = propsNode.get( "lines" );
 			if( tempLines ) {
 				node.lines = tempLines.toObject();
+				console.log( node.lines );
+			} else {
+				node.lines = { };
 			}
+			
+			_context.clusterNodes.set( id, node );
+			onNodeMove( node );
 			//console.log("updated  -> " + node);
         } );
 
-
-		
-		// match existing lines to props (update old ones)
-        _context.lines.forEach( ( line, id ) => {
-            const propsLine = propsLines.get( id );
-
-             if ( !propsLine ) {
-                // const { body } = line;
-
-                _context.lines.delete( id )
-                // _context.bodyToNodeMapping.delete(body.id);
-                // World.remove(_context.engine.world, body);
-
-                //console.log(`removed line ${id}`);
-                return;
-            }
-            propsLines.delete( id );
-
-			//console.log("updated -> " + line);
-
-            return Object.assign( line, {
-				id,
-				primaryType: propsLine.get( "primaryType" ),
-				parentType: propsLine.get( "parentType" ),
-				parentId: propsLine.get( "parentId" ),
-				childType: propsLine.get( "childType" ),
-				childId: propsLine.get( "childId" )
-            } );
-        } );		
-		
-		
-		
-		
 		// match existing pins to props (update old ones)
         _context.pins.forEach( ( pin, id ) => {
             const propsPin = propsPins.get( id );
@@ -188,8 +299,12 @@ export default function() {
 			var tempLines = propsPin.get( "lines" );
 			if( tempLines ) {
 				pin.lines = tempLines.toObject();
+				console.log( pin.lines );
 			}
-			//console.log(pin);
+			else {
+				pin.lines = { };
+			}
+			
         } );
 
         // add new nodes (were in props and not in state)
@@ -220,14 +335,26 @@ export default function() {
 			var tempLines = propsNode.get( "lines" );
 			if( tempLines ) {
 				node.lines = tempLines.toObject();
+			} else {
+				node.lines = { };
 			}
 			
 			//console.log(node);
+			//console.log(node);
+			
 			
             _context.nodes.set( id, node );
+			if( node.type === NODE_TYPE_CLUSTER ) {
+				_context.clusterNodes.set( id, node );
+			}
             _context.bodyToNodeMapping[ body.id ] = node;
+			
             World.add( _context.engine.world, body );
 
+			onNodeMove( node );
+			if( node.type === NODE_TYPE_CLUSTER ) {
+				buildCluster( node );
+			}
             //console.log(`added node ${id}`);
         } )
 		
@@ -243,11 +370,10 @@ export default function() {
             };
 			//console.log(line);
 		   _context.lines.set( id, line );
+		   buildPath( line );
 			//console.log(`added line ${id}`);
 		} );
 
-		
-		
 		// add new pins (were in props and not in state)
         propsPins.forEach( ( propsPin, id ) => {
             const radius = MINDMAP_PIN_RADIUS;
@@ -272,6 +398,9 @@ export default function() {
 			var tempLines = propsPin.get( "lines" );
 			if ( tempLines ) {
 				pin.lines = tempLines.toObject();
+			}
+			else {
+				pin.lines = { };
 			}
             _context.pins.set( id, pin );
             //_context.bodyToNodeMapping[body.id] = node;
@@ -303,23 +432,25 @@ export default function() {
 		if ( hits.length > 0 ) {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
-                 if ( _selectedNodeId !== node.id ) {
+                 if ( _selectedId !== node.id ) {
                      setSelectedNode(node);
                  }
 				 else {
 					 _actions.removeObject( node.primaryType, node.id );
-					 setSelectedNode(null);		
+					 setSelectedNode(null);
 				 }
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
-			 setSelectedNode(null);
+			if(_selectedId && _selectedType === TYPE_NODE ) {
+				_actions.createObject( { primaryType: TYPE_NODE, type: NODE_TYPE_CLUSTER, x: pos.x, y: pos.y },  _context.nodes.get( _selectedId ) );
+			}
 		}
 	}
 
     function setSelectedNode(node) {
-        _selectedNodeId = node ? node.id : null;
-        
+        _selectedId = node ? node.id : null;
+		
         if (_actions.updateSelection) {
             const selection = node
                 ? {
@@ -328,10 +459,60 @@ export default function() {
                 }
                 : null;
             
-            _actions.updateSelection(selection);
+           // _actions.updateSelection(selection);
         }
+		
+		if( _selectedId ) {
+			_selectedType = TYPE_NODE;
+		}
+		else {
+			_selectedType = null;
+		}
     }
 	
+	function setSelectedCluster(cluster) {
+		_selectedId = cluster ? cluster.id : null;
+		
+		 if (_actions.updateSelection) {
+            const selection = cluster
+                ? {
+                    id: cluster.id,
+                    primaryType: TYPE_CLUSTER
+                }
+                : null;
+            
+            // _actions.updateSelection(selection);
+        }
+		
+		if( _selectedId ) {
+			_selectedType = TYPE_CLUSTER;
+		}
+		else {
+			_selectedType = null;
+		}
+	}
+	
+	function setSelectedPin(pin) {
+		_selectedId = pin ? pin.id : null;
+
+		if (_actions.updateSelection) {
+            const selection = pin
+                ? {
+                    id: pin.id,
+                    primaryType: TYPE_PIN
+                }
+                : null;
+            
+            // _actions.updateSelection(selection);
+        }
+		
+		if( _selectedId ) {
+			_selectedType = TYPE_PIN;
+		}
+		else {
+			_selectedType = null;
+		}	
+	}
 
     function onInputMove( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
@@ -355,7 +536,7 @@ export default function() {
     function onLongPress( action ) {
 	    const pos = translateToCamera( _camera, action.endPosition );
 
-        _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
+        // _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
     }
 
     function update() {
@@ -385,32 +566,42 @@ export default function() {
 
         const draw = createRenderer( ctx, { camera: _camera } );
 
-		_context.lines.forEach( line => {
-            drawLine(
-				draw,
-				line,
-				_context.engine.world.bodies,
-				line.parentType === "node" ? _context.nodes.get( line.parentId ) : _context.pins.get( line.parentId ), 
-				line.childType === "node" ? _context.nodes.get( line.childId ) : _context.pins.get( line.childId )
-			);
+		_context.clusterNodes.forEach( clusterNode => {
+			if( clusterNode.members ) {	
+				for( var node of clusterNode.members ) {
+					node = node[ 1 ];
+					node = _context.nodes.get( node );
+					draw.circle( {
+						x: node.anchor.x,
+						y: node.anchor.y,
+						r: node.radius * 1.25 + MINDMAP_NODE_HIGHLIGHT_MARGIN, 
+						color: "red" 
+					} );
+				}
+			}
+		} );
+		
+		_context.lines.forEach( line => {		
+            draw.curve( line.path );
         } );
 		
         // draw non-selected node(s)
         _context.nodes.forEach( node => {
-            if ( node.id !== _selectedNodeId ) {
+            if ( node.id !== _selectedId ) {
                 drawNode( draw, node, false );
             }
         } );
 
         // draw selected node(s)
-        if ( _selectedNodeId !== null ) {
-            drawNode( draw, _context.nodes.get( _selectedNodeId ), true );
+        if ( _selectedId !== null ) {
+            drawNode( draw, _context.nodes.get( _selectedId ), true );
         }
 
 		drawFPS( draw, _fps );
     }
 
     return {
+		initProps,
         updateProps,
         onInputStart,
         onInputEnd,
@@ -435,7 +626,8 @@ function drawLine( draw, line, bodies, parentNode, childNode ) {
 	//const anchors = findAnchors(parentNode.anchor, childNode.anchor);
 	if( !parentNode || !childNode ) return;
 	draw.curve(
-		findPath( bodies, parentNode.body, childNode.body )
+		// findPath( bodies, parentNode.body, childNode.body )
+		line.path
 	);
 }
 
