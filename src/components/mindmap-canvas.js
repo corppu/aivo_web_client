@@ -225,9 +225,6 @@ export default function() {
 				}
                 _context.bodyToNodeMapping.delete( body.id );
 				
-				if( node.type === NODE_TYPE_CLUSTER ) {
-					clusterNodes.delete( id );
-				}
 				
 				World.remove( _context.engine.world, body );
 
@@ -259,7 +256,7 @@ export default function() {
 			var tempLines = propsNode.get( "lines" );
 			if( tempLines ) {
 				node.lines = tempLines.toObject();
-				console.log( node.lines );
+				//console.log( node.lines );
 			} else {
 				node.lines = { };
 			}
@@ -299,7 +296,7 @@ export default function() {
 			var tempLines = propsPin.get( "lines" );
 			if( tempLines ) {
 				pin.lines = tempLines.toObject();
-				console.log( pin.lines );
+				//console.log( pin.lines );
 			}
 			else {
 				pin.lines = { };
@@ -567,18 +564,27 @@ export default function() {
         const draw = createRenderer( ctx, { camera: _camera } );
 
 		_context.clusterNodes.forEach( clusterNode => {
+
+			draw.circle( {
+				x: clusterNode.body.position.x,
+				y: clusterNode.body.position.y,
+				r: clusterNode.radius * 1.25 + MINDMAP_NODE_HIGHLIGHT_MARGIN, 
+				color: "red" 
+			} );
+		
 			if( clusterNode.members ) {	
-				for( var node of clusterNode.members ) {
-					node = node[ 1 ];
+				clusterNode.members.forEach( node => {
 					node = _context.nodes.get( node );
+					
 					draw.circle( {
-						x: node.anchor.x,
-						y: node.anchor.y,
+						x: node.body.position.x,
+						y: node.body.position.y,
 						r: node.radius * 1.25 + MINDMAP_NODE_HIGHLIGHT_MARGIN, 
 						color: "red" 
 					} );
-				}
+				} );
 			}
+			
 		} );
 		
 		_context.lines.forEach( line => {		

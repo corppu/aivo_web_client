@@ -63,22 +63,22 @@ export function buildCluster( clusterNode, visited = null, parentNode = null ) {
 	
 	if( !visited ) {
 		visited = new Set();
-		visited.add( clusterNode.body.id );
+		visited.add( clusterNode.id );
 	}
 	
 	for ( var node of _nodes ) {
 		node = node[ 1 ];
 		
-		if( visited.has( node.body.id ) ) {
+		if( visited.has( node.id ) ) {
 			continue;
 		} else {
-			visited.add( node.body.id );
+			visited.add( node.id );
 		}
 		
 		if( boundsDistance( parentNode.body.bounds, node.body.bounds ) <= MAX_LINE_WIDTH ) {
-			parentNode.children.add( node.body.id );
-			node.parent = parentNode.body.id;
-			clusterNode.members.add( node.body.id );
+			parentNode.children.add( node.id );
+			node.parent = parentNode.id;
+			clusterNode.members.add( node.id );
 			node.clusterNode = clusterNode;
 		}
 	}
@@ -167,13 +167,16 @@ export function onNodeMove( nodeA ) {
 export function onNodeRemove( node ) {
 	
 	if( node.parent ) {
-		node.parent.children.remove( node.id );
+		_nodes.get( node.parent ).children.delete( node.id );
 	}
 	if ( node.children ) {
-		for( var child of node.children ) {
-			child[ 1 ].parent = null;
-			// if(node.children.has(
-		}
+		node.children.forEach( child => {
+			_nodes.get( child ).parent = null;
+		} );
+	}
+	
+	if(node.clusterNode) {
+		node.clusterNode.members.delete( node.id );
 	}
 }
 
