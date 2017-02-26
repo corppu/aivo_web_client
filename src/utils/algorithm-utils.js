@@ -51,7 +51,7 @@ export function addNode( node, nodes, lines ) {
 
 	
 	_hull = hull( _points, 100 ); 
-	console.log(_hull);
+	//console.log(_hull);
 }
 
 export function moveNode( node, nodes, lines ) {

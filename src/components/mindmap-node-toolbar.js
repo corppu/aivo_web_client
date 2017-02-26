@@ -13,7 +13,7 @@ const MindMapNodeToolbar = createClass({
     },
 
     render: function() {
-        const { id, primaryType, remove } = this.props;
+        const { id, primaryType, update, remove } = this.props;
 
         return (
             <div
@@ -32,7 +32,18 @@ const MindMapNodeToolbar = createClass({
                     { id }
                     <Separator/>
                     { primaryType }
-                    <Separator/>                    
+                    <Separator/>
+                    <i
+                        className="fa fa-circle-o fa-lg"/>
+                    <Separator/>
+                    <i
+                        className="fa fa-circle fa-lg"
+                        onClick={() => {
+                            update({
+                                customColor: "green"
+                            });
+                        }}/>
+                    <Separator/>
                     <i
                         className="fa fa-trash-o fa-lg"
                         onClick={remove}/>
