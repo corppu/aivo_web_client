@@ -29,7 +29,11 @@ const MindMapNodeToolbar = createClass({
                         padding: "5px 10px",
                         backgroundColor: "#fff"
                     }}>
-                    { id } | { primaryType }
+                    { id }
+                    <Separator/>
+                    { primaryType }
+                    <Separator/>                    
+                    <i className="fa fa-trash-o fa-lg"></i>
                 </div>
             </div>
         );
@@ -64,5 +68,11 @@ const MindMapNodeToolbar = createClass({
         );
     }
 });
+
+function Separator() {
+    return (
+        <span> | </span>
+    );
+}
 
 export default MindMapNodeToolbar;
