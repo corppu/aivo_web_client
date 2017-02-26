@@ -14,6 +14,14 @@ let _clusterNodes = null;
 let _pins = null;
 let _lines = null;
 
+
+// Convex hull - Graham algorithm:
+let _leftMostNode;
+let _topMostNode;
+let _rightMostNode;
+let _bottomMostNode;
+
+
 /** 
 	bodies from matter-js world,
 	nodes mapped as [ node.id, node ],

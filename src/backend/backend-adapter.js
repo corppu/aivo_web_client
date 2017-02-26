@@ -108,7 +108,7 @@ function attachAuthChangedListener() {
 
 // A function that creates the home board after user has signed up...
 // or user try to open home board, but it does not exist.
-function createHomeBoard() {
+export function createHomeBoard() {
 	// console.log("Trying to create home board");
 	const userId = firebase.auth().currentUser.uid;
 	const parentId = firebase.database().ref("nodes").push().key;
