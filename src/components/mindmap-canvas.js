@@ -71,7 +71,9 @@ export default function() {
 	
     function updateProps( props ) {
         _actions.createObject = props.tryCreateObject;
-        _actions.updateObject = props.tryUpdateObject;
+        _actions.updateObject = function(node, changes) {
+             props.tryUpdateObject(Object.assign({}, node, changes));
+        };
 	
         _actions.removeObject = props.tryRemoveObject;
 		//_actions.moveObject = props.tryMoveObject;
@@ -206,6 +208,7 @@ export default function() {
                 title: propsNode.get( "title" ) || "",
                 text: propsNode.get( "text" ) || "",
 				imgURL: propsNode.get( "imgURL" ) || "",
+                customColor: propsNode.get( "customColor" ) || "",
                 radius,
 				x: anchor.x,
 				y: anchor.y,
@@ -340,10 +343,10 @@ export default function() {
                 let node = _context.nodes.get(action.data);
 
                 if (node) {     
-                    _actions.updateObject(Object.assign({}, node, {
+                    _actions.updateObject(node, {
                         x: pos.x,
                         y: pos.y
-                    }));
+                    });
                 }
 			}
          }
