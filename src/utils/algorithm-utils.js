@@ -32,7 +32,7 @@ export function addNode( node, nodes, lines ) {
 	var c = node.body.position;
 	var center = [ c.x, c.y ];
 	var top = [ c.x, b.min.y ];
-	var bottom = [ c.x, b.min.y ];
+	var bottom = [ c.x, b.max.y ];
 	var left = [ b.min.x, c.y ];
 	var right = [ b.max.x, c.y ];
 	var topLeft = [ b.min.x, b.min.y ];
