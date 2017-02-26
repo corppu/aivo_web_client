@@ -338,16 +338,17 @@ export default function() {
     function onInputMove( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
 
-        if ( action.data ) {
+        if (action.data) {
+            if (_actions.updateObject) {
+                let node = _context.nodes.get(action.data);
 
-            // REFACTOR TO WORK WITH NODE ID
-
-            // if ( _actions.updateObject ) {
-				// action.data.x = pos.x;
-				// action.data.y = pos.y;
-				// //console.log(action.data);
-			   // _actions.updateObject( action.data );
-			// }
+                if (node) {     
+                    _actions.updateObject(Object.assign({}, node, {
+                        x: pos.x,
+                        y: pos.y
+                    }));
+                }
+			}
          }
 		 else {
              Object.assign( _camera, Vector.add( _camera, action.lastDelta ) );

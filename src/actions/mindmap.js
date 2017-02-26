@@ -17,9 +17,7 @@ import {
 	TYPE_PIN
 } from "../constants/types";
 
-
 import * as backendAdapter from "../backend/backend-adapter";
-
 
 export function tryCreateObject(
 	object,
