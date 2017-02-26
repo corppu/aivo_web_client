@@ -9,7 +9,7 @@ import {
 import {
     createUserWithEmailAndSignIn,
     signInWithEmail,
-    createBoard,
+    createHomeBoard,
     openBoard,
     closeBoard,
     addNode
@@ -29,9 +29,7 @@ export function tryLogin(email, password) {
 
 export function tryCreateBoard(title) {
     return function() {
-        createBoard({
-            title
-        });
+        createHomeBoard();
     }
 }
 

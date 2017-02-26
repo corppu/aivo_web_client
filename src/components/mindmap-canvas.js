@@ -1,7 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { findPath } from "../utils/algorithm-utils";
+import { addNode, getHull, findPath } from "../utils/algorithm-utils";
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -227,6 +227,7 @@ export default function() {
             _context.nodes.set( id, node );
             _context.bodyToNodeMapping[ body.id ] = node;
             World.add( _context.engine.world, body );
+			addNode( node );
 
             //console.log(`added node ${id}`);
         } )
@@ -385,6 +386,8 @@ export default function() {
 
         const draw = createRenderer( ctx, { camera: _camera } );
 
+		
+		
 		_context.lines.forEach( line => {
             drawLine(
 				draw,
@@ -402,6 +405,16 @@ export default function() {
             }
         } );
 
+		// draw.curve(getHull());
+		var hull = getHull(1337);
+		
+		for( var i = 1; i < hull.length; ++i ) {
+			draw.line(	{
+				start : {x: hull[i - 1][0], y: hull[i -1][1]},
+				end : {x: hull[i][0], y: hull[i][1]},
+				lineWidth : 10,
+				color : "#ff0000"} );
+		}
         // draw selected node(s)
         if ( _selectedNodeId !== null ) {
             drawNode( draw, _context.nodes.get( _selectedNodeId ), true );

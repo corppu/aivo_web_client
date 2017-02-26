@@ -1,93 +1,64 @@
 import { Bounds, Query, Vector } from "matter-js";
-
+import hull from "hull.js"
 const DIVIDER_WIDTH = 40;
-let _clusters = new Map();
+let _clusterNodes = new Map();
 let _idCounter = 0;
 
+let _pointsByClusterId = new Map();
+let _hullByClusterId = new Map();
+let _points = [];
+let _hull = [];
 
-function mergeClusters( clusterTo, clusterFrom ) {
-	for( var node in clusterFrom.nodes.values() ) {
-		clusterTo.nodes[ node.body.id ] = node;
-		
-		if( clusterTo.topMost.body.bounds.min.y > node.body.bounds.min.y ) {
-			topMost = node;
-		}
-		
-		if( clusterTo.leftMost.body.bounds.min.x > node.body.bounds.min.x ) {
-			leftMost = node;
-		}
-		
-		if( clusterTo.bottomMost.body.bounds.max.y < node.body.bounds.max.y ) {
-			bottomMost = node;
-		}
-		
-		if( clusterTo.rightMost.body.bounds.max.x < node.body.bounds.max.x ) {
-			rightMost = node;
-		}
-	}
-	
-	_clusters.remove( clusterFrom.id );
+// var points = [ [236, 126], [234, 115], [238, 109], [247, 102], ... ];
+// hull(points, 50); // returns points of the hull (in clockwise order)
+
+export function getHull( clusterId ) {
+	//return _hullByClusterId.get( clusterId );
+	// var drawHull = [];
+	// for ( var i = 0; i < _hull.length; ++i ) {
+		// drawHull.push(_hull[i][0]);
+		// drawHull.push(_hull[i][1]);
+	// }
+	// return drawHull;
+	return _hull;
 }
 
-
-
-export function onNodeMove( node ) {
-	if ( !node.cluster ) {
-		
-		var cluster = {
-			id: _idCounter++,
-			nodes: new Map()
-		};
-		
-		cluster.nodes[ node.body.id ] = node;
-		cluster.bodies[ node.body.id ] = node;
-		cluster.topMost = node;
-		cluster.bottomMost = node;
-		cluster.leftMost = node;
-		cluster.rightMost = node;
-		
-		node.cluster = cluster;
-		_clusters[ cluster.id ] = cluster;
-	}
-	
-	var nodeBounds = node.body.bounds;
-	var clusterBounds = null;
-	for ( var cluster in _clusters.values() ) {
-		if ( cluster.id === node.cluster.id ) {
-			continue;
-		}
-		
-		// TODO: use ome divider?
-		clusterBounds = {
-			max : {
-				x: cluster.bottomMost.body.bounds.max.x, 
-				y: cluster.rightMost.body.bounds.max.y
-			},
-			
-			min: {
-				x: cluster.leftMost.body.bounds.min.x,
-				y: cluster.topMost.body.bounds.min.y
-			}
-		};
-		
-		if( Bounds.overlaps( nodeBounds, clusterBounds ) ) {
-			mergeClusters( cluster, node.cluster );
-			node.cluster = cluster;
-		}
-	}
+export function getPath(lineId) {
+	return _pathByLineId.get( lineId );
 }
 
-export function onNodeRemove( node ) {
-	if ( !node.cluster ) {
-		throw("something odd is going on as node.cluster is not found on removal");
-	}
+export function addNode( node, nodes, lines ) {
+	var b = node.body.bounds;
+	var c = node.body.position;
+	var center = [ c.x, c.y ];
+	var top = [ c.x, b.min.y ];
+	var bottom = [ c.x, b.min.y ];
+	var left = [ b.min.x, c.y ];
+	var right = [ b.max.x, c.y ];
+	var topLeft = [ b.min.x, b.min.y ];
+	var topRight = [ b.max.x, b.min.y ];
+	var bottomLeft = [ b.min.x, b.max.y ];
+	var bottomRight = [ b.max.x, b.max.y ];
+	_points.push( top );
+	_points.push( bottom );
+	_points.push( left );
+	_points.push( right );
+	_points.push( center );
+	_points.push( topLeft );
+	_points.push( topRight );
+	_points.push( bottomLeft );
+	_points.push( bottomRight );
+
 	
-	if( node.cluster.bodies.size == 1 ) {
-		_clusters.remove( node.cluster.id );
-		return;
-	}
+	_hull = hull( _points, 100 ); 
+	console.log(_hull);
+}
+
+export function moveNode( node, nodes, lines ) {
 	
-	node.cluster.nodes.remove( node.id );
+}
+
+export function removeNode( node, nodes, lines ) {
 	
 }
 

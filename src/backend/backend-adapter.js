@@ -108,7 +108,7 @@ function attachAuthChangedListener() {
 
 // A function that creates the home board after user has signed up...
 // or user try to open home board, but it does not exist.
-function createHomeBoard() {
+export function createHomeBoard() {
 	console.log("Trying to create home board");
 	const userId = firebase.auth().currentUser.uid;
 	const parentId = firebase.database().ref("nodes").push().key;
@@ -601,14 +601,6 @@ export function createObject(
 	
 	updates[ BOARD_PATH + object.primaryType + "s/" + object.id ] = object;
 	
-	
-	//_storeAdapter.createObject( object, parent, line );
-	if(parent && line) {
-		_storeAdapter.updateObject(line);
-		_storeAdapter.updateObject(parent);
-	}
-	_storeAdapter.updateObject(object);
-	
 	firebase.database().ref().update( updates ).then(
 		() => {
 			console.log( "Successfully created object " + object.primaryType + " " + object.id );
@@ -677,16 +669,6 @@ export function removeObjects(
 	firebase.database().ref().update( updates ).then(
 		() => {
 			
-			/*
-			copiesForUpdate.forEach((copy) => {
-				_storeAdapter.updateObject( copy );
-			});
-			
-			removables.forEach((removable) => {
-				_storeAdapter.removeObject( removable );
-			})
-			console.log( "Successfully removed object and updated the connections" );
-			*/
 		},
 		
 		error => {
