@@ -119,6 +119,7 @@ export default function() {
                 title: propsNode.get( "title" ) || "",
                 text: propsNode.get( "text" ) || "",
                 imgURL: propsNode.get( "imgURL" ) || "",
+                customColor: propsNode.get( "customColor" ) || null
             });
 			
 			var tempLines = propsNode.get( "lines" );
@@ -208,7 +209,7 @@ export default function() {
                 title: propsNode.get( "title" ) || "",
                 text: propsNode.get( "text" ) || "",
 				imgURL: propsNode.get( "imgURL" ) || "",
-                customColor: propsNode.get( "customColor" ) || "",
+                customColor: propsNode.get( "customColor" ) || null,
                 radius,
 				x: anchor.x,
 				y: anchor.y,
@@ -440,7 +441,7 @@ function drawLine( draw, line, bodies, parentNode, childNode ) {
 	);
 }
 
-function drawNode( draw, { type, imgURL, title, body, radius, hidden }, isSelected = false ) {
+function drawNode( draw, { type, title, imgURL, customColor, body, radius, hidden }, isSelected = false ) {
     if ( hidden ) {
         return;
     }
@@ -455,7 +456,7 @@ function drawNode( draw, { type, imgURL, title, body, radius, hidden }, isSelect
     switch ( type ) {
     case NODE_TYPE_TEXT:
         draw.circle( { x, y, r: radius,
-                color: "#080", strokeColor: "black", strokeWidth: 2 } );
+                color: customColor || "#080", strokeColor: "black", strokeWidth: 2 } );
         break;
     
     case NODE_TYPE_IMAGE:
@@ -465,7 +466,7 @@ function drawNode( draw, { type, imgURL, title, body, radius, hidden }, isSelect
 
     default:
         draw.circle( { x, y, r: radius,
-                color: "#888", strokeColor: "black", strokeWidth: 2 } );
+                color: customColor || "#888", strokeColor: "black", strokeWidth: 2 } );
         break;
     }
 

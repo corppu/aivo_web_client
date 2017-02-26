@@ -272,6 +272,7 @@ export function tryUpdateObject(
 				y : data.y || null,
 				lines : data.lines || null,
 				imgURL : data.imgURL || null,
+				customColor : data.customColor || null,
 				title : data.title || null,
 				type : data.type || null,
 				parentType : data.parentType || null,
