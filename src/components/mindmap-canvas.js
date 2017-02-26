@@ -306,10 +306,12 @@ export default function() {
                  if ( _selectedNodeId !== node.id ) {
                      setSelectedNode(node);
                  }
+                 /*
 				 else {
 					 _actions.removeObject( node.primaryType, node.id );
 					 setSelectedNode(null);		
 				 }
+                 */
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
