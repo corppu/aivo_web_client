@@ -2,6 +2,9 @@ import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
 import { findPath } from "../utils/algorithm-utils";
+import { isDoubleTap } from "../utils/input-utils";
+import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
+import { flagHidden } from "../utils/node-utils";
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -21,8 +24,6 @@ import {
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
 
-import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
-import { flagHidden } from "../utils/node-utils";
 
 export default function() {
     let _context = {
@@ -125,8 +126,6 @@ export default function() {
 			//console.log("updated  -> " + node);
         } );
 
-
-		
 		// match existing lines to props (update old ones)
         _context.lines.forEach( ( line, id ) => {
             const propsLine = propsLines.get( id );
@@ -154,9 +153,6 @@ export default function() {
 				childId: propsLine.get( "childId" )
             } );
         } );		
-		
-		
-		
 		
 		// match existing pins to props (update old ones)
         _context.pins.forEach( ( pin, id ) => {
@@ -296,7 +292,7 @@ export default function() {
         return node ? node.id : null;
     }
 
-    function onInputEnd( action ) {
+    function onInputEnd( action, prevAction ) {
         const pos = translateToCamera( _camera, action.endPosition );
         const hits = Query.point( _context.engine.world.bodies, pos );
 
@@ -306,16 +302,17 @@ export default function() {
                  if ( _selectedNodeId !== node.id ) {
                      setSelectedNode(node);
                  }
-                 /*
-				 else {
-					 _actions.removeObject( node.primaryType, node.id );
-					 setSelectedNode(null);		
-				 }
-                 */
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
-			 setSelectedNode(null);
+            if (isDoubleTap(action, prevAction)) {
+                _actions.createObject({
+                        primaryType: TYPE_NODE,
+                        x: pos.x,
+                        y: pos.y
+                });
+            }
+            setSelectedNode(null);
 		}
 	}
 
@@ -338,7 +335,7 @@ export default function() {
     function onInputMove( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
 
-        if (action.data) {
+        if (action.data && action.data === _selectedNodeId) {
             if (_actions.updateObject) {
                 let node = _context.nodes.get(action.data);
 
@@ -356,9 +353,7 @@ export default function() {
     }
 
     function onLongPress( action ) {
-	    const pos = translateToCamera( _camera, action.endPosition );
-
-        _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
+        // ...
     }
 
     function update() {
