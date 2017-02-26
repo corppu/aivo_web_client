@@ -2,6 +2,9 @@ import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
 import { addNode, getHull, findPath } from "../utils/algorithm-utils";
+import { isDoubleTap } from "../utils/input-utils";
+import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
+import { flagHidden } from "../utils/node-utils";
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -21,8 +24,6 @@ import {
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
 
-import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
-import { flagHidden } from "../utils/node-utils";
 
 export default function() {
     let _context = {
@@ -70,7 +71,9 @@ export default function() {
 	
     function updateProps( props ) {
         _actions.createObject = props.tryCreateObject;
-        _actions.updateObject = props.tryUpdateObject;
+        _actions.updateObject = function(node, changes) {
+             props.tryUpdateObject(Object.assign({}, node, changes));
+        };
 	
         _actions.removeObject = props.tryRemoveObject;
 		//_actions.moveObject = props.tryMoveObject;
@@ -116,6 +119,7 @@ export default function() {
                 title: propsNode.get( "title" ) || "",
                 text: propsNode.get( "text" ) || "",
                 imgURL: propsNode.get( "imgURL" ) || "",
+                customColor: propsNode.get( "customColor" ) || null
             });
 			
 			var tempLines = propsNode.get( "lines" );
@@ -125,8 +129,6 @@ export default function() {
 			//console.log("updated  -> " + node);
         } );
 
-
-		
 		// match existing lines to props (update old ones)
         _context.lines.forEach( ( line, id ) => {
             const propsLine = propsLines.get( id );
@@ -154,9 +156,6 @@ export default function() {
 				childId: propsLine.get( "childId" )
             } );
         } );		
-		
-		
-		
 		
 		// match existing pins to props (update old ones)
         _context.pins.forEach( ( pin, id ) => {
@@ -210,6 +209,7 @@ export default function() {
                 title: propsNode.get( "title" ) || "",
                 text: propsNode.get( "text" ) || "",
 				imgURL: propsNode.get( "imgURL" ) || "",
+                customColor: propsNode.get( "customColor" ) || null,
                 radius,
 				x: anchor.x,
 				y: anchor.y,
@@ -297,7 +297,7 @@ export default function() {
         return node ? node.id : null;
     }
 
-    function onInputEnd( action ) {
+    function onInputEnd( action, prevAction ) {
         const pos = translateToCamera( _camera, action.endPosition );
         const hits = Query.point( _context.engine.world.bodies, pos );
 
@@ -307,14 +307,17 @@ export default function() {
                  if ( _selectedNodeId !== node.id ) {
                      setSelectedNode(node);
                  }
-				 else {
-					 _actions.removeObject( node.primaryType, node.id );
-					 setSelectedNode(null);		
-				 }
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
-			 setSelectedNode(null);
+            if (isDoubleTap(action, prevAction)) {
+                _actions.createObject({
+                        primaryType: TYPE_NODE,
+                        x: pos.x,
+                        y: pos.y
+                });
+            }
+            setSelectedNode(null);
 		}
 	}
 
@@ -337,16 +340,17 @@ export default function() {
     function onInputMove( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
 
-        if ( action.data ) {
+        if (action.data && action.data === _selectedNodeId) {
+            if (_actions.updateObject) {
+                let node = _context.nodes.get(action.data);
 
-            // REFACTOR TO WORK WITH NODE ID
-
-            // if ( _actions.updateObject ) {
-				// action.data.x = pos.x;
-				// action.data.y = pos.y;
-				// //console.log(action.data);
-			   // _actions.updateObject( action.data );
-			// }
+                if (node) {     
+                    _actions.updateObject(node, {
+                        x: pos.x,
+                        y: pos.y
+                    });
+                }
+			}
          }
 		 else {
              Object.assign( _camera, Vector.add( _camera, action.lastDelta ) );
@@ -354,9 +358,7 @@ export default function() {
     }
 
     function onLongPress( action ) {
-	    const pos = translateToCamera( _camera, action.endPosition );
-
-        _actions.createObject( { primaryType: TYPE_NODE, x: pos.x, y: pos.y } );
+        // ...
     }
 
     function update() {
@@ -452,7 +454,7 @@ function drawLine( draw, line, bodies, parentNode, childNode ) {
 	);
 }
 
-function drawNode( draw, { type, imgURL, title, body, radius, hidden }, isSelected = false ) {
+function drawNode( draw, { type, title, imgURL, customColor, body, radius, hidden }, isSelected = false ) {
     if ( hidden ) {
         return;
     }
@@ -467,7 +469,7 @@ function drawNode( draw, { type, imgURL, title, body, radius, hidden }, isSelect
     switch ( type ) {
     case NODE_TYPE_TEXT:
         draw.circle( { x, y, r: radius,
-                color: "#080", strokeColor: "black", strokeWidth: 2 } );
+                color: customColor || "#080", strokeColor: "black", strokeWidth: 2 } );
         break;
     
     case NODE_TYPE_IMAGE:
@@ -477,7 +479,7 @@ function drawNode( draw, { type, imgURL, title, body, radius, hidden }, isSelect
 
     default:
         draw.circle( { x, y, r: radius,
-                color: "#888", strokeColor: "black", strokeWidth: 2 } );
+                color: customColor || "#888", strokeColor: "black", strokeWidth: 2 } );
         break;
     }
 

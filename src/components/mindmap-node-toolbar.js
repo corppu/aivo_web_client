@@ -13,7 +13,7 @@ const MindMapNodeToolbar = createClass({
     },
 
     render: function() {
-        const { id, primaryType } = this.props;
+        const { id, primaryType, remove } = this.props;
 
         return (
             <div
@@ -33,7 +33,9 @@ const MindMapNodeToolbar = createClass({
                     <Separator/>
                     { primaryType }
                     <Separator/>                    
-                    <i className="fa fa-trash-o fa-lg"></i>
+                    <i
+                        className="fa fa-trash-o fa-lg"
+                        onClick={remove}/>
                 </div>
             </div>
         );
@@ -70,8 +72,11 @@ const MindMapNodeToolbar = createClass({
 });
 
 function Separator() {
+    const style = {
+        color: "#bbb"
+    };
     return (
-        <span> | </span>
+        <span style={style}> | </span>
     );
 }
 

@@ -17,9 +17,7 @@ import {
 	TYPE_PIN
 } from "../constants/types";
 
-
 import * as backendAdapter from "../backend/backend-adapter";
-
 
 export function tryCreateObject(
 	object,
@@ -274,6 +272,7 @@ export function tryUpdateObject(
 				y : data.y || null,
 				lines : data.lines || null,
 				imgURL : data.imgURL || null,
+				customColor : data.customColor || null,
 				title : data.title || null,
 				type : data.type || null,
 				parentType : data.parentType || null,

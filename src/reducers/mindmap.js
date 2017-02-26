@@ -16,12 +16,16 @@ import {
 
 
 function clean(obj) {
-  for (var propName in obj) { 
-    if (obj[propName] === null || obj[propName] === undefined) {
-      console.warn(obj);
-	  delete obj[propName];
-    }
-  }
+
+	// made a no-op to see if this is actually needed
+
+	/*
+	for (var propName in obj) { 
+		if (obj[propName] === null || obj[propName] === undefined) {
+			delete obj[propName];
+		}
+	}
+	*/
 }
 
 
