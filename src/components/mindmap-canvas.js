@@ -1,10 +1,11 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { addNode, getHull, findPath } from "../utils/algorithm-utils";
+import { setBodies, delNode, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters } from "../utils/algorithm-utils";
 import { isDoubleTap } from "../utils/input-utils";
 import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
+
 
 import {
     NODE_TYPE_UNDEFINED,
@@ -70,6 +71,7 @@ export default function() {
 	}
 	
     function updateProps( props ) {
+		setBodies(_context.engine.world.bodies);
         _actions.createObject = props.tryCreateObject;
         _actions.updateObject = function(node, changes) {
              props.tryUpdateObject(Object.assign({}, node, changes));
@@ -101,6 +103,8 @@ export default function() {
 					setSelectedNode(null);
 				}
 				
+				delNode( node );
+				
                 //console.log(`removed node ${id}`);
                 return;
             }
@@ -126,6 +130,8 @@ export default function() {
 			if( tempLines ) {
 				node.lines = tempLines.toObject();
 			}
+			
+			updateNode( node );
 			//console.log("updated  -> " + node);
         } );
 
@@ -140,6 +146,7 @@ export default function() {
                 // _context.bodyToNodeMapping.delete(body.id);
                 // World.remove(_context.engine.world, body);
 
+				delLine( line );
                 //console.log(`removed line ${id}`);
                 return;
             }
@@ -155,7 +162,9 @@ export default function() {
 				childType: propsLine.get( "childType" ),
 				childId: propsLine.get( "childId" )
             } );
-        } );		
+			
+			updateLine( line );
+        } );
 		
 		// match existing pins to props (update old ones)
         _context.pins.forEach( ( pin, id ) => {
@@ -167,7 +176,7 @@ export default function() {
                 _context.pins.delete( id )
                 //_context.bodyToNodeMapping.delete(body.id);
                 //World.remove(_context.engine.world, body);
-
+				delPin( pin );
                 //console.log(`removed pin ${id}`);
                 return;
             }
@@ -188,6 +197,8 @@ export default function() {
 			if( tempLines ) {
 				pin.lines = tempLines.toObject();
 			}
+			
+			delPin( pin );
 			//console.log(pin);
         } );
 
@@ -227,7 +238,8 @@ export default function() {
             _context.nodes.set( id, node );
             _context.bodyToNodeMapping[ body.id ] = node;
             World.add( _context.engine.world, body );
-			addNode( node );
+			node.clusterId = 1;
+			updateNode( node );
 
             //console.log(`added node ${id}`);
         } )
@@ -244,6 +256,7 @@ export default function() {
             };
 			//console.log(line);
 		   _context.lines.set( id, line );
+		   updateLine( line );
 			//console.log(`added line ${id}`);
 		} );
 
@@ -278,6 +291,7 @@ export default function() {
             //_context.bodyToNodeMapping[body.id] = node;
             //World.add(_context.engine.world, body);
 
+			updatePin( pin );
             //console.log(`added pin ${id}`);
         } )
 		
@@ -386,41 +400,46 @@ export default function() {
     function render( ctx ) {
 		clear( ctx, { color: "#f0f0f0" } );
 
+		drawClusters( ctx, _camera );
+		drawLines( ctx, _camera );
+		drawNodes( ctx, _camera );
+		drawPins( ctx, _camera );
+		
         const draw = createRenderer( ctx, { camera: _camera } );
 
 		
 		
-		_context.lines.forEach( line => {
-            drawLine(
-				draw,
-				line,
-				_context.engine.world.bodies,
-				line.parentType === "node" ? _context.nodes.get( line.parentId ) : _context.pins.get( line.parentId ), 
-				line.childType === "node" ? _context.nodes.get( line.childId ) : _context.pins.get( line.childId )
-			);
-        } );
+		// _context.lines.forEach( line => {
+            // drawLine(
+				// draw,
+				// line,
+				// _context.engine.world.bodies,
+				// line.parentType === "node" ? _context.nodes.get( line.parentId ) : _context.pins.get( line.parentId ), 
+				// line.childType === "node" ? _context.nodes.get( line.childId ) : _context.pins.get( line.childId )
+			// );
+        // } );
 		
-        // draw non-selected node(s)
-        _context.nodes.forEach( node => {
-            if ( node.id !== _selectedNodeId ) {
-                drawNode( draw, node, false );
-            }
-        } );
+        // // draw non-selected node(s)
+        // _context.nodes.forEach( node => {
+            // if ( node.id !== _selectedNodeId ) {
+                // drawNode( draw, node, false );
+            // }
+        // } );
 
-		// draw.curve(getHull());
-		var hull = getHull(1337);
+		// // draw.curve(getHull());
+		// var hull = getHull(1337);
 		
-		for( var i = 1; i < hull.length; ++i ) {
-			draw.line(	{
-				start : {x: hull[i - 1][0], y: hull[i -1][1]},
-				end : {x: hull[i][0], y: hull[i][1]},
-				lineWidth : 10,
-				color : "#ff0000"} );
-		}
-        // draw selected node(s)
-        if ( _selectedNodeId !== null ) {
-            drawNode( draw, _context.nodes.get( _selectedNodeId ), true );
-        }
+		// for( var i = 1; i < hull.length; ++i ) {
+			// draw.line(	{
+				// start : {x: hull[i - 1][0], y: hull[i -1][1]},
+				// end : {x: hull[i][0], y: hull[i][1]},
+				// lineWidth : 10,
+				// color : "#ff0000"} );
+		// }
+        // // draw selected node(s)
+        // if ( _selectedNodeId !== null ) {
+            // drawNode( draw, _context.nodes.get( _selectedNodeId ), true );
+        // }
 
 		drawFPS( draw, _fps );
     }
