@@ -14,13 +14,18 @@ export function setBodies( bodies ) {
 
 export function drawClusters( ctx, camera ) {
 
+	ctx.save();
+	
+	if ( ctx.setLineDash !== undefined )   ctx.setLineDash([30,10]);
+	if ( ctx.mozDash !== undefined )       ctx.mozDash = [30,10];
+
 	for( var cluster of _clusters ) {
 		cluster = cluster[ 1 ];
 		
 		var firstVertex = null
 		
 		ctx.beginPath( );
-		ctx.fillStyle = "blue";
+		ctx.fillStyle = "#f2f2f2";
 		
 		for( var i = 0; i < cluster.hull.length; ++i ) {
 			
@@ -42,27 +47,32 @@ export function drawClusters( ctx, camera ) {
 		ctx.fill( );
 		
 		ctx.strokeStyle = "black";
-        ctx.lineWidth = 10;
+        ctx.lineWidth = 5;
 
         ctx.stroke();
 	}
+	
+	ctx.restore();
 }
 
 export function drawLines( ctx, camera ) {
+	ctx.save();
 	for( var line of _lines ) {
 		line = line[ 1 ];
 		if( line.path ) {
 			curve( ctx, camera, line.path );
 		}
 	}
+	ctx.restore();
 }
 
 export function drawNodes( ctx, camera ) {
+	ctx.save();
 	for( var node of _nodes ) {
 		node = node[ 1 ];
 		
 		ctx.beginPath( );
-		ctx.fillStyle = "black";
+		ctx.fillStyle = "#666666";
 		
         ctx.arc( node.body.position.x - camera.x, node.body.position.y - camera.y, node.radius, 0, 2 * Math.PI );
         
@@ -70,29 +80,35 @@ export function drawNodes( ctx, camera ) {
 		ctx.fill( );
 		
         ctx.strokeStyle = "black";
-        ctx.lineWidth = 10;
+        ctx.lineWidth = 5;
+		if ( ctx.setLineDash !== undefined )   ctx.setLineDash([30,10]);
+		if ( ctx.mozDash !== undefined )       ctx.mozDash = [30,10];
+
 
         ctx.stroke();
 	}
+	ctx.restore();
 }
 
 
 export function drawPins( ctx, camera ) {
-	for( var node of _nodes ) {
-		node = node[ 1 ];
+	ctx.save();
+	for( var pin of _pins ) {
+		pin = pin[ 1 ];
 		
 		ctx.beginPath( );
-		ctx.fillStyle = node.color || '#f00';
+		ctx.fillStyle = pin.color || "black";
 		
-        ctx.arc( node.body.position.x - camera.x, node.body.position.y - camera.y, node.radius, 0, 2 * Math.PI );
+        ctx.arc( pin.body.position.x - camera.x, pin.body.position.y - camera.y, pin.radius, 0, 2 * Math.PI );
         
 		ctx.closePath();
 		ctx.fill( );
 		
-		ctx.strokeStyle = "black";
+		ctx.strokeStyle = "red";
         ctx.lineWidth = 10;
         ctx.stroke();
 	}
+	ctx.restore();
 }
 
 

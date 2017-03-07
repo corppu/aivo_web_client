@@ -398,7 +398,7 @@ export default function() {
     }
     
     function render( ctx ) {
-		clear( ctx, { color: "#f0f0f0" } );
+		clear( ctx, { color: "#e6e6ff" } );
 
 		drawClusters( ctx, _camera );
 		drawLines( ctx, _camera );
