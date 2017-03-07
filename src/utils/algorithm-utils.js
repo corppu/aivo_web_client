@@ -115,9 +115,15 @@ export function drawPins( ctx, camera ) {
 function updateHull( cluster ) {
 	var vertices = [ ];
 	
+	
 	for( var verIter of cluster.vertices ) {
+		var point = Vertices.centre( verIter[ 1 ] );
 		for( var i = 0; i < verIter[ 1 ].length; ++i ) {
-			vertices.push( verIter[ 1 ][ i ] );
+			var vertex = Object.assign( { }, verIter[ 1 ][ i ] );
+			var delta = Vector.sub( vertex, point );
+			vertex.x = point.x + delta.x * 1.5;
+			vertex.y = point.y + delta.y * 1.5;
+			vertices.push( vertex );
 		}
 	}
 
