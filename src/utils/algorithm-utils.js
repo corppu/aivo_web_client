@@ -121,8 +121,8 @@ function updateHull( cluster ) {
 		for( var i = 0; i < verIter[ 1 ].length; ++i ) {
 			var vertex = Object.assign( { }, verIter[ 1 ][ i ] );
 			var delta = Vector.sub( vertex, point );
-			vertex.x = point.x + delta.x * 1.5;
-			vertex.y = point.y + delta.y * 1.5;
+			vertex.x = point.x + delta.x * 6;
+			vertex.y = point.y + delta.y * 6;
 			vertices.push( vertex );
 		}
 	}

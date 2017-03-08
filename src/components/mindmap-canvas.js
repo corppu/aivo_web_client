@@ -198,7 +198,7 @@ export default function() {
 				pin.lines = tempLines.toObject();
 			}
 			
-			delPin( pin );
+			updatePin( pin );
 			//console.log(pin);
         } );
 
