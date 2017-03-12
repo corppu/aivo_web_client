@@ -74,7 +74,7 @@ export default function() {
 		setBodies(_context.engine.world.bodies);
         _actions.createObject = props.tryCreateObject;
         _actions.updateObject = function(node, changes) {
-             props.tryUpdateObject(Object.assign({}, node, changes));
+             props.tryUpdateObject( Object.assign( { }, node, changes ) );
         };
 	
         _actions.removeObject = props.tryRemoveObject;
@@ -307,8 +307,13 @@ export default function() {
     function onInputStart( action ) {
         const pos = translateToCamera( _camera, action.startPosition );
 
-        const node = queryNodeAtPoint( _context, pos );
-        return node ? node.id : null;
+		// const pin = queryPinAtPoint( _context, pos );
+		// if( pin ) {
+			// return pin;
+		// }
+        // const node = queryNodeAtPoint( _context, pos );
+        // return node ? node : null;
+		return trySelectObject( pos );
     }
 
     function onInputEnd( action, prevAction ) {
@@ -354,16 +359,28 @@ export default function() {
     function onInputMove( action ) {
         const pos = translateToCamera( _camera, action.endPosition );
 
-        if (action.data && action.data === _selectedNodeId) {
+        if (action.data) { //&& action.data === _selectedNodeId) {
             if (_actions.updateObject) {
-                let node = _context.nodes.get(action.data);
+                
+				let pin = _context.pins.get(action.data);
+				
+				if(pin) {
+					_actions.updateObject(pin, {
+						x: pos.x,
+						y: pos.y
+					});
+				}
+				
+				else {
+					let node = _context.nodes.get(action.data);
 
-                if (node) {     
-                    _actions.updateObject(node, {
-                        x: pos.x,
-                        y: pos.y
-                    });
-                }
+					if (node) {     
+						_actions.updateObject(node, {
+							x: pos.x,
+							y: pos.y
+						});
+					}
+				}
 			}
          }
 		 else {
