@@ -22,7 +22,7 @@ const Login = createClass({
                     onSubmit={this.handleSubmit}>
 
                     <div className="unauthed-title">
-                        Register your account
+                        Sign in to your account
                     </div>
                     <div style={{ height: 48 }}/>
                     <div>
@@ -55,7 +55,7 @@ const Login = createClass({
                         <input
                             className="unauthed-button"
                             type="submit"
-                            value="Login"/>
+                            value="Sign In"/>
                     </div>
                 </form>
             </div>

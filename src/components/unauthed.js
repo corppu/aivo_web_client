@@ -32,14 +32,18 @@ const Unauthed = createClass({
             <div>
                 <Login/>
                 <div
-                    style={{
-                        color: "blue",
-                        textDecoration: "underline",
-                        cursor: "pointer"
-                    }}
-                    onClick={this.flipShowRegister}>
+                    className="unauthed-footer noselect">
+                    <span
+                        className="unauthed-footer-swap"
+                        onClick={this.flipShowRegister}>
 
-                    Not registered?
+                        Don't have an account? Sign Up
+                    </span>
+                    <span
+                        className="unauthed-footer-forgot">
+
+                        Forgot password?    
+                    </span>
                 </div>
             </div>
         );
@@ -50,14 +54,13 @@ const Unauthed = createClass({
             <div>
                 <Register/>
                 <div
-                    style={{
-                        color: "blue",
-                        textDecoration: "underline",
-                        cursor: "pointer"
-                    }}
-                    onClick={this.flipShowRegister}>
+                    className="unauthed-footer noselect">
+                    <span
+                        className="unauthed-footer-swap"
+                        onClick={this.flipShowRegister}>
 
-                    Already registered?
+                        Already have an account? Sign In
+                    </span>
                 </div>
             </div>
         );

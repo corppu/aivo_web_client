@@ -27,7 +27,7 @@
 .unauthed-field-input {
     outline: none;
     border: 0;
-    width: 399px;
+    width: 351px;
     height: 100%;
     background-color: inherit;
     font-family: inherit;
@@ -57,4 +57,22 @@
     color: #ffffff;
     background-color: #f852a9;
     box-shadow: 0 1px 4px 0 rgba(154, 154, 154, 0.5);
+}
+
+.unauthed-footer {
+    position: relative;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+}
+.unauthed-footer-swap {
+    position: absolute;
+    top: 20px;
+    right: 1px;
+}
+.unauthed-footer-forgot {
+    position: absolute;
+    top: 20px;
+    left: 1px;
 }
