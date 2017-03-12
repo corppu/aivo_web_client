@@ -12,38 +12,50 @@ const Register = createClass({
         const { username, password } = this.state;
     
         return (
-            <div>
+            <div className="unauthed-container">
+                <img
+                    className="unauthed-logo"
+                    src="/image/aivo-logo.png"/>
+
                 <form
                     name="register"
                     onSubmit={this.handleSubmit}>
 
-                    <div>
-                        Create new user?
+                    <div className="unauthed-title">
+                        Register your account
                     </div>
+                    <div style={{ height: 48 }}/>
                     <div>
-                        <label>
-                            Username:
+                        <div className="unauthed-field">
+                            <i className="fa fa-envelope unauthed-field-icon"/>
                             <input
+                                 className="unauthed-field-input"
                                 type="text"
                                 name="username"
+                                placeholder="Email"
                                 value={username}
                                 onChange={this.handleUsernameChange}/>
-                        </label>
+                        </div>
                     </div>
+                    <div style={{ height: 52 }}/>
                     <div>
-                        <label>
-                            Password:
+                        <div className="unauthed-field">
+                            <i className="fa fa-lock unauthed-field-icon"/>
                             <input
+                                className="unauthed-field-input"
                                 type="password"
                                 name="password"
+                                placeholder="Password"
                                 value={password}
                                 onChange={this.handlePasswordChange}/>
-                        </label>
+                        </div>
                     </div>
+                    <div style={{ height: 61 }}/>
                     <div>
                         <input
+                            className="unauthed-button"
                             type="submit"
-                            value="register"/>
+                            value="Register now"/>
                     </div>
                 </form>
             </div>
