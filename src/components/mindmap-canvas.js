@@ -89,6 +89,9 @@ export default function() {
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
 		
+        let t = 0;
+        let n = 0;
+
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
             const propsNode = propsNodes.get( id );
@@ -111,6 +114,14 @@ export default function() {
             }
             propsNodes.delete( id );
 			
+            let d = true;
+            if (node && node.lastPropsX && node.lastPropsY) {
+                let dx = Math.abs(node.lastPropsX - propsNode.get("x"));
+                let dy = Math.abs(node.lastPropsY - propsNode.get("y"));
+                
+                d = dx > 0 || dy > 0;
+            }
+
             Object.assign( node, {
 				id,
 				primaryType: propsNode.get( "primaryType" ),
@@ -121,6 +132,8 @@ export default function() {
                 },
 				x : propsNode.get( "x" ),
 				y : propsNode.get( "y" ),
+                lastPropsX : propsNode.get( "x" ),
+				lastPropsY : propsNode.get( "y" ),
                 title: propsNode.get( "title" ) || "",
                 text: propsNode.get( "text" ) || "",
                 imgURL: propsNode.get( "imgURL" ) || "",
@@ -132,9 +145,23 @@ export default function() {
 				node.lines = tempLines.toObject();
 			}
 			
-			updateNode( node );
+            
+            var t0 = performance.now();
+            if (d) {
+                updateNode( node );
+                n++
+            }
+            var t1 = performance.now();
+
+            
+            t += t1 - t0
+          
 			//console.log("updated  -> " + node);
         } );
+
+        if (n > 0) {
+            console.log("D1", n, t / n, t);
+        }
 
 		// match existing lines to props (update old ones)
         _context.lines.forEach( ( line, id ) => {
@@ -224,6 +251,8 @@ export default function() {
                 radius,
 				x: anchor.x,
 				y: anchor.y,
+                lastPropsX : propsNode.get( "x" ),
+				lastPropsY : propsNode.get( "y" ),
                 anchor,
                 body
             };
@@ -239,7 +268,12 @@ export default function() {
             _context.bodyToNodeMapping[ body.id ] = node;
             World.add( _context.engine.world, body );
 			node.clusterId = 1;
+
+            //var t0 = performance.now();
 			updateNode( node );
+            //var t1 = performance.now();
+
+            //console.log("D0:", t1 - t0);
 
             //console.log(`added node ${id}`);
         } )
@@ -255,9 +289,9 @@ export default function() {
 				childId: propsLine.get( "childId" )
             };
 			//console.log(line);
-		   _context.lines.set( id, line );
-		   updateLine( line );
-			//console.log(`added line ${id}`);
+		    _context.lines.set( id, line );
+		    updateLine( line );
+		    //console.log(`added line ${id}`);
 		} );
 
 		
