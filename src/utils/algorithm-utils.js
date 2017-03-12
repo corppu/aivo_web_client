@@ -1,39 +1,126 @@
-import { Bounds, Query, Vector, Vertices, Body, Bodies } from "matter-js";
+import { Engine, Bounds, Query, Vector, Vertices, Body, Bodies } from "matter-js";
+
+import {
+    NODE_TYPE_UNDEFINED,
+    NODE_TYPE_IMAGE,
+    NODE_TYPE_TEXT,
+	
+	TYPE_NODE,
+	TYPE_CLUSTER,
+	TYPE_LINE,
+	TYPE_NONE,
+	TYPE_PIN
+} from "../constants/types";
 
 var _nodes = new Map( );
 var _pins = new Map( );
 var _clusters = new Map( );
 var _lines = new Map( );
 var _bodies = null;
+var _engine = null;
+
+export function updatePhysics() {
+	// _nodes.forEach( ( node ) => {
+		// const { radius, anchor, body } = node;
+
+		// const diff = Vector.sub( anchor, body.position );
+		// if ( diff !== 0 ) {
+			// const vel = Vector.mult( diff, 1/1000 );
+
+			// Body.applyForce( body, Vector.create( 0, 0 ), vel );
+			// //updateNode(node);
+		// }
+    // } );
+
+	// // update physics
+	// _engine.world.gravity.x = 0;
+	// _engine.world.gravity.y = 0;
+	
+	// Engine.update( _engine );
+}
+
+
+export function moveObject( objectData, lastDelta ) {
+	var object = null;
+	
+	var objects = [ ];
+	var dx = lastDelta.x;
+	var dy = lastDelta.y;
+	
+	switch( objectData.primaryType ) {	
+		case TYPE_PIN:
+			object = _pins.get( objectData.id );
+			object.anchor.x += dx;
+			object.anchor.y += dy;
+			object.x -= dx;
+			object.y -= dy;
+			objects.push( object );
+			break;
+		
+		case TYPE_NODE:
+			object = _nodes.get( objectData.id );
+			object.anchor.x -= dx;
+			object.anchor.y -= dy;
+			object.x -= dx;
+			object.y -= dy;
+			objects.push( object );
+			break;
+
+		case TYPE_CLUSTER:
+			object = _clusters.get( objectData.id );
+			
+			for( var iter of object.vertices ) {
+				var node = _nodes.get( iter[ 0 ] );
+				node.anchor.x -= dx;
+				node.anchor.y -= dy;
+				node.x -= dx;
+				node.y -= dy;
+				objects.push( node );
+			}
+			
+			break;
+			
+		default:
+			break;
+	}
+
+	
+	return objects;
+}
 
 // vertice: [{ x: 0, y: 0 }, { x: 25, y: 50 }, { x: 50, y: 0 }]
 
-export function trySelectObject( x, y ) {
+export function trySelectObject( point ) {
 	var object;
 	var iter;
-	var point = Vector.create( x, y );
 	
 	for( iter of _pins ) {
 		object = iter[ 1 ];
 		if( Vertices.contains( object.body.vertices, point ) ) {
-			object = { primaryType, id } = object;
-			return object;
+			return {
+				primaryType: object.primaryType,
+				id: object.id
+			}
 		}
 	}
 	
 	for( iter of _nodes ) {
 		object = iter[ 1 ];
 		if( Vertices.contains( object.body.vertices, point ) ) {
-			object = { primaryType, id } = object;
-			return object;
+			return {
+				primaryType: object.primaryType,
+				id: object.id
+			}
 		}
 	}
 	
 	for( iter of _clusters ) {
 		object = iter[ 1 ];
 		if( Vertices.contains( object.hull, point ) ) {
-			object = { primaryType, id } = object;
-			return object;
+			return {
+				primaryType: object.primaryType,
+				id: object.id
+			}
 		}
 	}
 	
@@ -41,8 +128,9 @@ export function trySelectObject( x, y ) {
 }
 
 
-export function setBodies( bodies ) {
-	_bodies = bodies;
+export function setEngine( engine ) {
+	_bodies = engine.world.bodies;
+	_engine = engine;
 }
 
 export function drawClusters( ctx, camera ) {
@@ -146,9 +234,9 @@ export function drawPins( ctx, camera ) {
 
 
 function updateHull( cluster ) {
+	
+	
 	var vertices = [ ];
-	
-	
 	for( var verIter of cluster.vertices ) {
 		var point = Vertices.centre( verIter[ 1 ] );
 		for( var i = 0; i < verIter[ 1 ].length; ++i ) {
@@ -168,9 +256,9 @@ function setToCluster( node ) {
 
 	if( !cluster ) {
 		cluster = {
-			primaryType: "cluster",
+			primaryType: TYPE_CLUSTER,
 			id: node.clusterId,
-			vertices : new Map( )
+			vertices: new Map( )
 		};
 		_clusters.set( node.clusterId, cluster );
 	}
@@ -194,7 +282,8 @@ function delFromCluster( node ) {
 }
 
 
-function updateLinePaths( ) {
+export function updateLinePaths( ) {
+
 	for( var line of _lines ) {
 		line = line[ 1 ];
 		
@@ -216,6 +305,8 @@ function updateLinePaths( ) {
 
 
 export function updateNode( node ) {
+	const translation = Vector.sub( node.anchor, node.body.position );
+	Body.translate( node.body, translation );
 	var oldNode = _nodes.get( node.id );
 	_nodes.set( node.id, node );
 
@@ -243,13 +334,15 @@ export function delNode( node ) {
 }
 
 export function updatePin( pin ) {
+	const translation = Vector.sub( pin.anchor, pin.body.position );
+	Body.translate( pin.body, translation );
 	_pins.set( pin.id, pin );
 	updateLinePaths( );
 }
 
 export function delPin( pin ) {	
 	_pins.delete( pin.id )
-	updateLinePaths( );	
+	updateLinePaths( );
 }
 
 export function updateLine( line ) {
