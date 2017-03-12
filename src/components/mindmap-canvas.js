@@ -88,9 +88,6 @@ export default function() {
         let propsNodes = new Map( props.nodes );
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
-		
-        let t = 0;
-        let n = 0;
 
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
@@ -114,12 +111,12 @@ export default function() {
             }
             propsNodes.delete( id );
 			
-            let d = true;
+            let posChanged = true;
             if (node && node.lastPropsX && node.lastPropsY) {
                 let dx = Math.abs(node.lastPropsX - propsNode.get("x"));
                 let dy = Math.abs(node.lastPropsY - propsNode.get("y"));
                 
-                d = dx > 0 || dy > 0;
+                posChanged = dx > 0 || dy > 0;
             }
 
             Object.assign( node, {
@@ -145,23 +142,13 @@ export default function() {
 				node.lines = tempLines.toObject();
 			}
 			
-            
-            var t0 = performance.now();
-            if (d) {
-                updateNode( node );
-                n++
+            if (posChanged) {
+                updateNode(node);
             }
-            var t1 = performance.now();
-
             
-            t += t1 - t0
-          
 			//console.log("updated  -> " + node);
         } );
 
-        if (n > 0) {
-            console.log("D1", n, t / n, t);
-        }
 
 		// match existing lines to props (update old ones)
         _context.lines.forEach( ( line, id ) => {
