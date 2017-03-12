@@ -1,0 +1,57 @@
+
+.unauthed-container {
+    position: relative;
+    margin-top: 224px;
+    padding: 126px 39px 39px 35px;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+    color: #a5a9ac;
+    font-size: 28px;
+    box-shadow: 0 60px 100px 0 rgba(0, 0, 0, 0.13);
+    text-align: center;
+}
+
+.unauthed-logo {
+    position: absolute;
+    top: -60px;
+    left: calc(50% - 60px);
+}
+
+.unauthed-field {
+    background-color: #ffffff;
+    height: 49px;
+}
+.unauthed-field-icon {
+    width: 48px;
+}
+.unauthed-field-input {
+    outline: none;
+    border: 0;
+    width: 399px;
+    height: 100%;
+    font-size: 24px;
+    background-color: inherit;
+}
+.unauthed-field-input::-webkit-input-placeholder {
+    color: #a5a9ac;
+}
+.unauthed-field-input:-moz-placeholder {
+    color: #a5a9ac;
+}
+.unauthed-field-input::-moz-placeholder {
+    color: #a5a9ac;
+}
+.unauthed-field-input:-ms-input-placeholder {
+    color: #a5a9ac;
+}
+
+.unauthed-button {
+    border: 0;
+    width: 399px;
+    height: 49px;
+    border-radius: 4px;
+    font-size: 24px;
+    color: #ffffff;
+    background-color: #f852a9;
+    box-shadow: 0 1px 4px 0 rgba(154, 154, 154, 0.5);
+}
