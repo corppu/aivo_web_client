@@ -7,8 +7,10 @@ const App = createClass({
         const { authed, children } = this.props;
         
         return (
-            <div>
-                <h1>Aivo v0.0.1</h1>
+            <div
+                style={{
+                    height: "100vh"
+                }}>
                 {authed ? children : <Unauthed/>}
             </div>
         );

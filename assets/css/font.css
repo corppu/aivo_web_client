@@ -1,0 +1,11 @@
+
+@font-face {
+    font-family: Texta;
+    src: url("/font/Texta-Light.otf") format("opentype");
+}
+
+@font-face {
+    font-family: Texta;
+    font-weight: bold;
+    src: url("/font/Texta-Bold.otf") format("opentype");
+}

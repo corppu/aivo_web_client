@@ -17,7 +17,9 @@ const Unauthed = createClass({
             <div
                 style={{
                     display: "flex",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    backgroundImage: "linear-gradient(233deg, #0eb1f9, #673ac3)",
+                    minHeight: "100%"
                 }}>
                 
                 { showRegister ? this.renderRegister() : this.renderLogin() }
@@ -30,14 +32,18 @@ const Unauthed = createClass({
             <div>
                 <Login/>
                 <div
-                    style={{
-                        color: "blue",
-                        textDecoration: "underline",
-                        cursor: "pointer"
-                    }}
-                    onClick={this.flipShowRegister}>
+                    className="unauthed-footer noselect">
+                    <span
+                        className="unauthed-footer-swap"
+                        onClick={this.flipShowRegister}>
 
-                    Not registered?
+                        Don't have an account? Sign Up
+                    </span>
+                    <span
+                        className="unauthed-footer-forgot">
+
+                        Forgot password?    
+                    </span>
                 </div>
             </div>
         );
@@ -48,14 +54,13 @@ const Unauthed = createClass({
             <div>
                 <Register/>
                 <div
-                    style={{
-                        color: "blue",
-                        textDecoration: "underline",
-                        cursor: "pointer"
-                    }}
-                    onClick={this.flipShowRegister}>
+                    className="unauthed-footer noselect">
+                    <span
+                        className="unauthed-footer-swap"
+                        onClick={this.flipShowRegister}>
 
-                    Already registered?
+                        Already have an account? Sign In
+                    </span>
                 </div>
             </div>
         );
