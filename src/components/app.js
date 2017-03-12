@@ -7,10 +7,7 @@ const App = createClass({
         const { authed, children } = this.props;
         
         return (
-            <div
-                style={{
-                    height: "100vh"
-                }}>
+            <div>
                 {authed ? children : <Unauthed/>}
             </div>
         );
