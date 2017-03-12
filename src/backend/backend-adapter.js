@@ -626,7 +626,7 @@ export function updateObject(
 	updates[ PATH ] = object;
 	firebase.database().ref().update( updates ).then(
 		() => {
-			console.log( "Successfully updated object " + object.primaryType + " " + object.id );
+			// console.log( "Successfully updated object " + object.primaryType + " " + object.id );
 		},
 		
 		error => {

@@ -1,7 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { setBodies, delNode, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters } from "../utils/algorithm-utils";
+import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters } from "../utils/algorithm-utils";
 import { isDoubleTap } from "../utils/input-utils";
 import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
@@ -12,6 +12,7 @@ import {
     NODE_TYPE_IMAGE,
     NODE_TYPE_TEXT,
 	TYPE_NODE,
+	TYPE_CLUSTER,
 	TYPE_LINE,
 	TYPE_NONE,
 	TYPE_PIN
@@ -71,7 +72,7 @@ export default function() {
 	}
 	
     function updateProps( props ) {
-		setBodies(_context.engine.world.bodies);
+		setEngine(_context.engine );
         _actions.createObject = props.tryCreateObject;
         _actions.updateObject = function(node, changes) {
              props.tryUpdateObject( Object.assign( { }, node, changes ) );
@@ -197,7 +198,6 @@ export default function() {
 			if( tempLines ) {
 				pin.lines = tempLines.toObject();
 			}
-			
 			updatePin( pin );
 			//console.log(pin);
         } );
@@ -357,29 +357,14 @@ export default function() {
 	
 
     function onInputMove( action ) {
-        const pos = translateToCamera( _camera, action.endPosition );
+        //const pos = translateToCamera( _camera, action.endPosition );
 
         if (action.data) { //&& action.data === _selectedNodeId) {
-            if (_actions.updateObject) {
-                
-				let pin = _context.pins.get(action.data);
+            if (_actions.updateObject && action.data.primaryType  && action.data.id ) {
 				
-				if(pin) {
-					_actions.updateObject(pin, {
-						x: pos.x,
-						y: pos.y
-					});
-				}
-				
-				else {
-					let node = _context.nodes.get(action.data);
-
-					if (node) {     
-						_actions.updateObject(node, {
-							x: pos.x,
-							y: pos.y
-						});
-					}
+				var objects = moveObject( action.data, action.lastDelta );
+				for( var i = 0; i < objects.length; ++i ) {
+					_actions.updateObject( objects[ i ] );
 				}
 			}
          }
@@ -394,24 +379,25 @@ export default function() {
 
     function update() {
         updateFps(); // Just testing...
+		updatePhysics();
+        // _context.nodes.forEach( ( node ) => {
+            // const { radius, anchor, body } = node;
 
-        _context.nodes.forEach( ( node ) => {
-            const { radius, anchor, body } = node;
+            // const diff = Vector.sub( anchor, body.position );
 
-            const diff = Vector.sub( anchor, body.position );
+            // //if (Vector.magnitude(diff) > radius * 1.5) {
+                // const vel = Vector.mult( diff, 1/1000 );
 
-            //if (Vector.magnitude(diff) > radius * 1.5) {
-                const vel = Vector.mult( diff, 1/1000 );
+                // Body.applyForce( body, Vector.create( 0, 0 ), vel );
+				// updateNode(node);
+            // //}
+        // } );
 
-                Body.applyForce( body, Vector.create( 0, 0 ), vel );
-            //}
-        } );
-
-        // update physics
-        _context.engine.world.gravity.x = 0;
-        _context.engine.world.gravity.y = 0;
+        // // update physics
+        // _context.engine.world.gravity.x = 0;
+        // _context.engine.world.gravity.y = 0;
         
-        Engine.update( _context.engine );
+        // Engine.update( _context.engine );
     }
     
     function render( ctx ) {
