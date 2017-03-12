@@ -234,12 +234,16 @@ export function drawPins( ctx, camera ) {
 
 
 function updateHull( cluster ) {
-	
-	
+		
 	var vertices = [ ];
 	for( var verIter of cluster.vertices ) {
-		var point = Vertices.centre( verIter[ 1 ] );
-		for( var i = 0; i < verIter[ 1 ].length; ++i ) {
+		const vs = verIter[ 1 ];
+		const point = Vertices.centre( vs );
+
+		const limit = vs.length;
+		const skip = 2;
+
+		for( var i = 0; i < limit; i += skip ) {
 			var vertex = Object.assign( { }, verIter[ 1 ][ i ] );
 			var delta = Vector.sub( vertex, point );
 			vertex.x = point.x + delta.x * 6;
