@@ -17,7 +17,9 @@ const Unauthed = createClass({
             <div
                 style={{
                     display: "flex",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    backgroundImage: "linear-gradient(233deg, #0eb1f9, #673ac3)",
+                    minHeight: "100%"
                 }}>
                 
                 { showRegister ? this.renderRegister() : this.renderLogin() }
