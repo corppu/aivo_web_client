@@ -8,6 +8,39 @@ var _bodies = null;
 
 // vertice: [{ x: 0, y: 0 }, { x: 25, y: 50 }, { x: 50, y: 0 }]
 
+export function trySelectObject( x, y ) {
+	var object;
+	var iter;
+	var point = Vector.create( x, y );
+	
+	for( iter of _pins ) {
+		object = iter[ 1 ];
+		if( Vertices.contains( object.body.vertices, point ) ) {
+			object = { primaryType, id } = object;
+			return object;
+		}
+	}
+	
+	for( iter of _nodes ) {
+		object = iter[ 1 ];
+		if( Vertices.contains( object.body.vertices, point ) ) {
+			object = { primaryType, id } = object;
+			return object;
+		}
+	}
+	
+	for( iter of _clusters ) {
+		object = iter[ 1 ];
+		if( Vertices.contains( object.hull, point ) ) {
+			object = { primaryType, id } = object;
+			return object;
+		}
+	}
+	
+	return null;
+}
+
+
 export function setBodies( bodies ) {
 	_bodies = bodies;
 }
@@ -135,6 +168,8 @@ function setToCluster( node ) {
 
 	if( !cluster ) {
 		cluster = {
+			primaryType: "cluster",
+			id: node.clusterId,
 			vertices : new Map( )
 		};
 		_clusters.set( node.clusterId, cluster );
@@ -224,6 +259,18 @@ export function updateLine( line ) {
 
 export function delLine( line ) {
 	_lines.delete( line.id );
+}
+
+export function updateCluster( cluster ) {
+	var current = _clusters.get( cluster.id );
+	
+	if( current ) {
+		Object.assign( current, cluster );
+	}
+	else {
+		cluster.vertices = new Map( );
+		_clusters.set( cluster.id, cluster );
+	}
 }
 
 
