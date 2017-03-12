@@ -29,8 +29,9 @@
     border: 0;
     width: 399px;
     height: 100%;
-    font-size: 24px;
     background-color: inherit;
+    font-family: inherit;
+    font-size: 24px;
 }
 .unauthed-field-input::-webkit-input-placeholder {
     color: #a5a9ac;
@@ -50,7 +51,9 @@
     width: 399px;
     height: 49px;
     border-radius: 4px;
+    font-family: inherit;
     font-size: 24px;
+    font-weight: bold;
     color: #ffffff;
     background-color: #f852a9;
     box-shadow: 0 1px 4px 0 rgba(154, 154, 154, 0.5);

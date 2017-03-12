@@ -9,7 +9,7 @@ export function createAction(position) {
         startTime: getTimestamp(),
         duration: 0,
 
-        lastDelta: { x: 0, y: 0},
+        lastDelta: { x: 0, y: 0 },
         lastDeltaMagnitude: 0,
 
         delta: { x: 0, y: 0 },
