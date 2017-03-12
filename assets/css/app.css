@@ -17,3 +17,8 @@ a {
     -ms-user-select: none;
     user-select: none;
 }
+
+/* horrible hack to disable yellow background in autocompleted forms on chrome */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+}
