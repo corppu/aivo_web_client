@@ -6,3 +6,4 @@ export const TYPE_NODE = "node";
 export const TYPE_LINE = "line";
 export const TYPE_NONE = "none";
 export const TYPE_PIN = "pin";
+export const TYPE_CLUSTER = "cluster";
