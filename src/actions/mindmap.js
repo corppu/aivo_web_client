@@ -48,7 +48,6 @@ export function tryCreateObject(
 				}
 			);
 			
-			
 			if( parent.primaryType === TYPE_NODE ) {
 				Object.assign(
 					parentCopy,
@@ -101,7 +100,7 @@ export function tryRemoveObject(
             return;
         }
 	
-		var removable = { 
+		var removable = {
 			primaryType,
 			id
 		};

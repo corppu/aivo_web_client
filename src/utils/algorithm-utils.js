@@ -12,6 +12,12 @@ import {
 	TYPE_PIN
 } from "../constants/types";
 
+import {
+	MINDMAP_PIN_RADIUS,
+	MINDMAP_NODE_RADIUS,
+    MINDMAP_NODE_HIGHLIGHT_MARGIN,
+} from "../constants/config";
+
 var _nodes = new Map( );
 var _pins = new Map( );
 var _clusters = new Map( );
@@ -252,7 +258,7 @@ function updateHull( cluster ) {
 
 		const limit = vs.length;
 		const skip = 2;
-
+		
 		for( var i = 0; i < limit; i += skip ) {
 			var vertex = Object.assign( { }, verIter[ 1 ][ i ] );
 			var delta = Vector.sub( vertex, point );
@@ -261,8 +267,16 @@ function updateHull( cluster ) {
 			vertices.push( vertex );
 		}
 	}
-
+	
+	if( cluster.cellVertices ) {
+		for( var j = 0; j < cluster.cellVertices.length; ++j ) {
+			vertices.push( cluster.cellVertices[ i ] );
+		}
+	}
 	cluster.hull = Vertices.hull( vertices );
+	var center = Vertices.centre( cluster.hull );
+	cluster.x = center.x;
+	cluster.y = center.y;
 }
 
 function setToCluster( node ) {
@@ -340,6 +354,7 @@ export function updateNode( node ) {
 }
 
 
+
 export function delNode( node ) {
 	var oldNode = _nodes.get( node.id );
 	_nodes.delete( node.id );
@@ -347,8 +362,6 @@ export function delNode( node ) {
 	if( oldNode.clusterId ) {
 		delFromCluster( oldNode );
 	}
-	
-	
 }
 
 export function updatePin( pin ) {
@@ -373,14 +386,30 @@ export function delLine( line ) {
 }
 
 export function updateCluster( cluster ) {
-	var current = _clusters.get( cluster.id );
-	
-	if( current ) {
-		Object.assign( current, cluster );
+	var oldCluster = _clusters.get( cluster.id );
+	if( oldCluster ) {
+		_clusters.set( cluster.id, Object.assign( oldCluster, cluster ) );
 	}
 	else {
+		cluster.cellVertices = [ 
+								Vector.create(cluster.x + MINDMAP_NODE_RADIUS * 1.5, cluster.y),
+								Vector.create( cluster.x, cluster.y + MINDMAP_NODE_RADIUS * 1.5 ), 
+							    Vector.create( cluster.x - MINDMAP_NODE_RADIUS * 1.5, cluster.y - MINDMAP_NODE_RADIUS * 1.5 ) 
+							];
 		cluster.vertices = new Map( );
 		_clusters.set( cluster.id, cluster );
+	}
+}
+
+export function delCluster( cluster ) {
+	var oldCluster = _clusters.get( node.id );
+	_clusters.delete( cluster.id );
+	var node = null;
+	for( var iter of _cluster.vertices ) {
+		node = _nodes.get( iter[ 0 ] );
+		if( node && node.clusterId && node.clusterId === cluster.id ) {
+			node.clusterId = null;
+		}
 	}
 }
 
