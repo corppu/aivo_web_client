@@ -1,11 +1,11 @@
 import React, { createClass } from "react";
-import { Link } from "react-router";
 
 import { openBoardList, closeBoardList } from "../backend/backend-adapter";
 
-import { constructBoardURL } from "../utils/url-utils";
+import MainMenuGridItem from "./main-menu-grid-item";
 
-const BoardList = createClass({
+
+const MainMenu = createClass({
     componentDidMount: function() {
         openBoardList();
     },
@@ -20,9 +20,7 @@ const BoardList = createClass({
         return (
             <div>
                 {boards.map((data, id) =>
-                    <div key={id}>
-                        <Link to={constructBoardURL(id)}>{data.title}</Link>
-                    </div>
+                    <MainMenuGridItem div key={id} {...data}/>
                 ).toList()}
 
                 <button
@@ -41,4 +39,4 @@ const BoardList = createClass({
     }
 });
 
-export default BoardList;
+export default MainMenu;

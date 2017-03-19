@@ -11,7 +11,7 @@ import authReducer from "./reducers/auth";
 import mindmapReducer from "./reducers/mindmap";
 
 import App from "./containers/app";
-import BoardList from "./containers/board-list";
+import MainMenu from "./containers/main-menu";
 import MindMap from "./containers/mindmap";
 import NodeView from "./containers/node-view";
 
@@ -48,7 +48,7 @@ render(
     <Provider store={store}>
         <Router history={history}>
             <Route path="/" component={App}>
-                <IndexRoute component={BoardList}/>
+                <IndexRoute component={MainMenu}/>
                 <Route path="/board/:boardID" component={MindMap}>
                     <Route path="/board/:boardID/:nodeID" component={NodeView}/>
                 </Route>

@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 
-import BoardList from "../components/board-list";
+import MainMenu from "../components/main-menu";
 
 import { tryCreateBoard } from "../actions/backend";
 
@@ -12,4 +12,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps, { tryCreateBoard })(BoardList);
+export default connect(mapStateToProps, { tryCreateBoard })(MainMenu);
