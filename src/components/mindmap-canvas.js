@@ -441,17 +441,18 @@ export default function() {
     }
     
     function render( ctx ) {
+
 		clear( ctx, { color: "#e6e6ff" } );
 
 		drawClusters( ctx, _camera );
 		drawLines( ctx, _camera );
 		drawNodes( ctx, _camera );
 		drawPins( ctx, _camera );
-		
+        
+	
         const draw = createRenderer( ctx, { camera: _camera } );
 
-		
-		
+	
 		// _context.lines.forEach( line => {
             // drawLine(
 				// draw,
@@ -485,6 +486,12 @@ export default function() {
         // }
 
 		drawFPS( draw, _fps );
+    
+        /*
+        let t0 = performance.now();
+        let t1 = performance.now();
+        console.log(t1 - t0);
+        */
     }
 
     return {
