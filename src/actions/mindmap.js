@@ -239,11 +239,12 @@ function removeLineHelper(
 			);
 		}
 		
+		/*
 		console.log("ALKUPERÄINEN");
 		console.log(otherData);
 		console.log("KOPIO");
 		console.log(otherCopy);
-		
+		*/
 		
 		copiesForUpdate.push( otherCopy );
 	}
@@ -282,7 +283,7 @@ export function tryUpdateObject(
 			}
 		);
 		
-		dispatch( updateObject( dataCopy ) );
+		//dispatch( updateObject( dataCopy ) );
         backendAdapter.updateObject( boardID, dataCopy );
     };
 }
