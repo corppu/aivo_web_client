@@ -73,6 +73,10 @@ const MindMap = createClass({
             }));
         }
     },
+
+    shouldComponentUpdate: function(nextProps, nextState) {
+        return true; //false; // TODO: logic for this for slight performance gain
+    },
     
     render: function() {
         const { children } = this.props;

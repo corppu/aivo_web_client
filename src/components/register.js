@@ -62,7 +62,7 @@ const Register = createClass({
         );
     },
 
-     handleUsernameChange: function(e) {
+    handleUsernameChange: function(e) {
         this.setState({
             username: e.target.value
         });
