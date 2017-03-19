@@ -235,6 +235,8 @@ export function drawPins( ctx, camera ) {
 }
 
 export function updateHulls() {
+	updateLinePaths( );
+
 	_dirtyClusters.forEach(cluster => {
 		updateHull( cluster );
 	});
@@ -299,7 +301,7 @@ function delFromCluster( node ) {
 
 
 export function updateLinePaths( ) {
-
+	
 	for( var line of _lines ) {
 		line = line[ 1 ];
 		
@@ -334,36 +336,36 @@ export function updateNode( node ) {
 		setToCluster( node );
 	}
 	
-	updateLinePaths( );
+	//updateLinePaths( );
 }
 
 
 export function delNode( node ) {
-	var oldNode = _nodes.get( node.id );	
+	var oldNode = _nodes.get( node.id );
 	_nodes.delete( node.id );
 	
 	if( oldNode.clusterId ) {
 		delFromCluster( oldNode );
 	}
 	
-	updateLinePaths( );
+	
 }
 
 export function updatePin( pin ) {
 	const translation = Vector.sub( pin.anchor, pin.body.position );
 	Body.translate( pin.body, translation );
 	_pins.set( pin.id, pin );
-	updateLinePaths( );
+	//updateLinePaths( );
 }
 
 export function delPin( pin ) {	
 	_pins.delete( pin.id )
-	updateLinePaths( );
+	//updateLinePaths( );
 }
 
 export function updateLine( line ) {
 	_lines.set( line.id, line );
-	updateLinePaths( );
+	//updateLinePaths( );
 }
 
 export function delLine( line ) {
