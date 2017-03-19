@@ -623,11 +623,11 @@ export function updateObjects(
 	}
 	var updates = { };
 	
-	
 	for( var i = 0; i < objects.length; ++i ) {
 		var object = objects[ i ];
 		if( !validateObject( object ) ) {
-			throw("object is invalid");
+			console.warn("object is invalid");
+			continue;
 		}
 		const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
 		updates[ PATH ] = object;
