@@ -287,7 +287,7 @@ export function tryUpdateObjects(
 			);
 			dataCopies.push( dataCopy );
 		}
-		
+		dispatch( updateObjects( dataCopies ) );
         backendAdapter.updateObjects( boardID, dataCopies );
     };
 }
