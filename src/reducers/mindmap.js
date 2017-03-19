@@ -85,6 +85,26 @@ export default function( state = initialState, action ) {
 		);
     }
 
+	case UPDATE_OBJECTS:
+    {
+        const { data } = action;
+		
+		for( var i = 0; i < data.length; ++i ) {
+			clean( data[ i ] );
+			
+			state = state.updateIn( 
+			
+				[ data[ i ].primaryType + "s", data[ i ].id ], 
+				
+				prop => {
+					const immutableData = fromJS( data[ i ] );
+
+					return prop ? prop.merge( immutableData ) : immutableData;
+				}
+			);
+		}
+		return state;
+	}
 	
     case REMOVE_OBJECT:
     {
