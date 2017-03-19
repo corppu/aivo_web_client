@@ -19,6 +19,8 @@ var _lines = new Map( );
 var _bodies = null;
 var _engine = null;
 
+var _dirtyClusters = new Set( );
+
 export function updatePhysics() {
 	// _nodes.forEach( ( node ) => {
 		// const { radius, anchor, body } = node;
@@ -232,6 +234,12 @@ export function drawPins( ctx, camera ) {
 	ctx.restore();
 }
 
+export function updateHulls() {
+	_dirtyClusters.forEach(cluster => {
+		updateHull( cluster );
+	});
+	_dirtyClusters.clear();
+}
 
 function updateHull( cluster ) {
 		
@@ -269,7 +277,9 @@ function setToCluster( node ) {
 
 	cluster.vertices.set( node.id, node.body.vertices );
 	
-	updateHull( cluster );
+	//updateHull( cluster );
+
+	_dirtyClusters.add( cluster );
 }
 
 function delFromCluster( node ) {
@@ -280,7 +290,9 @@ function delFromCluster( node ) {
 		if( cluster.size === 0 ) {
 			_clusters.delete( node.clusterId );
 		} else {
-			updateHull( cluster );
+			//updateHull( cluster );
+
+			_dirtyClusters.add( cluster );
 		}
 	}
 }
@@ -386,12 +398,6 @@ export function clusters( ) {
 export function lines( ) {
 	return _lines;
 }
-
-
-
-
-
-
 
 
 function centerX(bounds) {

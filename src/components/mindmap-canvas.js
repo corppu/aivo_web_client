@@ -1,7 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters } from "../utils/algorithm-utils";
+import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters, updateHulls } from "../utils/algorithm-utils";
 import { isDoubleTap } from "../utils/input-utils";
 import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
@@ -323,6 +323,8 @@ export default function() {
 
             _context.nodes = flagHidden( _context.nodes, _searchFilter );
         }
+
+        updateHulls();
     }
 	
     function onInputStart( action ) {
