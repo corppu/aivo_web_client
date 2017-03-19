@@ -19,15 +19,18 @@ const MainMenu = createClass({
 
         return (
             <div>
-                {boards.map((data, id) =>
-                    <MainMenuGridItem div key={id} {...data}/>
-                ).toList()}
-
-                <button
-                    onClick={this.handleCreateBoard}>
-
-                    Create new board
-                </button>
+                <div className="main-menu-nav">
+                    <button
+                        className="main-menu-nav-create-button"
+                        onClick={this.handleCreateBoard}>
+                        +
+                    </button>
+                </div>
+                <div className="main-menu">
+                    {boards.map((data, id) =>
+                        <MainMenuGridItem div key={id} {...data}/>
+                    ).toList()}
+                </div>
             </div>
         );
     },

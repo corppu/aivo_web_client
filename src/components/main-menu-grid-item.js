@@ -10,7 +10,12 @@ const MainMenuGridItem = createClass({
         return (
             <div
                 style={{
-                    
+                    width: 220,
+                    height: 215,
+                    margin: 8,
+                    borderRadius: 4,
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 2px 4px 0 rgba(120, 123, 150, 0.2)"
                 }}>
                 <Link to={constructBoardURL(id)}>{title}</Link>
             </div>
