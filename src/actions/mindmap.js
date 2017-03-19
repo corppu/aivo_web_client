@@ -2,6 +2,7 @@ import {
     UPDATE_BOARD,
 	// REMOVE_BOARD,
 	UPDATE_OBJECT,
+	UPDATE_OBJECTS,
 	// MOVE_OBJECT,
 	REMOVE_OBJECT,
 	REMOVE_OBJECTS
@@ -250,40 +251,44 @@ function removeLineHelper(
 }
 
 
-export function tryUpdateObject(
+export function tryUpdateObjects(
 	data
 ) {
 	return function ( dispatch, getState ) {
         const { mindmap } = getState();
 
-        const boardID = mindmap.get("boardID");
+        const boardID = mindmap.get( "boardID" );
         
-		if ( !boardID  || !data || !data.primaryType ) {
+		if ( !boardID  || !data || !data.length ) {
             return;
         }
 		
-		var dataCopy = { }; 
-		Object.assign(
-			dataCopy, 
-			{
-				id : data.id,
-				primaryType : data.primaryType,
-				x : data.x || null,
-				y : data.y || null,
-				lines : data.lines || null,
-				title : data.title || null,
-				imgURL : data.imgURL || null,
-				customColor : data.customColor || null,
-				type : data.type || null,
-				parentType : data.parentType || null,
-				parentId : data.parentId || null,
-				childType : data.childType || null,
-				childId : data.childId || null,
-			}
-		);
+		var dataCopies = [ ];
+		for( var i = 0; i < data.length; ++i ) {
+			var dataCopy = { };
+			Object.assign(
+				dataCopy,
+				{
+					id : data[ i ].id,
+					primaryType : data[ i ].primaryType,
+					x : data[ i ].x || null,
+					y : data[ i ].y || null,
+					lines : data[ i ].lines || null,
+					title : data[ i ].title || null,
+					imgURL : data[ i ].imgURL || null,
+					customColor : data[ i ].customColor || null,
+					type : data[ i ].type || null,
+					parentType : data[ i ].parentType || null,
+					parentId : data[ i ].parentId || null,
+					childType : data[ i ].childType || null,
+					childId : data[ i ].childId || null,
+				}
+			);
+			dataCopies.push( dataCopy );
+		}
 		
-		dispatch( updateObject( dataCopy ) );
-        backendAdapter.updateObject( boardID, dataCopy );
+		// dispatch( updateObjects( dataCopies ) );
+        backendAdapter.updateObjects( boardID, dataCopies );
     };
 }
 
@@ -293,6 +298,10 @@ export function updateBoard( data ) {
 
 export function updateObject( data ) {
     return { type: UPDATE_OBJECT, data };
+}
+
+export function updateObjects( data ) {
+    return { type: UPDATE_OBJECTS, data };
 }
 
 export function createObject( data, parentData, lineData ) {

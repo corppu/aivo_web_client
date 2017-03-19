@@ -10,6 +10,7 @@ export const UPDATE_BOARD = "UPDATE_BOARD";
 // export const REMOVE_BOARD = "REMOVE_BOARD";
 
 export const UPDATE_OBJECT = "UPDATE_OBJECT";
+export const UPDATE_OBJECTS = "UPDATE_OBJECTS";
 // export const MOVE_OBJECT = "MOVE_OBJECT";
 export const REMOVE_OBJECT = "REMOVE_OBJECT";
 export const REMOVE_OBJECTS = "REMOVE_OBJECTS";

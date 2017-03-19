@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { push } from "react-router-redux";
 
-import { tryCreateObject, tryUpdateObject, tryRemoveObject } from "../actions/mindmap";
+import { tryCreateObject, tryUpdateObjects, tryRemoveObject } from "../actions/mindmap";
 import { tryOpenBoard } from "../actions/backend";
 
 import { constructNodeURL } from "../utils/url-utils";
@@ -24,7 +24,7 @@ function mapStateToProps(state, ownProps) {
 
 function mergeProps(stateProps, dispatchProps) {
     const { boardID, lines, nodes, pins, children } = stateProps;
-    const { tryCreateObject, tryUpdateObject, tryRemoveObject, tryOpenBoard, push } = dispatchProps;
+    const { tryCreateObject, tryUpdateObjects, tryRemoveObject, tryOpenBoard, push } = dispatchProps;
 
     return {
         nodes,
@@ -34,7 +34,7 @@ function mergeProps(stateProps, dispatchProps) {
         children,
 
         tryCreateObject,
-        tryUpdateObject,
+        tryUpdateObjects,
 		tryRemoveObject,
         tryOpenBoard: function() {
             tryOpenBoard(boardID)
@@ -46,4 +46,4 @@ function mergeProps(stateProps, dispatchProps) {
 }
 
 export default connect(mapStateToProps,
-        { tryCreateObject, tryUpdateObject, tryRemoveObject, tryOpenBoard, push }, mergeProps)(MindMap);
+        { tryCreateObject, tryUpdateObjects, tryRemoveObject, tryOpenBoard, push }, mergeProps)(MindMap);

@@ -25,6 +25,10 @@ export default function( store ) {
         store.dispatch( mindmapActions.updateObject( data ) );
     }
 
+	function updateObjects( data ) {
+        store.dispatch( mindmapActions.updateObjects( data ) );
+    }
+	
     function removeObject( data ) {
         store.dispatch( mindmapActions.removeObject( data ) );
     }
@@ -50,6 +54,8 @@ export default function( store ) {
 		updateBoard,
 	
 		updateObject,
+		updateObjects,
+		
 		removeObject,
 		removeObjects,
 	

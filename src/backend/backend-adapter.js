@@ -614,16 +614,24 @@ export function createObject(
 }
 
 
-export function updateObject(
+export function updateObjects(
 	boardId,
-	object
+	objects
 ) {
-	if( !object || !validateObject(object) ) {
-		throw("object value was null or undefined or it has invalid properties");
+	if( !objects || !objects.length ) {
+		throw("object value was null or undefined or not array");
 	}
 	var updates = { };
-	const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
-	updates[ PATH ] = object;
+	
+	
+	for( var i = 0; i < objects.length; ++i ) {
+		var object = objects[ i ];
+		if( !validateObject( object ) ) {
+			throw("object is invalid");
+		}
+		const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
+		updates[ PATH ] = object;
+	}
 	firebase.database().ref().update( updates ).then(
 		() => {
 			// console.log( "Successfully updated object " + object.primaryType + " " + object.id );

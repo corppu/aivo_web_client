@@ -46,7 +46,7 @@ export default function() {
 
     let _actions = {
         createObject: null,
-        updateObject: null,
+        updateObjects: null,
 		// moveObject: null,
 		removeObject: null,
         openNode: null,
@@ -74,9 +74,7 @@ export default function() {
     function updateProps( props ) {
 		setEngine(_context.engine );
         _actions.createObject = props.tryCreateObject;
-        _actions.updateObject = function(node, changes) {
-             props.tryUpdateObject( Object.assign( { }, node, changes ) );
-        };
+        _actions.updateObjects = props.tryUpdateObjects;
 	
         _actions.removeObject = props.tryRemoveObject;
 		//_actions.moveObject = props.tryMoveObject;
@@ -382,13 +380,13 @@ export default function() {
     function onInputMove( action ) {
         //const pos = translateToCamera( _camera, action.endPosition );
 
-        if (action.data) { //&& action.data === _selectedNodeId) {
-            if (_actions.updateObject && action.data.primaryType  && action.data.id ) {
+        if ( action.data ) { //&& action.data === _selectedNodeId) {
+							// console.log(updateObjects);
+
+            if ( _actions.updateObjects && action.data.primaryType  && action.data.id ) {
 				
 				var objects = moveObject( action.data, action.lastDelta );
-				for( var i = 0; i < objects.length; ++i ) {
-					_actions.updateObject( objects[ i ] );
-				}
+				_actions.updateObjects( objects );
 			}
          }
 		 else {
