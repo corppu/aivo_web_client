@@ -240,11 +240,12 @@ function removeLineHelper(
 			);
 		}
 		
+		/*
 		console.log("ALKUPERÄINEN");
 		console.log(otherData);
 		console.log("KOPIO");
 		console.log(otherCopy);
-		
+		*/
 		
 		copiesForUpdate.push( otherCopy );
 	}
@@ -287,7 +288,6 @@ export function tryUpdateObjects(
 			dataCopies.push( dataCopy );
 		}
 		
-		// dispatch( updateObjects( dataCopies ) );
         backendAdapter.updateObjects( boardID, dataCopies );
     };
 }

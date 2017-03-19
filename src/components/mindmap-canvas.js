@@ -72,7 +72,12 @@ export default function() {
 	}
 	
     function updateProps( props ) {
-		setEngine(_context.engine );
+        /*
+        let t = 0;
+        let t0 = performance.now();
+        */
+
+    	setEngine(_context.engine );
         _actions.createObject = props.tryCreateObject;
         _actions.updateObjects = props.tryUpdateObjects;
 	
@@ -87,8 +92,12 @@ export default function() {
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
 
+        
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
+
+            let t0 = performance.now();
+
             const propsNode = propsNodes.get( id );
 
              if ( !propsNode ) {
@@ -140,12 +149,15 @@ export default function() {
 				node.lines = tempLines.toObject();
 			}
 			
+            
+
             if (posChanged) {
                 updateNode(node);
             }
-            
+ 
 			//console.log("updated  -> " + node);
         } );
+
 
 
 		// match existing lines to props (update old ones)
@@ -254,11 +266,7 @@ export default function() {
             World.add( _context.engine.world, body );
 			node.clusterId = 1;
 
-            //var t0 = performance.now();
 			updateNode( node );
-            //var t1 = performance.now();
-
-            //console.log("D0:", t1 - t0);
 
             //console.log(`added node ${id}`);
         } )
@@ -316,13 +324,22 @@ export default function() {
 		
 		
         // search filtering
+        /*
         if ( props.searchFilter && props.searchFilter !== _searchFilter ) {
             _searchFilter = props.searchFilter;
 
             _context.nodes = flagHidden( _context.nodes, _searchFilter );
         }
+        */
 
         updateHulls();
+
+        /*
+        let t1 = performance.now();
+        t += t1-t0
+
+        console.log(t);
+        */
     }
 	
     function onInputStart( action ) {
@@ -422,17 +439,18 @@ export default function() {
     }
     
     function render( ctx ) {
+
 		clear( ctx, { color: "#e6e6ff" } );
 
 		drawClusters( ctx, _camera );
 		drawLines( ctx, _camera );
 		drawNodes( ctx, _camera );
 		drawPins( ctx, _camera );
-		
+        
+	
         const draw = createRenderer( ctx, { camera: _camera } );
 
-		
-		
+	
 		// _context.lines.forEach( line => {
             // drawLine(
 				// draw,
@@ -466,6 +484,12 @@ export default function() {
         // }
 
 		drawFPS( draw, _fps );
+    
+        /*
+        let t0 = performance.now();
+        let t1 = performance.now();
+        console.log(t1 - t0);
+        */
     }
 
     return {

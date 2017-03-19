@@ -47,10 +47,14 @@ const MindMap = createClass({
             if (!this.mindmap) {
                 return;
             }
+            //let t0 = performance.now();
             this.mindmap.update();
+            //let t1 = performance.now();
             this.mindmap.render(ctx);
-
+            
             requestAnimationFrame(renderLoop);
+            //let t2 = performance.now();
+            //console.log(t1 - t0, t2 - t1);
         }
         requestAnimationFrame(renderLoop);
 
@@ -64,6 +68,8 @@ const MindMap = createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
+        //let t0 = performance.now();
+
         const { tryOpenBoard } = nextProps;
         tryOpenBoard();
 
@@ -72,6 +78,14 @@ const MindMap = createClass({
                 updateSelection: this.handleSelectionUpdate
             }));
         }
+        /*
+        let t1 = performance.now();
+        console.log(t1 - t0);
+        */
+    },
+
+    shouldComponentUpdate: function(nextProps, nextState) {
+        return true; //false; // TODO: logic for this for slight performance gain
     },
     
     render: function() {
