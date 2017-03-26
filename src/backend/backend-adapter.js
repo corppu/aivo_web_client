@@ -627,6 +627,7 @@ export function updateObjects(
 		var object = objects[ i ];
 		if( !validateObject( object ) ) {
 			console.warn("object is invalid");
+			console.log(object);
 			continue;
 		}
 		const PATH = "/boards/" + boardId + "/" + object.primaryType + "s/" + object.id;
