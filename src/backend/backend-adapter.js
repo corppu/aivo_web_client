@@ -367,8 +367,10 @@ export function createBoard(boardData, boardId = null) {
 }
 
 export function removeBoard(boardId) {
-	firebase.database().ref("boards/"+boardId).remove();
-	firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards/"+boardId).remove();
+	var updates = [ ];
+	updates["boards/"+boardId] = null;
+	updates["users/"+firebase.auth().currentUser.uid+"/boards/"+boardId] = null;
+	firebase.update( updates);
 }
 
 
