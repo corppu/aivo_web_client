@@ -38,7 +38,24 @@ const MainMenu = createClass({
                         style={{
                             float:"right"
                         }}>
-                        [PLACEHOLDER]
+                        <button className="button">
+                            Select all
+                        </button>
+                        <button
+                            className="button"
+                            style={{
+                                marginLeft: 16,
+                                backgroundColor: "#f752a9",
+                                color: "#ffffff",
+                                fontWeight: "bold"
+                            }}>
+                            <i
+                                className="fa fa-trash-o"
+                                style={{
+                                    marginRight: 8
+                                }}/>
+                            Remove
+                        </button>
                     </div>
                 </div>
                 <div className="main-menu-board-container">
