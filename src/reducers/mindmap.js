@@ -150,7 +150,12 @@ export default function( state = initialState, action ) {
     case LIST_UPDATE:
     {
         const { data } = action;
+
 		clean( data );
+
+		if (!data) {
+			return state;
+		}
         return state.setIn( [ "boards", data.id ], data );
     }
 	

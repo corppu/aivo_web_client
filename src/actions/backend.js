@@ -35,7 +35,9 @@ export function tryCreateBoard(title) {
 }
 
 export function tryRemoveBoard(boardId) {
-	removeBoard(boardId);
+    return function() {
+	    removeBoard(boardId);
+    }
 }
 
 let currentSessionId = null;
