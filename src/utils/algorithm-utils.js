@@ -18,6 +18,9 @@ import {
     MINDMAP_NODE_HIGHLIGHT_MARGIN,
 } from "../constants/config";
 
+var _rootClusters = new Map( );
+var _rootNodes = new Map( );
+
 var _nodes = new Map( );
 var _pins = new Map( );
 var _clusters = new Map( );
@@ -142,50 +145,67 @@ export function setEngine( engine ) {
 }
 
 export function drawClusters( ctx, camera ) {
+	for( var cluster of _rootClusters ) {
+		cluster = cluster[ 1 ];
+		drawClusterHelper( cluster, ctx, camera );;
+	}
+}
 
-	ctx.save();
-	
+function drawClusterHelper( cluster, ctx, camera ) {
+	drawCluster( cluster, ctx, camera );
+	if( cluster.children ) {
+		for( var childId in cluster.children ) {
+			var child = _clusters.get( childId );
+			if( child ) {
+				drawClusterHelper( child, ctx, camera );
+			}
+		}
+	}
+}
+
+function drawCluster( cluster, ctx, camera ) {		
+	if( !cluster.hull ) {
+		// console.warn("!cluster.hull");
+		return;
+	}
+
+	ctx.save( );
+	var firstVertex = null
+
 	if ( ctx.setLineDash !== undefined )   ctx.setLineDash([30,10]);
 	if ( ctx.mozDash !== undefined )       ctx.mozDash = [30,10];
 
-	for( var cluster of _clusters ) {
-		cluster = cluster[ 1 ];
-		
-		var firstVertex = null
-		
-		ctx.beginPath( );
-		ctx.fillStyle = "#f2f2f2";
-		
-		for( var i = 0; i < cluster.hull.length; ++i ) {
-			
-			var vertex = cluster.hull[ i ];
-			if( !firstVertex ) {
-				ctx.moveTo( vertex.x - camera.x, vertex.y - camera.y );
-				firstVertex = vertex;
-				continue;
-			}
-			
-			ctx.lineTo( vertex.x - camera.x, vertex.y - camera.y );
-		}
 	
-		if( firstVertex ) {
-			ctx.lineTo( firstVertex.x - camera.x, firstVertex.y - camera.y );
+	ctx.beginPath( );
+	ctx.fillStyle = "#f2f2f2";
+	for( var i = 0; i < cluster.hull.length; ++i ) {
+		
+		var vertex = cluster.hull[ i ];
+		if( !firstVertex ) {
+			ctx.moveTo( vertex.x - camera.x, vertex.y - camera.y );
+			firstVertex = vertex;
+			continue;
 		}
 		
-		ctx.closePath( );
-		ctx.fill( );
-		
-		ctx.strokeStyle = "black";
-        ctx.lineWidth = 5;
+		ctx.lineTo( vertex.x - camera.x, vertex.y - camera.y );
+	}
 
-        ctx.stroke();
+	if( firstVertex ) {
+		ctx.lineTo( firstVertex.x - camera.x, firstVertex.y - camera.y );
 	}
 	
-	ctx.restore();
+	ctx.closePath( );
+	ctx.fill( );
+	
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 5;
+
+	ctx.stroke( );
+	ctx.restore( );
 }
 
 export function drawLines( ctx, camera ) {
-	ctx.save();
+	ctx.save( );
 	for( var line of _lines ) {
 		line = line[ 1 ];
 		if( line.path ) {
@@ -210,9 +230,9 @@ export function drawNodes( ctx, camera ) {
 		
         ctx.strokeStyle = "black";
         ctx.lineWidth = 5;
+		
 		if ( ctx.setLineDash !== undefined )   ctx.setLineDash([30,10]);
 		if ( ctx.mozDash !== undefined )       ctx.mozDash = [30,10];
-
 
         ctx.stroke();
 	}
@@ -244,39 +264,54 @@ export function updateHulls() {
 	updateLinePaths( );
 
 	_dirtyClusters.forEach(cluster => {
-		updateHull( cluster );
+		updateHull( _clusters.get( cluster ) );
 	});
 	_dirtyClusters.clear();
 }
 
 function updateHull( cluster ) {
-		
+	console.log( cluster );
 	var vertices = [ ];
-	for( var verIter of cluster.vertices ) {
-		const vs = verIter[ 1 ];
-		const point = Vertices.centre( vs );
+	if( cluster.vertices ) {
+		for( var verIter of cluster.vertices ) {
+			const vs = verIter[ 1 ];
+			const point = Vertices.centre( vs );
 
-		const limit = vs.length;
-		const skip = 2;
-		
-		for( var i = 0; i < limit; i += skip ) {
-			var vertex = Object.assign( { }, verIter[ 1 ][ i ] );
-			var delta = Vector.sub( vertex, point );
-			vertex.x = point.x + delta.x * 6;
-			vertex.y = point.y + delta.y * 6;
-			vertices.push( vertex );
+			const limit = vs.length;
+			const skip = 2;
+			
+			for( var i = 0; i < limit; i += skip ) {
+				var vertex = Object.assign( { }, verIter[ 1 ][ i ] );
+				var delta = Vector.sub( vertex, point );
+				vertex.x = point.x + delta.x * 6;
+				vertex.y = point.y + delta.y * 6;
+				vertices.push( vertex );
+							// console.log( vertex);
+
+			}
 		}
+	} else {
+		console.warn("Vertices not found for " + cluster.id );
 	}
-	
 	if( cluster.cellVertices ) {
 		for( var j = 0; j < cluster.cellVertices.length; ++j ) {
-			vertices.push( cluster.cellVertices[ i ] );
+			vertices.push( cluster.cellVertices[ j ] );
+			// console.log( cluster.cellVertices[ j ] );
 		}
 	}
-	cluster.hull = Vertices.hull( vertices );
-	var center = Vertices.centre( cluster.hull );
-	cluster.x = center.x;
-	cluster.y = center.y;
+	else {
+		console.warn("cellVertices not found for " + cluster.id );
+	}
+	
+	if( vertices.length !== 0 ) {
+		cluster.hull = Vertices.hull( vertices );
+		var center = Vertices.centre( cluster.hull );
+		cluster.x = center.x;
+		cluster.y = center.y;
+	} else {
+		console.warn( "hull is empty for " + cluster.id );
+		cluster.hull = [];
+	}
 }
 
 function setToCluster( node ) {
@@ -288,6 +323,7 @@ function setToCluster( node ) {
 			id: node.clusterId,
 			vertices: new Map( )
 		};
+		_rootClusters.set( node.clusterId, cluster );
 		_clusters.set( node.clusterId, cluster );
 	}
 
@@ -349,7 +385,14 @@ export function updateNode( node ) {
 	if( node.clusterId ) {
 		setToCluster( node );
 	}
+
+	// if( oldNode && !oldNode.parent && node.parent ) {
+		// _rootNodes.delete( node.id );
+	// }
 	
+	// if( !node.parent ) {
+		// _rootNodes.set( node.id, node );
+	// }
 	//updateLinePaths( );
 }
 
@@ -387,17 +430,29 @@ export function delLine( line ) {
 
 export function updateCluster( cluster ) {
 	var oldCluster = _clusters.get( cluster.id );
+	console.log("ASD");
+	if( oldCluster && !oldCluster.parent && cluster.parent ) {
+		_rootClusters.delete( cluster.id );
+	}
+
+	if( !cluster.parent ) {
+		_rootClusters.set( cluster.id, cluster );
+		console.log("ASD");
+	}
+	
 	if( oldCluster ) {
 		_clusters.set( cluster.id, Object.assign( oldCluster, cluster ) );
+		_dirtyClusters.add( cluster.id );
 	}
 	else {
 		cluster.cellVertices = [ 
-								Vector.create(cluster.x + MINDMAP_NODE_RADIUS * 1.5, cluster.y),
-								Vector.create( cluster.x, cluster.y + MINDMAP_NODE_RADIUS * 1.5 ), 
-							    Vector.create( cluster.x - MINDMAP_NODE_RADIUS * 1.5, cluster.y - MINDMAP_NODE_RADIUS * 1.5 ) 
-							];
+			Vector.create(cluster.x + MINDMAP_NODE_RADIUS * 1.5, cluster.y),
+			Vector.create( cluster.x, cluster.y + MINDMAP_NODE_RADIUS * 1.5 ), 
+			Vector.create( cluster.x - MINDMAP_NODE_RADIUS * 1.5, cluster.y - MINDMAP_NODE_RADIUS * 1.5 ) 
+		];
 		cluster.vertices = new Map( );
 		_clusters.set( cluster.id, cluster );
+		_dirtyClusters.add( cluster.id );
 	}
 }
 
@@ -405,10 +460,12 @@ export function delCluster( cluster ) {
 	var oldCluster = _clusters.get( node.id );
 	_clusters.delete( cluster.id );
 	var node = null;
-	for( var iter of _cluster.vertices ) {
-		node = _nodes.get( iter[ 0 ] );
-		if( node && node.clusterId && node.clusterId === cluster.id ) {
-			node.clusterId = null;
+	if( _cluster.vertices ) {
+		for( var iter of _cluster.vertices ) {
+			node = _nodes.get( iter[ 0 ] );
+			if( node && node.clusterId && node.clusterId === cluster.id ) {
+				node.clusterId = null;
+			}
 		}
 	}
 }

@@ -9,7 +9,8 @@ import {
 	TYPE_NODE,
 	TYPE_LINE,
 	TYPE_NONE,
-	TYPE_PIN
+	TYPE_PIN,
+	TYPE_CLUSTER
 } from "../constants/types";
 
 
@@ -121,6 +122,8 @@ export function createHomeBoard() {
 	const lineId = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
 	const lineIdToPin = firebase.database().ref("/boards/" + boardId + "/lines/").push().key;
 	const pinId = firebase.database().ref("/boards/" + boardId + "/pins/").push().key;
+	const parentClusterId = firebase.database().ref("/boards/" + boardId + "/clusters").push().key;
+	const emptyClusterId = firebase.database().ref("/boards/" + boardId + "/clusters").push().key;
 	
 	let updates = {};
 	
@@ -140,6 +143,7 @@ export function createHomeBoard() {
 		title: "parent example",
 		primaryType : TYPE_NODE,
 		id : parentId,
+		// clusterId : parentClusterId,
 		type: NODE_TYPE_UNDEFINED,
 		imgURL: "http://xpenology.org/wp-content/themes/qaengine/img/default-thumbnail.jpg",
 		x: parentX,
@@ -219,6 +223,26 @@ export function createHomeBoard() {
 		childType: "pin",
 		childId: pinId
 	};
+	
+	updates["/boards/" + boardId + "/clusters/" + parentClusterId]= {
+		id: parentClusterId,
+		x: 960,	
+		y: 560,
+		primaryType: TYPE_CLUSTER,
+		color: "#D9D9D9", // BG default color
+		children: {
+			[emptyClusterId]: emptyClusterId
+		}
+	}
+	
+	updates["/boards/" + boardId + "/clusters/" + emptyClusterId] = {
+		id: emptyClusterId,
+		x: 960,
+		y: 560,
+		primaryType: TYPE_CLUSTER,
+		color: "#D9D9D9", // BG default color
+		parent: parentClusterId
+	}
 	
 	firebase.database().ref().update(
 		updates, 
@@ -468,12 +492,27 @@ function attachBoardListeners(boardId) {
 	linesRef.on("child_removed", function(data) {
 		_storeAdapter.removeObject(data.val());
 	});
+	
+	var clusterRef = firebase.database().ref("boards/" + boardId + "/clusters");
+
+	clusterRef.on("child_added", function(data) {
+		_storeAdapter.updateObject(data.val());
+	});
+	
+	clusterRef.on("child_changed", function(data) {
+		_storeAdapter.updateObject(data.val());
+	});
+	
+	clusterRef.on("child_removed", function(data) {
+		_storeAdapter.removeObject(data.val());
+	});	
 }
 
 export function detachBoardListeners(boardId) {
 	firebase.database().ref("boards/"+boardId+"/lines").off();
 	firebase.database().ref("boards/"+boardId+"/nodes").off();
 	firebase.database().ref("boards/"+boardId+"/pins").off();
+	firebase.database().ref("boards"/+boardId+"/clusters").off();
 	firebase.database().ref("boards/"+boardId+"/meta").off(
 		"value",
 		B_META_VALUE,
