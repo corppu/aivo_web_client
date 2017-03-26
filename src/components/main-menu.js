@@ -4,7 +4,6 @@ import { openBoardList, closeBoardList } from "../backend/backend-adapter";
 
 import MainMenuGridItem from "./main-menu-grid-item";
 
-
 const MainMenu = createClass({
     getInitialState: function() {
         return {
@@ -110,9 +109,18 @@ const MainMenu = createClass({
     },
 
     handleRemove: function() {
+        const { selections } = this.state;
 
-        console.log("remove!");
+        // TODO: use correct removal action
 
+        console.log("board(s) that should be removed:");
+        selections.forEach((id) => {
+            console.log("\t" + id);
+        })
+
+        this.setState({
+            selections: new Set()
+        });
     },
 
     handleSelect: function(id) {
