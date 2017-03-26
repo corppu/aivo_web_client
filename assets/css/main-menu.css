@@ -51,16 +51,18 @@
 .main-menu-board-icon {
     display: flex;
     justify-content: center;
-    align-content: center;
-    width: 156px;
-    height: 146px;
+    width: 140px;
+    height: 134px;
+    margin-top: 26px;
     border-radius: 16px;
     background-color: rgba(58, 101, 202, 0.05);
 }
 .main-menu-board-title {
-    
+    font-size: 20px;
 }
 .main-menu-board-date {
-
+    opacity: 0.5;
+    font-size: 10px;
+    font-weight: bold;
 }
 

@@ -18,7 +18,7 @@ const MainMenuGridItem = createClass({
                     {title}
                 </div>
                 <div className="main-menu-board-date">
-                    [PLACEHOLDER]
+                    1.1.1970
                 </div>
             </div>
         );
