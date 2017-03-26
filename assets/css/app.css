@@ -21,6 +21,11 @@ a {
     -ms-user-select: none;
 }
 
+.selected {
+    background-color: #f752a9;
+    color: #ffffff;
+}
+
 .button {
     width: 110px;
     height: 32px;

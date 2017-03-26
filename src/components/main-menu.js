@@ -6,6 +6,12 @@ import MainMenuGridItem from "./main-menu-grid-item";
 
 
 const MainMenu = createClass({
+    getInitialState: function() {
+        return {
+            selections: new Set()
+        };
+    },
+
     componentDidMount: function() {
         openBoardList();
     },
@@ -16,6 +22,7 @@ const MainMenu = createClass({
 
     render: function() {
         const { boards } = this.props;
+        const { selections } = this.state;
 
         return (
             <div>
@@ -64,7 +71,11 @@ const MainMenu = createClass({
                 </div>
                 <div className="main-menu-board-container">
                     {boards.map((data, id) =>
-                        <MainMenuGridItem div key={id} {...data}/>
+                        <MainMenuGridItem
+                            div key={id}
+                            isSelected={selections.has(id)}
+                            onSelect={this.handleSelect}
+                            {...data}/>
                     ).toList()}
                 </div>
             </div>
@@ -75,6 +86,21 @@ const MainMenu = createClass({
         const { tryCreateBoard } = this.props;
 
         tryCreateBoard("testilauta!");
+    },
+
+    handleSelect: function(id) {
+        const { selections } = this.state;
+    
+        let nextSelections = new Set(selections);
+        if (selections.has(id)) {
+            nextSelections.delete(id);
+        } else {
+            nextSelections.add(id);
+        }
+
+        this.setState({
+            selections: nextSelections
+        });
     }
 });
 
