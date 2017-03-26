@@ -18,18 +18,20 @@ function mapStateToProps(state, ownProps) {
 		lines: mindmap.get("lines"),
         nodes: mindmap.get("nodes"),
 		pins: mindmap.get("pins"),
+		clusters: mindmap.get("clusters"),
         children
     };
 }
 
 function mergeProps(stateProps, dispatchProps) {
-    const { boardID, lines, nodes, pins, children } = stateProps;
+    const { boardID, lines, nodes, pins, clusters, children } = stateProps;
     const { tryCreateObject, tryUpdateObjects, tryRemoveObject, tryOpenBoard, push } = dispatchProps;
 
     return {
         nodes,
 		lines,
 		pins,
+		clusters,
 		
         children,
 

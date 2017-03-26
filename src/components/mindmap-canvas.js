@@ -1,7 +1,7 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters, updateHulls } from "../utils/algorithm-utils";
+import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateCluster, delCluster, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters, updateHulls } from "../utils/algorithm-utils";
 import { isDoubleTap } from "../utils/input-utils";
 import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
@@ -31,6 +31,7 @@ export default function() {
     let _context = {
         engine: Engine.create(),
         nodes: new Map(),
+		clusters: new Map(),
         lines: new Map(),
 		pins: new Map(),
         bodyToNodeMapping: new Map(),  
@@ -87,11 +88,56 @@ export default function() {
 		//_actions.openNodeBoard = props.openNodeBoard;
 
         _actions.updateSelection = props.updateSelection;
-		
+		let propsClusters = new Map( props.clusters );
         let propsNodes = new Map( props.nodes );
 		let propsLines = new Map( props.lines );
 		let propsPins = new Map( props.pins );
 
+
+		_context.clusters.forEach( ( cluster,  id ) => {
+			var propsCluster = propsClusters.get( id );
+			if( propsCluster ) {
+				Object.assign( cluster, {
+					color: propsCluster.get("color") || null,
+					x: propsCluster.get("x") || null,
+					y: propsCluster.get("y") || null,
+				} );
+				
+				var tempLines = propsCluster.get( "lines" );
+				
+				if( tempLines ) {
+					cluster.lines = tempLines.toObject();
+				}
+				
+				var tempChildren = propsCluster.get( "children" );
+				
+				if( tempChildren ) {
+					cluster.children = tempChildren.toObject();
+				}
+				
+				updateCluster( cluster );
+				propsClusters.delete( id );
+			} else {
+				delCluster( cluster );
+			}
+		});
+		
+		propsClusters.forEach( ( propsCluster ) => {
+			
+			var cluster = {
+				id: propsCluster.get("id"),
+				primaryType: propsCluster.get("primaryType"),
+				x: propsCluster.get("x") || null,
+				y: propsCluster.get("y") || null,
+				color: propsCluster.get("color") || null,
+				parent: propsNodes.get("parent") || null
+			};
+			
+		
+			
+			_context.clusters.set( cluster.id, cluster );
+			updateCluster( cluster );
+		} );
         
         // match existing nodes to props (update old ones)
         _context.nodes.forEach( ( node, id ) => {
@@ -264,7 +310,7 @@ export default function() {
             _context.nodes.set( id, node );
             _context.bodyToNodeMapping[ body.id ] = node;
             World.add( _context.engine.world, body );
-			node.clusterId = 1;
+			// node.clusterId = 1;
 
 			updateNode( node );
 
