@@ -109,13 +109,11 @@ const MainMenu = createClass({
     },
 
     handleRemove: function() {
+        const { tryRemoveBoard } = this.props;
         const { selections } = this.state;
 
-        // TODO: use correct removal action
-
-        console.log("board(s) that should be removed:");
         selections.forEach((id) => {
-            console.log("\t" + id);
+           tryRemoveBoard(id);
         })
 
         this.setState({
