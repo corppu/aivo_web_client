@@ -51,8 +51,7 @@ const MainMenu = createClass({
                             style={{
                                 marginLeft: 16,
                                 backgroundColor: "#f752a9",
-                                color: "#ffffff",
-                                fontWeight: "bold"
+                                color: "#ffffff"
                             }}>
                             <i
                                 className="fa fa-trash-o"

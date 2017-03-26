@@ -8,8 +8,18 @@ const MainMenuGridItem = createClass({
         const { id, title } = this.props;
 
         return (
-            <div className="main-menu-board">
-                <Link to={constructBoardURL(id)}>{title}</Link>
+            <div className="main-menu-board card">
+                <Link
+                    className="main-menu-board-icon"
+                    to={constructBoardURL(id)}>
+                    [PLACEHOLDER]
+                </Link>
+                <div className="main-menu-board-title">
+                    {title}
+                </div>
+                <div className="main-menu-board-date">
+                    [PLACEHOLDER]
+                </div>
             </div>
         );
     }

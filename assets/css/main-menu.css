@@ -5,15 +5,6 @@
     justify-content: center;
     margin: 11px 72px 144px 72px;
 }
-.main-menu-board {
-    justify-content: center;
-    width: 220px;
-    height: 215px;
-    margin: 8px;
-    border-radius: 4px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.2);
-}
 
 .main-menu-header {
     margin: 185px 72px 11px 72px;
@@ -45,3 +36,31 @@
     font-size: 48px;
     box-shadow: 0 4px 8px 0 rgba(120, 123, 150, 0.18);
 }
+
+.main-menu-board {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    height: 215px;
+    margin: 8px;
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+.main-menu-board-icon {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 156px;
+    height: 146px;
+    border-radius: 16px;
+    background-color: rgba(58, 101, 202, 0.05);
+}
+.main-menu-board-title {
+    
+}
+.main-menu-board-date {
+
+}
+
