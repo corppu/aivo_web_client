@@ -13,15 +13,41 @@ a {
 }
 
 .noselect {
+    user-select: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;
+}
+
+.selected {
+    background-color: #f752a9;
+    color: #ffffff;
+}
+
+.button {
+    width: 110px;
+    height: 32px;
+    border-radius: 34px;
+    border-width: 0;
+    background-color: #ffffff;
+    color: #787c96;
+    font-family: Texta;
+    font-size: 14px;
+    box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.2);
+}
+
+.card {
+    box-shadow: 0 1px 3px rgba(120,123,150,0.12), 0 1px 2px rgba(120,123,150,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+.card:hover {
+    box-shadow: 0 14px 28px rgba(120,123,150,0.25), 0 10px 10px rgba(120,123,150,0.2);
 }
 
 /* horrible hack to disable yellow background in autocompleted forms on chrome */
 input:-webkit-autofill {
+    box-shadow: 0 0 0px 1000px white inset;
     -webkit-box-shadow: 0 0 0px 1000px white inset;
 }

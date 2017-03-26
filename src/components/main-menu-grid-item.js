@@ -5,19 +5,35 @@ import { constructBoardURL } from "../utils/url-utils";
 
 const MainMenuGridItem = createClass({
     render: function() {
-        const { id, title } = this.props;
+        const { id, title, isSelected, onSelect } = this.props;
 
         return (
-            <div
-                style={{
-                    width: 220,
-                    height: 215,
-                    margin: 8,
-                    borderRadius: 4,
-                    backgroundColor: "#ffffff",
-                    boxShadow: "0 2px 4px 0 rgba(120, 123, 150, 0.2)"
-                }}>
-                <Link to={constructBoardURL(id)}>{title}</Link>
+            <div className="main-menu-board card">
+                <Link
+                    className="main-menu-board-icon"
+                    to={constructBoardURL(id)}>
+
+                    [PLACEHOLDER]
+                </Link>
+                <div className="main-menu-board-title">
+                    {title}
+                </div>
+                <div className="main-menu-board-date">
+                    1.1.1970
+                </div>
+                <div
+                    className={ isSelected
+                        ? "main-menu-board-selection selected"
+                        : "main-menu-board-selection"}
+                    onClick={() => {
+                        if (onSelect) {
+                            onSelect(id);
+                        }
+                    }}>
+                    { isSelected
+                        ? <i className="fa fa-check"/>
+                        : null }
+                </div>
             </div>
         );
     }

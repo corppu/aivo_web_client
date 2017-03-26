@@ -1,9 +1,16 @@
 
-.main-menu {
+.main-menu-board-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 232px 72px 144px 72px;
+    margin: 11px 72px 144px 72px;
+}
+
+.main-menu-header {
+    margin: 185px 72px 11px 72px;
+    height: 32px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .main-menu-nav {
@@ -13,6 +20,7 @@
     height: 88px;
     background-color: #6464b5;
     box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.2);
+    z-index: 1000
 }
 .main-menu-nav-create-button {
     position: absolute;
@@ -27,4 +35,45 @@
     color: #ffffff;
     font-size: 48px;
     box-shadow: 0 4px 8px 0 rgba(120, 123, 150, 0.18);
+}
+
+.main-menu-board {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    height: 215px;
+    margin: 8px;
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+.main-menu-board-icon {
+    display: flex;
+    justify-content: center;
+    width: 140px;
+    height: 134px;
+    margin-top: 26px;
+    border-radius: 16px;
+    background-color: rgba(58, 101, 202, 0.05);
+}
+.main-menu-board-title {
+    font-size: 20px;
+}
+.main-menu-board-date {
+    opacity: 0.5;
+    font-size: 10px;
+    font-weight: bold;
+}
+.main-menu-board-selection {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 12px;
+    height: 14px;
+    border-radius: 8px;
+    font-size: 9px;
+    padding-top: 2px;
+    padding-left: 4px;
+    box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.18);
 }
