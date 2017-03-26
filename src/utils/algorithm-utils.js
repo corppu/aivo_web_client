@@ -270,7 +270,6 @@ export function updateHulls() {
 }
 
 function updateHull( cluster ) {
-	console.log( cluster );
 	var vertices = [ ];
 	if( cluster.vertices ) {
 		for( var verIter of cluster.vertices ) {
@@ -286,8 +285,6 @@ function updateHull( cluster ) {
 				vertex.x = point.x + delta.x * 6;
 				vertex.y = point.y + delta.y * 6;
 				vertices.push( vertex );
-							// console.log( vertex);
-
 			}
 		}
 	} else {
@@ -430,14 +427,12 @@ export function delLine( line ) {
 
 export function updateCluster( cluster ) {
 	var oldCluster = _clusters.get( cluster.id );
-	console.log("ASD");
 	if( oldCluster && !oldCluster.parent && cluster.parent ) {
 		_rootClusters.delete( cluster.id );
 	}
 
 	if( !cluster.parent ) {
 		_rootClusters.set( cluster.id, cluster );
-		console.log("ASD");
 	}
 	
 	if( oldCluster ) {

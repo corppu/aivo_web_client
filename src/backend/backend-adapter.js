@@ -367,23 +367,8 @@ export function createBoard(boardData, boardId = null) {
 }
 
 export function removeBoard(boardId) {
-// <<<<<<< HEAD
-	var updates = [ ];
-	updates["boards/"+boardId] = null;
-	updates["users/"+firebase.auth().currentUser.uid+"/boards/"+boardId] = null;
-	firebase.database().ref().update(updates, function(error){
-		if(error) {
-			console.warn(error);
-			_storeAdapter.error(error.code);
-		}
-		else {
-			console.log("removed succesfully¨");
-		}
-	});
-// =======
-	// firebase.database().ref("boards/"+boardId).remove();
-	// //firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards/"+boardId).remove();
-// >>>>>>> 61eba48f9b2738311ff17395a0c98628b5046ac2
+	firebase.database().ref("boards/"+boardId).remove();
+	firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards/"+boardId).remove();
 }
 
 
@@ -716,8 +701,7 @@ export function removeObjects(
 		if( !value ) {
 			throw("removable value was null or undefined");
 		}
-		updates[ BOARD_PATH + value.primaryType + "s/" + value.id ] = null;
-		console.log(value);
+		firebase.database().ref( BOARD_PATH + value.primaryType + "s/" + value.id ).remove();
 	}
 	
 	for( i = 0; i < copiesForUpdate.length; ++i ) {
@@ -726,7 +710,6 @@ export function removeObjects(
 			throw("copiesForUpdate value was null or undefined");
 		}
 		updates[ BOARD_PATH + value.primaryType + "s/" + value.id ] = value;
-		console.log(value);
 	}
 	
 	firebase.database().ref().update( updates ).then(
