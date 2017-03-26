@@ -1,9 +1,17 @@
 import React, { createClass } from "react";
 
-const STATE_NONE = ""
-const STATE_TYPE_SELECT = "TYPE_SELECT"
-const STATE_STYLE_SELECT = "STYLE_SELECT"
-const STATE_COLOR_SELECT = "COLOR_SELECT"
+import {
+    TYPE_NODE,
+    TYPE_LINE,
+    TYPE_NONE,
+    TYPE_PIN,
+    TYPE_CLUSTER
+} from "../constants/types";
+
+const STATE_NONE = "";
+const STATE_TYPE_SELECT = "TYPE_SELECT";
+const STATE_STYLE_SELECT = "STYLE_SELECT";
+const STATE_COLOR_SELECT = "COLOR_SELECT";
 
 const MindMapNodeToolbar = createClass({
     getInitialState: function() {
@@ -34,14 +42,22 @@ const MindMapNodeToolbar = createClass({
                     { primaryType }
                     <Separator/>
                     <i
-                        className="fa fa-circle-o fa-lg"/>
+                        className="fa fa-circle-o fa-lg"
+                        onClick={() => {
+                            update({
+                                //primaryType: TYPE_CLUSTER
+                                x: 0
+                            });
+                        }}/>
                     <Separator/>
                     <i
                         className="fa fa-circle fa-lg"
                         onClick={() => {
+                            /*
                             update({
                                 customColor: "green"
                             });
+                            */
                         }}/>
                     <Separator/>
                     <i
