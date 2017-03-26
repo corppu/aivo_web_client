@@ -3,7 +3,7 @@ import { fromJS, Map } from "immutable";
 
 import {
     UPDATE_BOARD,
-	// REMOVE_BOARD,
+	REMOVE_BOARD,
 	
 	UPDATE_OBJECT,
 	UPDATE_OBJECTS,
@@ -44,10 +44,8 @@ const initialState = fromJS({
 
 export default function( state = initialState, action ) {
 
-	/*
 	console.log(action);
-	console.log(state.toJS());
-	*/
+	//console.log(state.toJS());
 
     switch ( action.type ) {
     case UPDATE_BOARD:
@@ -161,9 +159,9 @@ export default function( state = initialState, action ) {
 	
     case LIST_REMOVE:
     {
-        const { data } = action;
+        const { boardId } = action;
 		clean( data );
-        return state.deleteIn( [ "boards", data.id ] );
+        return state.deleteIn( [ "boards", boardId ] );
     }
 	
     default:

@@ -3,7 +3,8 @@ import {
     BACKEND_LOGOUT,
     BACKEND_ERROR,
     LIST_UPDATE,
-    LIST_REMOVE
+    LIST_REMOVE,
+    REMOVE_BOARD,
 } from "../constants/action-types";
 
 import {
@@ -35,8 +36,10 @@ export function tryCreateBoard(title) {
 }
 
 export function tryRemoveBoard(boardId) {
-    return function() {
+    return function(dispatch) {
 	    removeBoard(boardId);
+
+        dispatch(listRemove(boardId));
     }
 }
 
@@ -73,6 +76,6 @@ export function listUpdate(data) {
     return { type: LIST_UPDATE, data };
 }
 
-export function listRemove(data) {
-    return { type: LIST_REMOVE, data };
+export function listRemove(boardId) {
+    return { type: LIST_REMOVE, boardId };
 }
