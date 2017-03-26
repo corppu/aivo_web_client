@@ -26,7 +26,22 @@ const MainMenu = createClass({
                         +
                     </button>
                 </div>
-                <div className="main-menu">
+                <div className="main-menu-header">
+                    <div
+                        style={{
+                            float: "left",
+                            opacity: 0.5
+                        }}>
+                        My boards
+                    </div>
+                    <div
+                        style={{
+                            float:"right"
+                        }}>
+                        [PLACEHOLDER]
+                    </div>
+                </div>
+                <div className="main-menu-board-container">
                     {boards.map((data, id) =>
                         <MainMenuGridItem div key={id} {...data}/>
                     ).toList()}
