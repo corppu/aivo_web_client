@@ -367,10 +367,23 @@ export function createBoard(boardData, boardId = null) {
 }
 
 export function removeBoard(boardId) {
+// <<<<<<< HEAD
 	var updates = [ ];
 	updates["boards/"+boardId] = null;
 	updates["users/"+firebase.auth().currentUser.uid+"/boards/"+boardId] = null;
-	firebase.update( updates);
+	firebase.database().ref().update(updates, function(error){
+		if(error) {
+			console.warn(error);
+			_storeAdapter.error(error.code);
+		}
+		else {
+			console.log("removed succesfully¨");
+		}
+	});
+// =======
+	// firebase.database().ref("boards/"+boardId).remove();
+	// //firebase.database().ref("users/"+firebase.auth().currentUser.uid+"/boards/"+boardId).remove();
+// >>>>>>> 61eba48f9b2738311ff17395a0c98628b5046ac2
 }
 
 

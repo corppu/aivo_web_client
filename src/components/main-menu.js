@@ -4,7 +4,6 @@ import { openBoardList, closeBoardList } from "../backend/backend-adapter";
 
 import MainMenuGridItem from "./main-menu-grid-item";
 
-
 const MainMenu = createClass({
     getInitialState: function() {
         return {
@@ -49,7 +48,8 @@ const MainMenu = createClass({
                             <span
                                 style={{
                                     opacity: 0.5
-                                }}>
+                                }}
+                                onClick={this.handleSelectAll}>
                                 Select all
                             </span>
                         </button>
@@ -59,7 +59,8 @@ const MainMenu = createClass({
                                 marginLeft: 16,
                                 backgroundColor: "#f752a9",
                                 color: "#ffffff"
-                            }}>
+                            }}
+                            onClick={this.handleRemove}>
                             <i
                                 className="fa fa-trash-o"
                                 style={{
@@ -86,6 +87,38 @@ const MainMenu = createClass({
         const { tryCreateBoard } = this.props;
 
         tryCreateBoard("testilauta!");
+    },
+
+    handleSelectAll: function() {
+        const { boards } = this.props;
+        const { selections } = this.state;
+    
+        let nextSelections = new Set(selections);
+
+        if (selections.size === boards.size) {
+            nextSelections.clear();
+        } else {
+             boards.forEach((board) => {
+                nextSelections.add(board.id);
+            })
+        }
+
+        this.setState({
+            selections: nextSelections
+        })
+    },
+
+    handleRemove: function() {
+        const { tryRemoveBoard } = this.props;
+        const { selections } = this.state;
+
+        selections.forEach((id) => {
+           tryRemoveBoard(id);
+        })
+
+        this.setState({
+            selections: new Set()
+        });
     },
 
     handleSelect: function(id) {

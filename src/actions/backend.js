@@ -11,6 +11,7 @@ import {
     signInWithEmail,
     createHomeBoard,
     openBoard,
+    removeBoard,
     closeBoard,
     addNode
 } from "../backend/backend-adapter";
@@ -31,6 +32,10 @@ export function tryCreateBoard(title) {
     return function() {
         createHomeBoard();
     }
+}
+
+export function tryRemoveBoard(boardId) {
+	removeBoard(boardId);
 }
 
 let currentSessionId = null;

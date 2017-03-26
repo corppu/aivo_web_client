@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 
 import MainMenu from "../components/main-menu";
 
-import { tryCreateBoard } from "../actions/backend";
+import { tryCreateBoard, tryRemoveBoard } from "../actions/backend";
 
 function mapStateToProps(state) {
     const { mindmap } = state;
@@ -12,4 +12,7 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps, { tryCreateBoard })(MainMenu);
+export default connect(mapStateToProps, {
+    tryCreateBoard,
+    tryRemoveBoard
+})(MainMenu);
