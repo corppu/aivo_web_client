@@ -39,7 +39,12 @@ const MainMenu = createClass({
                             float:"right"
                         }}>
                         <button className="button">
-                            Select all
+                            <span
+                                style={{
+                                    opacity: 0.5
+                                }}>
+                                Select all
+                            </span>
                         </button>
                         <button
                             className="button"

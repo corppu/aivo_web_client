@@ -20,6 +20,7 @@
     height: 88px;
     background-color: #6464b5;
     box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.2);
+    z-index: 1000
 }
 .main-menu-nav-create-button {
     position: absolute;
