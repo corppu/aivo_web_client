@@ -5,6 +5,15 @@
     justify-content: center;
     margin: 11px 72px 144px 72px;
 }
+.main-menu-board {
+    justify-content: center;
+    width: 220px;
+    height: 215px;
+    margin: 8px;
+    border-radius: 4px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.2);
+}
 
 .main-menu-header {
     margin: 185px 72px 11px 72px;
