@@ -200,8 +200,8 @@ export function tryUpdateObjects( data ) {
 				{
 					id : data[ i ].id,
 					primaryType : data[ i ].primaryType,
-					x : data[ i ].x || null,
-					y : data[ i ].y || null,
+					x : data[ i ].x || (data[ i ].x === 0 ? 0 : null),
+					y : data[ i ].y || (data[ i ].y === 0 ? 0 : null),
 					lines : data[ i ].lines || null,
 					title : data[ i ].title || null,
 					imgURL : data[ i ].imgURL || null,
