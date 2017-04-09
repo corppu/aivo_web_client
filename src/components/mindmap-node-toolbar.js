@@ -31,32 +31,35 @@ const MindMapNodeToolbar = createClass({
                     position: "fixed",
                     bottom: 20,
                     width: "100%",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    alignItems: "flex-end"
                 }}>
-                <div
-                    style={{
-                        padding: "5px 10px",
-                        backgroundColor: "#fff"
-                    }}>
-                    <i
-                        className="fa fa-circle-o fa-lg"
-                        onClick={() => {
-                            update({
-                                // primaryType: TYPE_CLUSTER
-                            });
-                        }}/>
-                    <Separator/>
-                    <i
-                        className="fa fa-circle fa-lg"
-                        onClick={() => {
-                            update({ customColor: "green" });
-                        }}/>
-                    <Separator/>
-                    { type }
-                    <Separator/>
-                    <i
-                        className="fa fa-trash-o fa-lg"
-                        onClick={remove}/>
+                <div>
+                    <div
+                        style={{
+                            padding: "5px 10px",
+                            backgroundColor: "#fff"
+                        }}>
+                        <i
+                            className="fa fa-circle-o fa-lg"
+                            onClick={() => {
+                                update({
+                                    // primaryType: TYPE_CLUSTER
+                                });
+                            }}/>
+                        <Separator/>
+                        <i
+                            className="fa fa-circle fa-lg"
+                            onClick={() => {
+                                update({ customColor: "green" });
+                            }}/>
+                        <Separator/>
+                        { type }
+                        <Separator/>
+                        <i
+                            className="fa fa-trash-o fa-lg"
+                            onClick={remove}/>
+                    </div>
                 </div>
                 { this.renderSubMenu() }
             </div>
@@ -66,38 +69,79 @@ const MindMapNodeToolbar = createClass({
     renderSubMenu: function() {
         const { subMenuState } = this.state;
 
-        let child = null;
+        let menu = null;
         switch (subMenuState) {
-            case STATE_TYPE_SELECT:     child = <TypeSelect/>; break;
-            case STATE_STYLE_SELECT:    child = <StyleSelect/>; break;
-            case STATE_COLOR_SELECT:    child = <ColorSelect/>; break;
+            case STATE_TYPE_SELECT:     menu = <TypeSelect/>; break;
+            case STATE_STYLE_SELECT:    menu = <StyleSelect/>; break;
+            case STATE_COLOR_SELECT:    menu = <ColorSelect/>; break;
         }
-        if (!child) {
+        if (!menu) {
             return null;
         }
         return (
             <div
                 style={{
                     marginLeft: 10, // for temp layout
+                    padding: 8,
                     backgroundColor: "#fff"
                 }}>
-                { child }
+                { menu }
             </div>
         );
     }
 });
 
-/*
-    fa-file-text-o
-    fa-file-image-o
-    fa-check-square-o
-    fa-share-alt
-*/
-
 function TypeSelect() {
     return (
+        <div
+            style={{
+                display: "flex"
+            }}>
+            <TypeSelectItem
+                iconClass="fa-file-text-o"
+                labelText="Note"/>
+
+            <TypeSelectItem
+                iconClass="fa-file-image-o"
+                labelText="File"/>
+
+            <TypeSelectItem
+                iconClass="fa-check-square-o"
+                labelText="To-Do"/>
+
+            <TypeSelectItem
+                iconClass="fa-share-alt"
+                labelText="Group"/>
+        </div>
+    );
+}
+
+function TypeSelectItem({ iconClass, labelText, handleSelect }) {
+    return (
         <div>
-            TYPE SELECT PLACEHOLDER
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxSizing: "border-box",
+                    width: 64,
+                    height: 64,
+                    margin: "8px 8px 0 8px",
+                    borderWidth: 2,
+                    borderRadius: 34,
+                    borderStyle: "solid"
+                }}>
+                <i className={`fa ${iconClass} fa-2x`}/>
+            </div>
+            <div
+                style={{
+                    fontSize: 22,
+                    fontWeight: "bold",
+                    textAlign: "center"
+                }}>
+                { labelText }
+            </div> 
         </div>
     );
 }
