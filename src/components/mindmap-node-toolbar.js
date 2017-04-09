@@ -26,13 +26,15 @@ const MindMapNodeToolbar = createClass({
 
         return (
             <div
+                className="noselect"
                 style={{
                     display: "flex",
                     position: "fixed",
                     bottom: 20,
                     width: "100%",
                     justifyContent: "center",
-                    alignItems: "flex-end"
+                    alignItems: "flex-end",
+                    cursor: "default"
                 }}>
                 <div>
                     <div
@@ -41,23 +43,21 @@ const MindMapNodeToolbar = createClass({
                             backgroundColor: "#fff"
                         }}>
                         <i
-                            className="fa fa-circle-o fa-lg"
-                            onClick={() => {
-                                update({
-                                    // primaryType: TYPE_CLUSTER
-                                });
-                            }}/>
+                            className="fa fa-circle-o fa-lg pointer"
+                            onClick={() => { this.setSelection(STATE_COLOR_SELECT); }}/>
                         <Separator/>
                         <i
-                            className="fa fa-circle fa-lg"
-                            onClick={() => {
-                                update({ customColor: "green" });
-                            }}/>
+                            className="fa fa-circle fa-lg pointer"
+                            onClick={() => { this.setSelection(STATE_STYLE_SELECT); }}/>
                         <Separator/>
-                        { type }
+                        <span
+                            className="pointer"
+                            onClick={() => { this.setSelection(STATE_TYPE_SELECT); }}>
+                            { type }
+                        </span>
                         <Separator/>
                         <i
-                            className="fa fa-trash-o fa-lg"
+                            className="fa fa-trash-o fa-lg pointer"
                             onClick={remove}/>
                     </div>
                 </div>
@@ -88,6 +88,16 @@ const MindMapNodeToolbar = createClass({
                 { menu }
             </div>
         );
+    },
+
+    setSelection: function(newState) {
+        const { subMenuState } = this.state;
+
+        if (subMenuState === newState) {
+            this.setState({ subMenuState: STATE_NONE });
+        } else {
+            this.setState({ subMenuState: newState });
+        }
     }
 });
 

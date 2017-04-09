@@ -19,6 +19,9 @@ a {
     -moz-user-select: none;
     -ms-user-select: none;
 }
+.pointer {
+    cursor: pointer
+}
 
 .selected {
     background-color: #f752a9;
