@@ -224,7 +224,7 @@ export function tryUpdateObject(object) {
 	if (object.toJS) {
 		object = object.toJS();
 	}
-	tryUpdateObjects([object]);
+	return tryUpdateObjects([object]);
 }
 
 export function updateBoard( data ) {
