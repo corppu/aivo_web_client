@@ -251,9 +251,7 @@ function removeLineHelper(
 }
 
 
-export function tryUpdateObjects(
-	data
-) {
+export function tryUpdateObjects( data ) {
 	return function ( dispatch, getState ) {
         const { mindmap } = getState();
 
@@ -289,6 +287,13 @@ export function tryUpdateObjects(
 		dispatch( updateObjects( dataCopies ) );
         backendAdapter.updateObjects( boardID, dataCopies );
     };
+}
+
+export function tryUpdateObject(object) {
+	if (object.toJS) {
+		object = object.toJS();
+	}
+	tryUpdateObjects([object]);
 }
 
 export function updateBoard( data ) {
