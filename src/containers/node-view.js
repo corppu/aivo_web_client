@@ -3,7 +3,7 @@ import { push } from "react-router-redux";
 
 import NodeView from "../components/node-view";
 
-import { tryUpdateNode } from "../actions/mindmap";
+import { tryUpdateObject } from "../actions/mindmap";
 
 import { constructBoardURL } from "../utils/url-utils";
 
@@ -28,8 +28,11 @@ function mergeProps(stateProps, dispatchProps) {
         nodeID,
         node,
 
-        updateNode: function(newNode) {
-            tryUpdateNode(nodeID, newNode)
+        updateNode: (newNode) => {
+            if (newNode !== node) {
+                return;
+            }
+            tryUpdateObject(newNode);
         },
         goToParentBoard: function() {
             push(constructBoardURL(boardID));
@@ -37,4 +40,4 @@ function mergeProps(stateProps, dispatchProps) {
     }
 }
 
-export default connect(mapStateToProps, { tryUpdateNode, push }, mergeProps)(NodeView);
+export default connect(mapStateToProps, { tryUpdateObject, push }, mergeProps)(NodeView);

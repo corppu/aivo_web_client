@@ -82,7 +82,7 @@ const NodeView = createClass({
                     placeholder="Click to edit title..."
                     onChange={(e) => {
                         const { value } = e.target;
-                        this.updateNodeData(node.set("title", value));
+                        updateNode(node.set("title", value));
                     }}/>
             </div>
         );
@@ -103,7 +103,7 @@ const NodeView = createClass({
                     value={ text || "" }
                     onChange={(e) => {
                         const { value } = e.target;
-                        this.updateNodeData(node.set("text", value));
+                        updateNode(node.set("text", value));
                     }}/>
             );
         }
@@ -125,7 +125,7 @@ const NodeView = createClass({
                         placeholder="input image URL"
                         onChange={(e) => {
                             const { value } = e.target;
-                            this.updateNodeData(node.set("imgURL", value));
+                            updateNode(node.set("imgURL", value));
                         }}/>
                 </div>
             );
@@ -148,21 +148,10 @@ const NodeView = createClass({
     },
 
     setNodeType: function(type) {
-        const { node } = this.state;
+        const { node, updateNode } = this.state;
 
-        this.updateNodeData(node.set("type", type));
+        updateNode(node.set("type", type));
     },
-    
-    updateNodeData: function(newNode) {
-        const { node, updateNode } = this.props;
-        
-        if (newNode !== node) {
-            this.setState({
-                node: newNode
-            });
-            updateNode(newNode.toJS());
-        }
-    }
 });
 
 export default NodeView;
