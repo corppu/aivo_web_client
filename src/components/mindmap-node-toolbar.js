@@ -1,10 +1,10 @@
 import React, { createClass } from "react";
 
 import {
-    TYPE_NODE,
-    TYPE_LINE,
-    TYPE_NONE,
-    TYPE_PIN,
+    NODE_TYPE_TEXT,
+    NODE_TYPE_FILE,
+    NODE_TYPE_TODO,
+
     TYPE_CLUSTER
 } from "../constants/types";
 
@@ -16,54 +16,52 @@ const STATE_COLOR_SELECT = "COLOR_SELECT";
 const MindMapNodeToolbar = createClass({
     getInitialState: function() {
         return {
-            subMenuState: STATE_NONE
+            subMenuState: STATE_TYPE_SELECT
         }
     },
 
     render: function() {
-        const { id, primaryType, update, remove } = this.props;
+        const { id, data, update, remove } = this.props;
+        const type = data.type || "Type";
 
         return (
             <div
+                className="noselect"
                 style={{
                     display: "flex",
                     position: "fixed",
-                    bottom: 10,
+                    bottom: 20,
                     width: "100%",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    alignItems: "flex-end",
+                    cursor: "default"
                 }}>
-                <div
-                    style={{
-                        padding: "5px 10px",
-                        backgroundColor: "#fff"
-                    }}>
-                    { id }
-                    <Separator/>
-                    { primaryType }
-                    <Separator/>
-                    <i
-                        className="fa fa-circle-o fa-lg"
-                        onClick={() => {
-                            update({
-                                //primaryType: TYPE_CLUSTER
-                                x: 0
-                            });
-                        }}/>
-                    <Separator/>
-                    <i
-                        className="fa fa-circle fa-lg"
-                        onClick={() => {
-                            /*
-                            update({
-                                customColor: "green"
-                            });
-                            */
-                        }}/>
-                    <Separator/>
-                    <i
-                        className="fa fa-trash-o fa-lg"
-                        onClick={remove}/>
+                <div>
+                    <div
+                        style={{
+                            padding: "5px 10px",
+                            backgroundColor: "#fff"
+                        }}>
+                        <i
+                            className="fa fa-circle-o fa-lg pointer"
+                            onClick={() => { this.setSelection(STATE_COLOR_SELECT); }}/>
+                        <Separator/>
+                        <i
+                            className="fa fa-circle fa-lg pointer"
+                            onClick={() => { this.setSelection(STATE_STYLE_SELECT); }}/>
+                        <Separator/>
+                        <span
+                            className="pointer"
+                            onClick={() => { this.setSelection(STATE_TYPE_SELECT); }}>
+                            { type }
+                        </span>
+                        <Separator/>
+                        <i
+                            className="fa fa-trash-o fa-lg pointer"
+                            onClick={remove}/>
+                    </div>
                 </div>
+                { this.renderSubMenu() }
             </div>
         );
     },
@@ -71,36 +69,138 @@ const MindMapNodeToolbar = createClass({
     renderSubMenu: function() {
         const { subMenuState } = this.state;
 
+        let menu = null;
         switch (subMenuState) {
-            case STATE_TYPE_SELECT:     return this.renderTypeSelect;
-            case STATE_STYLE_SELECT:     return this.renderStyleSelect;
-            case STATE_COLOR_SELECT:     return this.renderColorSelect;
+            case STATE_TYPE_SELECT:
+                menu = <TypeSelect handleSelect={this.handleTypeSelect}/>;
+                break;
+
+            case STATE_STYLE_SELECT:
+                menu = <StyleSelect/>;
+                break;
+
+            case STATE_COLOR_SELECT:
+                menu = <ColorSelect/>;
+                break;
         }
-        return null;
-    },
-
-    renderTypeSelect: function() {
+        if (!menu) {
+            return null;
+        }
         return (
-            <div>type select</div>
+            <div
+                style={{
+                    marginLeft: 10, // for temp layout
+                    padding: 8,
+                    backgroundColor: "#fff"
+                }}>
+                { menu }
+            </div>
         );
     },
 
-    renderStyleSelect: function() {
-        return (
-            <div>style select</div>
-        );
+    setSelection: function(newState) {
+        const { subMenuState } = this.state;
+
+        if (subMenuState === newState) {
+            this.setState({ subMenuState: STATE_NONE });
+        } else {
+            this.setState({ subMenuState: newState });
+        }
     },
 
-    renderColorSelect: function() {
-        return (
-            <div>color select</div>
-        );
+    handleTypeSelect: function(type) {
+    
+        // TODO: implement node type selection
+
     }
 });
 
+function TypeSelect({ handleSelect }) {
+    return (
+        <div
+            style={{
+                display: "flex"
+            }}>
+            <TypeSelectItem
+                iconClass="fa-file-text-o"
+                labelText="Note"
+                onClick={() => { handleSelect(NODE_TYPE_TEXT) }}/>
+
+            <TypeSelectItem
+                iconClass="fa-file-image-o"
+                labelText="File"
+                onClick={() => { handleSelect(NODE_TYPE_FILE) }}/>
+
+            <TypeSelectItem
+                iconClass="fa-check-square-o"
+                labelText="To-Do"
+                onClick={() => { handleSelect(NODE_TYPE_TODO) }}/>
+
+            <TypeSelectItem
+                iconClass="fa-share-alt"
+                labelText="Group"/>
+        </div>
+    );
+}
+
+function TypeSelectItem({ iconClass, labelText, onClick }) {
+    return (
+        <div
+            onClick={onClick}>
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxSizing: "border-box",
+                    width: 64,
+                    height: 64,
+                    margin: "8px 8px 0 8px",
+                    borderWidth: 2,
+                    borderRadius: 34,
+                    borderStyle: "solid"
+                }}>
+                <i className={`fa ${iconClass} fa-2x`}/>
+            </div>
+            <div
+                style={{
+                    fontSize: 22,
+                    fontWeight: "bold",
+                    textAlign: "center"
+                }}>
+                { labelText }
+            </div> 
+        </div>
+    );
+}
+
+function StyleSelect() {
+     return (
+        <div
+            style={{
+                fontWeight: "bold",
+                padding: 8
+            }}>
+            STYLE SELECT NOT IMPLEMENTED!
+        </div>
+    );
+}
+
+function ColorSelect() {
+    return (
+        <div
+            style={{
+                fontWeight: "bold",
+                padding: 8
+            }}>
+            COLOR SELECT NOT IMPLEMENTED!
+        </div>
+    );
+}
+
 function Separator() {
     const style = {
-        color: "#bbb"
+        color: "#000"
     };
     return (
         <span style={style}> | </span>

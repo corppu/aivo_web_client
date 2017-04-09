@@ -36,6 +36,7 @@ function mergeProps(stateProps, dispatchProps) {
     return {
         id,
         primaryType,
+        data,
 
         update: function(changes) {
             const next = Object.assign({}, data, changes);
