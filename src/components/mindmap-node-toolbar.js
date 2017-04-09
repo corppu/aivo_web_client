@@ -158,13 +158,25 @@ function TypeSelectItem({ iconClass, labelText, handleSelect }) {
 
 function StyleSelect() {
      return (
-        <div>STYLE SELECT PLACEHOLDER</div>
+        <div
+            style={{
+                fontWeight: "bold",
+                padding: 8
+            }}>
+            STYLE SELECT NOT IMPLEMENTED!
+        </div>
     );
 }
 
 function ColorSelect() {
     return (
-        <div>COLOR SELECT PLACEHOLDER</div>
+        <div
+            style={{
+                fontWeight: "bold",
+                padding: 8
+            }}>
+            COLOR SELECT NOT IMPLEMENTED!
+        </div>
     );
 }
 
