@@ -3,7 +3,6 @@ body {
     margin: 0;
     min-height: 100%;
     background-color: #eef1f5;
-    color: #787c96;
     font-family: Texta;
 }
 
@@ -32,7 +31,6 @@ a {
     border-radius: 34px;
     border-width: 0;
     background-color: #ffffff;
-    color: #787c96;
     font-family: Texta;
     font-size: 14px;
     box-shadow: 0 2px 4px 0 rgba(120, 123, 150, 0.2);
