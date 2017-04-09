@@ -1,6 +1,7 @@
 import React, { createClass } from "react";
 
 import createMindmap from "./mindmap-canvas";
+import * as kakka from "./mindmap-canvas-data";
 import MindMapToolbar from "./mindmap-toolbar";
 import MindMapNodeToolbar from "../containers/mindmap-node-toolbar";
 
@@ -224,7 +225,7 @@ const MindMap = createClass({
 
 function calculatePosition(canvas, clientX, clientY) {
     const bounds = canvas.getBoundingClientRect();
-
+    var kok = kakka;
     return {
         x: clientX - bounds.left,
         y: clientY - bounds.top

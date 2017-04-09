@@ -21,6 +21,6 @@
     "redux-thunk": "^2.1.0"
   },
   "devDependencies": {
-    "kotatsu": "^0.14.0"
+    "kotatsu": "^0.15.0"
   }
 }
