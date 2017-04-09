@@ -1,10 +1,10 @@
 import React, { createClass } from "react";
 
 import {
-    TYPE_NODE,
-    TYPE_LINE,
-    TYPE_NONE,
-    TYPE_PIN,
+    NODE_TYPE_TEXT,
+    NODE_TYPE_FILE,
+    NODE_TYPE_TODO,
+
     TYPE_CLUSTER
 } from "../constants/types";
 
@@ -71,9 +71,17 @@ const MindMapNodeToolbar = createClass({
 
         let menu = null;
         switch (subMenuState) {
-            case STATE_TYPE_SELECT:     menu = <TypeSelect/>; break;
-            case STATE_STYLE_SELECT:    menu = <StyleSelect/>; break;
-            case STATE_COLOR_SELECT:    menu = <ColorSelect/>; break;
+            case STATE_TYPE_SELECT:
+                menu = <TypeSelect handleSelect={this.handleTypeSelect}/>;
+                break;
+
+            case STATE_STYLE_SELECT:
+                menu = <StyleSelect/>;
+                break;
+
+            case STATE_COLOR_SELECT:
+                menu = <ColorSelect/>;
+                break;
         }
         if (!menu) {
             return null;
@@ -98,10 +106,16 @@ const MindMapNodeToolbar = createClass({
         } else {
             this.setState({ subMenuState: newState });
         }
+    },
+
+    handleTypeSelect: function(type) {
+    
+        // TODO: implement node type selection
+
     }
 });
 
-function TypeSelect() {
+function TypeSelect({ handleSelect }) {
     return (
         <div
             style={{
@@ -109,15 +123,18 @@ function TypeSelect() {
             }}>
             <TypeSelectItem
                 iconClass="fa-file-text-o"
-                labelText="Note"/>
+                labelText="Note"
+                onClick={() => { handleSelect(NODE_TYPE_TEXT) }}/>
 
             <TypeSelectItem
                 iconClass="fa-file-image-o"
-                labelText="File"/>
+                labelText="File"
+                onClick={() => { handleSelect(NODE_TYPE_FILE) }}/>
 
             <TypeSelectItem
                 iconClass="fa-check-square-o"
-                labelText="To-Do"/>
+                labelText="To-Do"
+                onClick={() => { handleSelect(NODE_TYPE_TODO) }}/>
 
             <TypeSelectItem
                 iconClass="fa-share-alt"
@@ -126,9 +143,10 @@ function TypeSelect() {
     );
 }
 
-function TypeSelectItem({ iconClass, labelText, handleSelect }) {
+function TypeSelectItem({ iconClass, labelText, onClick }) {
     return (
-        <div>
+        <div
+            onClick={onClick}>
             <div
                 style={{
                     display: "flex",
