@@ -64,16 +64,6 @@ export function tryCreateObject(
     };
 }
 
-// TODO: change to some utils or smthng
-function calcSize( obj )
-{
-	var size = 0, key;
-	for (key in obj) {
-		if (obj.hasOwnProperty(key)) size++;
-	}
-	return size;
-}
-
 export function tryRemoveObject(
 	primaryType,
 	id
@@ -188,68 +178,9 @@ export function tryRemoveObject(
 		}
         backendAdapter.removeObjects( boardID, removables, copiesForUpdate );
 		
-		// console.log(removables);
-		// console.log(copiesForUpdate);
 		//dispatch( removeObjects( removables, copiesForUpdate ) );
     };
 }
-
-
-// TODO: Rename?
-function removeLineHelper(
-	lineId,
-	otherData,
-	
-	removables,
-	copiesForUpdate
-) {
-	if( otherData.primaryType === TYPE_PIN &&  
-		calcSize( otherData.lines ) < 2 
-	) { 
-		removables.push( { 
-			primaryType : otherData.primaryType,
-			id : otherData.id
-		} );
-	}
-	
-	else {
-		var otherCopy = { };
-		Object.assign(
-			otherCopy,
-			{
-				id : otherData.id,
-				primaryType : otherData.primaryType,
-				x : otherData.x,
-				y : otherData.y,
-				lines : otherData.lines
-			}
-		);
-		
-		otherCopy.lines[ lineId ] = null;
-		
-		if( otherData.primaryType === TYPE_NODE ) {
-			Object.assign(
-				otherCopy,
-				{
-					title : otherData.title || null,
-					type : otherData.type || NODE_TYPE_UNDEFINED,
-					text: otherData.text || null,
-					imgURL: otherData.imgURL || null,
-				}
-			);
-		}
-		
-		/*
-		console.log("ALKUPERÄINEN");
-		console.log(otherData);
-		console.log("KOPIO");
-		console.log(otherCopy);
-		*/
-		
-		copiesForUpdate.push( otherCopy );
-	}
-}
-
 
 export function tryUpdateObjects( data ) {
 	return function ( dispatch, getState ) {
@@ -320,7 +251,57 @@ export function removeObject( data ) {
     return { type: REMOVE_OBJECT, data };
 }
 
-// export function moveObject( data ) {
-    // return { type: MOVE_OBJECT, data };
-// }
+function calcSize( obj )
+{
+	var size = 0, key;
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) size++;
+	}
+	return size;
+}
 
+function removeLineHelper(
+	lineId,
+	otherData,
+	
+	removables,
+	copiesForUpdate
+) {
+	if( otherData.primaryType === TYPE_PIN &&  
+		calcSize( otherData.lines ) < 2 
+	) { 
+		removables.push( { 
+			primaryType : otherData.primaryType,
+			id : otherData.id
+		} );
+	}
+	
+	else {
+		var otherCopy = { };
+		Object.assign(
+			otherCopy,
+			{
+				id : otherData.id,
+				primaryType : otherData.primaryType,
+				x : otherData.x,
+				y : otherData.y,
+				lines : otherData.lines
+			}
+		);
+		
+		otherCopy.lines[ lineId ] = null;
+		
+		if( otherData.primaryType === TYPE_NODE ) {
+			Object.assign(
+				otherCopy,
+				{
+					title : otherData.title || null,
+					type : otherData.type || NODE_TYPE_UNDEFINED,
+					text: otherData.text || null,
+					imgURL: otherData.imgURL || null,
+				}
+			);
+		}
+		copiesForUpdate.push( otherCopy );
+	}
+}
