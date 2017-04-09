@@ -46,7 +46,5 @@ export function isDoubleTap(action, prevAction) {
     const dt = getTimestamp(prevAction.startTime)
     const dp = Vector.sub(action.endPosition, prevAction.endPosition);
 
-    console.log(dt, dp)
-
     return dt < 0.5 && Vector.magnitude(dp) < 10;
 }
