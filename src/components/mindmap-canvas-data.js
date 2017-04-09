@@ -1,18 +1,126 @@
 import {
-	TYPE_CLUSTER 
+	TYPE_CLUSTER,
+	TYPE_NODE
 } from "../constants/types";
 
 import {
 	MINDMAP_NODE_RADIUS	
 } from "../constants/config";
 
-export function createViewModel() {
-	var _nodes = new Map( ),
+import firebase from "firebase";
+
+
+export function Presenter( currentBoardId ) {
+
+	var	_currentBoardId = currentBoardId,
+		_selectedObject = null,
+
+		 _nodes = new Map( ),
 		_parentClusters = new Map( ),
 		_childClusters = new Map( ),
-		_dirtyParentClusters = new Map( ),
-		_dirtyChildClusters = new Map( );
 		
+		// For updating hulls
+		_dirtyParentClusters = new Map( ),
+		_dirtyChildClusters = new Map( ),
+		
+	
+		// For updating firebase
+		_dirtyNodes = new Map( ),
+		_dirtyClusters = new Map( );
+
+	function updateSelection( object = null ) {
+		if( _selectedObject !== object ) {
+			if( _selectedObject ) {
+				_selectedObject.isSelected = false;
+				if( _selectedObject.primaryType === TYPE_CLUSTER ) {
+					_dirtyClusters.set( _selectedObject.id, _selectedObject );
+				} else if ( _selectedObject.primaryType === TYPE_NODE ) {
+					_dirtyNodes.set( _selectedObject.id, _selectedObject );
+				}
+			}
+
+			_selectedObject = object;
+
+			if( _selectedObject ) {
+				_selectedObject.isSelected = true;
+				
+				if( _selectedObject.primaryType === TYPE_CLUSTER ) {
+					_dirtyClusters.set( _selectedObject.id, _selectedObject );
+				} else if ( _selectedObject.primaryType === TYPE_NODE ) {
+					_dirtyNodes.set( _selectedObject.id, _selectedObject );
+				}
+			}
+		}
+	}
+	
+	function UserInput( ) {
+		
+		function trySelectNode( point ) {
+			for( var node of _nodes ) {
+				node = node[ 1 ];
+
+				if( Bounds.contains( node.body.bounds, point ) && Vertices.contains( node.body.vertices, point ) ) {
+					updateSelection( node );
+					return {
+						primaryType : node.primaryType,
+						id : node.id
+					};
+				}
+			}
+			updateSelection( null );
+			return null;
+		}
+
+		function trySelectCluster( point ) {
+			var cluster = null;
+			for( cluster of _childClusters ) {
+				cluster = cluster[ 1 ];
+
+				if( Bounds.contains( cluster.bounds, point ) && Vertices.contains( cluster.hull, point ) ) {
+					updateSelection( cluster );
+					return {
+						primaryType : cluster.primaryType,
+						id : cluster.id
+					};
+				}
+			}
+
+			for( cluster of _parentClusters ) {
+				cluster = cluster[ 1 ];
+
+				if( Bounds.contains( cluster.bounds, point ) && Vertices.contains( cluster.hull, point ) ) {
+					updateSelection( cluster );
+					return {
+						primaryType : cluster.primaryType,
+						id : cluster.id
+					};
+				}
+			}
+			updateSelection( null );
+			return null;
+		}
+
+		function tryMoveNode( node, delta ) {
+			Body.translate( node.body, delta );
+		}
+
+		function tryMoveCluster( cluster, delta ) {
+			var i = 0;
+			
+			for( ; i < cluster.bodies.length; ++i ) {
+				Body.translate( cluster.bodies[ i ], delta );
+			}
+
+			for( i = 0; i < cluster.cellBodies.length; ++i ) {
+				Body.translate( cluster.cellBodies[ i ], delta );
+			}
+
+			cluster.x -= delta.x;
+			cluster.y -= delta.y;
+
+			Vertices.translate( cluster.hull, delta );
+		}
+	};
 		
 	// Jos luodaan puuhun uusi lehti, viimeinen lehti merkataan likaiseksi...
 	
@@ -20,8 +128,10 @@ export function createViewModel() {
 		return {
 			id : id,
 			primaryType: TYPE_CLUSTER,
-			anchor: Object.assign( {}, anchor ),
-			hull: [ ],
+			anchor: Object.assign( { }, anchor ),
+			hull : [ ],
+			parent : null,
+			children : [ ],
 			cellBodies : [
 				// first in the top-left
 				Bodies.circle( 
@@ -59,37 +169,71 @@ export function createViewModel() {
 		}
 	}
 
-
-
 	function tryInsertNodeToClusters( node ) {
-		_clusters.forEach( ( cluster ) => {
-			if( Bounds.overlaps( cluster.bounds, node.body.bounds ) ) {
-				for( var i = 0; i < cellBodies.length; ++i ) {
-					if( Bounds.overlaps( cellBodies[ i ].bounds, node.body.bounds ) ) {
-						insertNodeToCluster( cluster, node );
-					}
-				}
-			}
-		} );
-	}
-	
-	function insertNodeToCluster( cluster, node ) {
-		cluster.bodies.push( node );
-	}
-	
-	
-	
-	function tryInsertClusterToClusters( child ) {
-		var inserted = false;
+		var inserted = false,
+			parent = null;
+		
 		for( parent of _childClusters ) {
-			if( child.id !== parent.id ) {
-				if( Bounds.overlaps( parent.bounds, child.bounds ) ) {
-					insertClusterToCluster( parent, child );
+			
+			if( Bounds.overlaps( parent.bounds, node.bounds ) ) {
+				insertNodeToCluster( parent, node );
+				inserted = true;
+				break;
+			}
+		}
+		
+		if( !inserted ) {
+			for( parent of _parentClusters ) {
+				if( Bounds.overlaps( parent.bounds, node.bounds ) ) {
+					insertNodeToCluster( parent, node );
 					inserted = true;
 					break;
 				}
 			}
 		}
+	}
+	
+	function insertNodeToCluster( cluster, node ) {
+		cluster.bodies.push( node.body );
+		
+		if( cluster.parent ) {
+			_dirtyParentClusters.set( cluster.parent, _parentClusters.get( cluster.parent ) );
+			_dirtyChildClusters.set( cluster.id, cluster );
+		}
+		else {
+			_dirtyParentClusters.set( cluster.id, cluster );
+		}
+	}
+
+	function deleteNodeFromCluster( cluster, node ) {
+		var filtered = [ ];
+		for( var i = 0; i < cluster.bodies.length; ++i ) {
+			if( cluster.bodies[ i ].id !== node.body.id ) {
+				filtered.push( cluster.bodies[ i ] );
+			}
+		}
+		cluster.bodies = filtered;
+		if( cluster.parent ) {
+			_dirtyParentClusters.set( cluster.parent, _parentClusters.get( cluster.parent ) );
+			_dirtyChildClusters.set( cluster.id, cluster );
+		} else {
+			_dirtyParentClusters.set( cluster.id, cluster );
+		}
+	}
+	
+	
+	function tryInsertClusterToClusters( child ) {
+		var inserted = false,
+			parent = null;
+		// for( parent of _childClusters ) {
+		// 	if( child.id !== parent.id ) {
+		// 		if( Bounds.overlaps( parent.bounds, child.bounds ) ) {
+		// 			insertClusterToCluster( parent, child );
+		// 			inserted = true;
+		// 			break;
+		// 		}
+		// 	}
+		// }
 		
 		if( !inserted ) {
 			for( parent of _parentClusters ) {
@@ -105,7 +249,25 @@ export function createViewModel() {
 	}
 	
 	function insertClusterToCluster( parent, child ) {
-		parent
+		_parent.children.push( child );
+		_dirtyParentClusters.set( parent.id, parent );
+		_dirtyChildClusters.set( child.id, child );
+		if(_parentClusters.has( child.id ) ) {
+			_parentClusters.delete( child.id );
+		}
+	}
+
+	function deleteClusterFromCluster( parent, child ) {
+		var filtered = [ ];
+		
+		for( var i = 0; i < parent.children.length; ++i ) {
+			if( parent.children[ i ].id !== child.id ) {
+				filtered.push( parent.children[ i ] );
+			}
+		}
+		
+		parent.children = filtered;
+		_dirtyParentClusters.set( parent.id, parent );
 	}
 	
 	function updateDirtyHulls( ) {
@@ -120,13 +282,13 @@ export function createViewModel() {
 				j = 0;
 			
 			for( ; i < cluster.cellBodies.length; ++i ) {
-				for( ; j < cluster.cellBodies[ i ].vertices.length; ++j ) {
+				for( ; j < cluster.cellBodies[ i ].vertices.length; j += 2 ) {
 					vertices.push( cluster.cellBodies[ i ].vertices[ j ] );
 				}
 			}
 			
 			for( i = 0; i < cluster.bodies.length; ++i ) {
-				for( j = 0; j < cluster.bodies[ i ].vertices.length; ++j ) {
+				for( j = 0; j < cluster.bodies[ i ].vertices.length; j += 2 ) {
 					vertices.push( cluster.bodies[ i ].vertices[ j ] );
 				}
 			}
@@ -135,15 +297,6 @@ export function createViewModel() {
 			cluster.bounds = Bounds.create( cluster.hull );
 		} );
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -254,50 +407,83 @@ export function createViewModel() {
 		
 		// New node belongs to cluster?
 		if( newNode.clusterId ) {
-			
-			var cluster = _clusters.get( newNode.clusterId );
-			
+
+			var cluster = _parentClusters.get( newNode.clusterId );
+			if( !cluster ) {
+				_childClusters.get( newNode.clusterId );
+			}
 			// Cluster exists in the state of view?
 			if( cluster ) {
 				
 				// The cluster exists, therefore we just insert the node to the cluster...
-				insertNodeToCluster( cluster, node );
+				insertNodeToCluster( cluster, newNode );
 			} else {
 				
 				// The cluster does not exist, therefore we have to create the cluster with default settings...
 				cluster = createDefaultCluster( newNode.id, newNode.anchor );
 				insertNodeToCluster( cluster, newNode );
 			}
-		} else {
-			tryInsertNodeToClusters( node ); 
+		} else if( !node.isSelected ) {
+			tryInsertNodeToClusters( node );
 		}
+
+		// 0.618 kerroin lähimmästä sisempään.
+		// 1 * 0.618 = 0.618;
+		// 0.618 / 0.618 = 1
+		// 2 * 0.618 = 1.236
+		// 1.236 / 0.618 = 2; 
 	}
 
 	function updateNode( oldNode, newNode ) {
-		
+		Object.assign( oldNode, newNode );
 	}
 
 	function deleteNode( oldNode ) {
-		
+		var cluster = null;
+		if( oldNode.clusterId ) {
+			cluster = _parentClusters.get( oldNode.clusterId );
+			if( !cluster ) {
+				cluster = _childClusters.get( oldNode.clusterId );
+			}
+		}
+
+		if( cluster ) {
+			deleteNodeFromCluster( oldNode );
+		}
+
+		_nodes.delete( oldNode.id );
 	}
 
 	function addCluster( newCluster ) {
-		
+		var oldCluster = _parentClusters.get( newCluster.id );
 	}
 	
 	function updateCluster( oldCluster, newCluster ) {
-		
+		if( oldCluster.x !== newCluster.x || oldCluster.y !== newCluster.y ) {
+			
+			translateCluster( oldCluster, delta );
+		}
+		Object.assign( oldCluster, newCluster );
 	}
 	
 	function deleteCluster( oldCluster ) {
 		
+		var cluster = null;
+		if( oldCluster.parent ) {
+			cluster = _parentClusters.get( oldNode.clusterId );
+			if( !cluster ) {
+				cluster = _childClusters.get( oldNode.clusterId );
+			}
+			if( cluster ) {
+				deleteClusterFromCluster( oldCluster );
+			}
+			
+			_childClusters.delete( oldCluster.id );
+		} 
+		else {
+			_parentClusters.delete( oldCluster.id );
+		}
 	}
-	
-	
-	
-	
-	
-	
 	
 	
 	
