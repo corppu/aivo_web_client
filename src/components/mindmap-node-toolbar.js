@@ -26,16 +26,18 @@ const MindMapNodeToolbar = createClass({
         const { id, data, canvasCamera, update, remove } = this.props;
         const type = data.type || "Type";
 
-        //console.log(translateToCamera(canvasCamera, { x: data.x, y: data.y }));
+        const pos = translateToCamera(
+                { x: -canvasCamera.x, y: -canvasCamera.y },
+                { x: data.x, y: data.y });
 
         return (
             <div
                 className="noselect"
                 style={{
-                    display: "flex",
                     position: "fixed",
-                    bottom: 20,
-                    width: "100%",
+                    left: pos.x,
+                    top: pos.y,
+                    display: "flex",
                     justifyContent: "center",
                     alignItems: "flex-end",
                     cursor: "default"
