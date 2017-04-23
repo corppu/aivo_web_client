@@ -123,13 +123,15 @@ const MindMap = createClass({
     },
 
     renderNodeToolbar: function() {
-        const { selection } = this.state;
+        const { selection, canvasCamera } = this.state;
 
         if (!selection) {
             return null;
         }
         return (
-            <MindMapNodeToolbar {...selection}/>
+            <MindMapNodeToolbar
+                canvasCamera={canvasCamera}
+                {...selection}/>
         );
     },
 

@@ -1,5 +1,7 @@
 import React, { createClass } from "react";
 
+import { translateToCamera } from "../utils/canvas-utils";
+
 import {
     NODE_TYPE_TEXT,
     NODE_TYPE_FILE,
@@ -21,8 +23,10 @@ const MindMapNodeToolbar = createClass({
     },
 
     render: function() {
-        const { id, data, update, remove } = this.props;
+        const { id, data, canvasCamera, update, remove } = this.props;
         const type = data.type || "Type";
+
+        //console.log(translateToCamera(canvasCamera, { x: data.x, y: data.y }));
 
         return (
             <div
