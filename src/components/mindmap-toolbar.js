@@ -12,6 +12,7 @@ const MindMapToolbar = createClass({
     renderSearchBar: function() {
         return (
             <div
+                className="noselect"
                 style={{
                     position: "fixed",
                     top: 0,

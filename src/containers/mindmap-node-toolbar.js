@@ -14,7 +14,7 @@ import {
 
 function mapStateToProps(state, ownProps) {
     const { mindmap } = state;
-    const { id, primaryType } = ownProps;
+    const { id, primaryType, canvasCamera } = ownProps;
 
     let data = null;
     switch (primaryType) {
@@ -25,18 +25,22 @@ function mapStateToProps(state, ownProps) {
     return {
         id,
         primaryType,
-        data
+        data,
+
+        canvasCamera
     }
 }
 
 function mergeProps(stateProps, dispatchProps) {
-    const { id, primaryType, data } = stateProps;
+    const { id, primaryType, data, canvasCamera } = stateProps;
     const { tryUpdateObject, tryRemoveObject } = dispatchProps;
 
     return {
         id,
         primaryType,
         data,
+
+        canvasCamera,
 
         update: function(changes) {
             const next = Object.assign({}, data, changes);

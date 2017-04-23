@@ -40,27 +40,26 @@ const NodeView = createClass({
                     left: 0,
                     width: "100vw",
                     height: "100vh",
-                    backgroundColor: "rgba(255,255,255,0.9333)",
+                    backgroundColor: "rgba(255,255,255,0.75)",
                     display: "flex",
                     justifyContent: "center",
-                    alignItems: "center"
+                    alignItems: "flex-end"
                 }}
                 onClick={ goToParentBoard }>
 
                 { node ? 
                     <div
                         style={{
-                            borderRadius: 5,
                             backgroundColor: "#fff",
-                            boxShadow: "0px 5px 15px 2.5px #ddd",
-                            overflow: "hidden"
+                            width: 600,
+                            boxShadow: "0 20px 70px 0 rgba(0, 0, 0, 0.2)"
                         }}
                         onClick={ (e) => e.stopPropagation() }>
 
                         { this.renderNodeTitle() }
                         <div
                             style={{
-                                margin: 20
+                                height: "60vh"
                             }}>
                             { this.renderNodeContent() }
                         </div>
@@ -78,7 +77,7 @@ const NodeView = createClass({
                 className="node-title">
                 <input
                     className="node-title-input"
-                    value={node.get("title")}
+                    value={node.get("title") || ""}
                     placeholder="Click to edit title..."
                     onChange={(e) => {
                         const { value } = e.target;
@@ -148,9 +147,7 @@ const NodeView = createClass({
     },
 
     setNodeType: function(type) {
-        const { node, updateNode } = this.state;
-
-        updateNode(node.set("type", type));
+        // no-op, old code
     },
 });
 

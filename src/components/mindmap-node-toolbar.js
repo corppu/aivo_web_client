@@ -1,5 +1,7 @@
 import React, { createClass } from "react";
 
+import { translateToCamera } from "../utils/canvas-utils";
+
 import {
     NODE_TYPE_TEXT,
     NODE_TYPE_FILE,
@@ -21,26 +23,31 @@ const MindMapNodeToolbar = createClass({
     },
 
     render: function() {
-        const { id, data, update, remove } = this.props;
+        const { id, data, canvasCamera, remove } = this.props;
         const type = data.type || "Type";
+
+        const pos = translateToCamera(
+                { x: -canvasCamera.x, y: -canvasCamera.y },
+                { x: data.x, y: data.y });
 
         return (
             <div
                 className="noselect"
                 style={{
-                    display: "flex",
                     position: "fixed",
-                    bottom: 20,
-                    width: "100%",
-                    justifyContent: "center",
-                    alignItems: "flex-end",
+                    left: pos.x + 48,
+                    top: pos.y - 64,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
                     cursor: "default"
                 }}>
                 <div>
                     <div
                         style={{
                             padding: "5px 10px",
-                            backgroundColor: "#fff"
+                            backgroundColor: "#fff",
+                            boxShadow: "0 2px 4px 1px #cecece"
                         }}>
                         <i
                             className="fa fa-circle-o fa-lg pointer"
@@ -89,9 +96,10 @@ const MindMapNodeToolbar = createClass({
         return (
             <div
                 style={{
-                    marginLeft: 10, // for temp layout
+                    marginTop: 8,
                     padding: 8,
-                    backgroundColor: "#fff"
+                    backgroundColor: "#fff",
+                    boxShadow: "0 2px 4px 1px #cecece"
                 }}>
                 { menu }
             </div>
@@ -109,9 +117,9 @@ const MindMapNodeToolbar = createClass({
     },
 
     handleTypeSelect: function(type) {
-    
-        // TODO: implement node type selection
+        const { update } = this.props;
 
+        update({ type });
     }
 });
 
@@ -146,6 +154,7 @@ function TypeSelect({ handleSelect }) {
 function TypeSelectItem({ iconClass, labelText, onClick }) {
     return (
         <div
+            className="pointer"
             onClick={onClick}>
             <div
                 style={{

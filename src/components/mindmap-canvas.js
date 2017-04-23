@@ -1,7 +1,14 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateCluster, delCluster, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters, updateHulls } from "../utils/algorithm-utils";
+
+import { updatePhysics, moveObject, trySelectObject,
+        setEngine, delNode, updateCluster, delCluster,
+        updateNode, delPin, updatePin, delLine,
+        updateLine, drawNodes, drawPins, drawLines,
+        drawClusters, updateHulls
+} from "../utils/algorithm-utils";
+
 import { isDoubleTap } from "../utils/input-utils";
 import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
@@ -25,7 +32,6 @@ import {
     MINDMAP_MODE_DEFAULT,
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
-
 
 export default function() {
     let _context = {
@@ -94,7 +100,7 @@ export default function() {
 		let propsPins = new Map( props.pins );
 
 
-		_context.clusters.forEach( ( cluster,  id ) => {
+		_context.clusters.forEach( ( cluster, id ) => {
 			var propsCluster = propsClusters.get( id );
 			if( propsCluster ) {
 				Object.assign( cluster, {
@@ -132,8 +138,6 @@ export default function() {
 				color: propsCluster.get("color") || null,
 				parent: propsNodes.get("parent") || null
 			};
-			
-		
 			
 			_context.clusters.set( cluster.id, cluster );
 			updateCluster( cluster );
@@ -407,9 +411,7 @@ export default function() {
 		if ( hits.length > 0 ) {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
-                 if ( _selectedNodeId !== node.id ) {
-                     setSelectedNode(node);
-                 }
+                updateSelection(node);
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
@@ -420,22 +422,32 @@ export default function() {
                         y: pos.y
                 });
             }
-            setSelectedNode(null);
+            updateSelection(null);
 		}
 	}
 
-    function setSelectedNode(node) {
-        _selectedNodeId = node ? node.id : null;
+    function updateSelection(node) {
+        let nextSelection = node ? node.id : null;
+        
+        if (nextSelection && nextSelection == _selectedNodeId) {
+            if (_actions.openNode) {
+                _actions.openNode(nextSelection);
+            }
+            nextSelection = null;
+        }
+        _selectedNodeId = nextSelection;
         
         if (_actions.updateSelection) {
-            const selection = node
+            const selection = _selectedNodeId
                 ? {
-                    id: node.id,
+                    id: _selectedNodeId,
                     primaryType: TYPE_NODE
                 }
                 : null;
             
-            _actions.updateSelection(selection);
+            if (_actions.updateSelection) {
+                _actions.updateSelection(selection);
+            }
         }
     }
 	
@@ -538,6 +550,10 @@ export default function() {
         */
     }
 
+    function getCamera() {
+        return Object.assign({}, _camera);
+    }
+
     return {
         updateProps,
         onInputStart,
@@ -545,7 +561,8 @@ export default function() {
         onInputMove,
         onLongPress,
         update,
-        render
+        render,
+        getCamera
     };
 }
 
