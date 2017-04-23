@@ -93,7 +93,7 @@ export default function() {
 		let propsPins = new Map( props.pins );
 
 
-		_context.clusters.forEach( ( cluster,  id ) => {
+		_context.clusters.forEach( ( cluster, id ) => {
 			var propsCluster = propsClusters.get( id );
 			if( propsCluster ) {
 				Object.assign( cluster, {

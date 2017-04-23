@@ -27,7 +27,8 @@ const MindMap = createClass({
         return {
             width: innerWidth,
             height: innerHeight,
-            selection: null
+            selection: null,
+            canvasCamera: null,
         };
     },
 
@@ -50,6 +51,8 @@ const MindMap = createClass({
             }
             this.mindmap.update();
             this.mindmap.render(ctx);
+
+            this.checkCamera(this.mindmap.getCamera());
             
             requestAnimationFrame(renderLoop);
         }
@@ -81,12 +84,12 @@ const MindMap = createClass({
     
     render: function() {
         const { children } = this.props;
-        const { width, height, selection } = this.state;
+        const { width, height } = this.state;
 
         return (
 			<div>
 				<MindMapToolbar/>
-                { selection ? <MindMapNodeToolbar {...selection}/> : null }
+                { this.renderNodeToolbar() }
 				<div
 					style={{
 						position: "fixed",
@@ -117,6 +120,17 @@ const MindMap = createClass({
 				</div>
 			</div>
         )
+    },
+
+    renderNodeToolbar: function() {
+        const { selection } = this.state;
+
+        if (!selection) {
+            return null;
+        }
+        return (
+            <MindMapNodeToolbar {...selection}/>
+        );
     },
 
 	handleTouchStart: function(e) {
@@ -210,12 +224,24 @@ const MindMap = createClass({
             width: innerWidth,
             height: innerHeight
         });
+    },
+
+    checkCamera: function(camera) {
+        const { canvasCamera } = this.state;
+
+        if (!canvasCamera
+                || camera.x != canvasCamera.x
+                || camera.y != canvasCamera.y)
+            {
+            this.setState({
+                canvasCamera: Object.assign({}, camera)
+            });
+        }
     }
 });
 
 function calculatePosition(canvas, clientX, clientY) {
     const bounds = canvas.getBoundingClientRect();
-    var kok = kakka;
     return {
         x: clientX - bounds.left,
         y: clientY - bounds.top
