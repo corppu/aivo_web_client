@@ -1,7 +1,14 @@
 import { Engine, World, Composite, Body, Bodies, Query, Vector } from "matter-js";
 
 import { queryNodeAtPoint } from "./mindmap-canvas-physics";
-import { updatePhysics, moveObject, trySelectObject, setEngine, delNode, updateCluster, delCluster, updateNode, delPin, updatePin, delLine, updateLine, drawNodes, drawPins, drawLines, drawClusters, updateHulls } from "../utils/algorithm-utils";
+
+import { updatePhysics, moveObject, trySelectObject,
+        setEngine, delNode, updateCluster, delCluster,
+        updateNode, delPin, updatePin, delLine,
+        updateLine, drawNodes, drawPins, drawLines,
+        drawClusters, updateHulls
+} from "../utils/algorithm-utils";
+
 import { isDoubleTap } from "../utils/input-utils";
 import { clear, createRenderer, translateToCamera } from "../utils/canvas-utils";
 import { flagHidden } from "../utils/node-utils";
@@ -404,9 +411,7 @@ export default function() {
 		if ( hits.length > 0 ) {
              const node = _context.bodyToNodeMapping[ hits[ 0 ].id ];
              if ( action.totalDeltaMagnitude <= 10 ) {
-                 if ( _selectedNodeId !== node.id ) {
-                     setSelectedNode(node);
-                 }
+                updateSelection(node);
 			 }
 		}
 		else if ( action.totalDeltaMagnitude <= 10 ) {
@@ -417,12 +422,20 @@ export default function() {
                         y: pos.y
                 });
             }
-            setSelectedNode(null);
+            updateSelection(null);
 		}
 	}
 
-    function setSelectedNode(node) {
-        _selectedNodeId = node ? node.id : null;
+    function updateSelection(node) {
+        let nextSelection =  node ? node.id : null;
+        
+        if (nextSelection && nextSelection == _selectedNodeId) {
+            if (_actions.openNode) {
+                _actions.openNode(nextSelection);
+            }
+            nextSelection = null;
+        }
+        _selectedNodeId = nextSelection;
         
         if (_actions.updateSelection) {
             const selection = node
@@ -432,7 +445,9 @@ export default function() {
                 }
                 : null;
             
-            _actions.updateSelection(selection);
+            if (_actions.updateSelection) {
+                _actions.updateSelection(selection);
+            }
         }
     }
 	

@@ -32,6 +32,8 @@ const NodeView = createClass({
         const { goToParentBoard } = this.props;
         const { node } = this.state;
 
+        return null; // this component is fucked atm
+
         return (
             <div
                 style={{
