@@ -35,18 +35,19 @@ const MindMapNodeToolbar = createClass({
                 className="noselect"
                 style={{
                     position: "fixed",
-                    left: pos.x,
-                    top: pos.y,
+                    left: pos.x + 48,
+                    top: pos.y - 64,
                     display: "flex",
-                    justifyContent: "center",
-                    alignItems: "flex-end",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
                     cursor: "default"
                 }}>
                 <div>
                     <div
                         style={{
                             padding: "5px 10px",
-                            backgroundColor: "#fff"
+                            backgroundColor: "#fff",
+                            boxShadow: "0 2px 4px 1px #cecece"
                         }}>
                         <i
                             className="fa fa-circle-o fa-lg pointer"
@@ -95,9 +96,10 @@ const MindMapNodeToolbar = createClass({
         return (
             <div
                 style={{
-                    marginLeft: 10, // for temp layout
+                    marginTop: 8,
                     padding: 8,
-                    backgroundColor: "#fff"
+                    backgroundColor: "#fff",
+                    boxShadow: "0 2px 4px 1px #cecece"
                 }}>
                 { menu }
             </div>
