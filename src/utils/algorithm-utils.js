@@ -21,6 +21,9 @@ import {
 var _rootClusters = new Map( );
 var _rootNodes = new Map( );
 
+var _parentClusters = new Map( );
+var _childClusters = new Map( );
+
 var _nodes = new Map( );
 var _pins = new Map( );
 var _clusters = new Map( );
@@ -28,7 +31,9 @@ var _lines = new Map( );
 var _bodies = null;
 var _engine = null;
 
-var _dirtyClusters = new Set( );
+var _dirtyParentClusters = new Set( );
+var _dirtyChildClusters = new Set( );
+
 
 export function updatePhysics() {
 	// _nodes.forEach( ( node ) => {
@@ -51,6 +56,95 @@ export function updatePhysics() {
 }
 
 
+function checkParentClusterCollision( object ) {
+	var cluster = null;
+	
+	for( cluster of _parentClusters ) {
+		cluster = cluster[ 1 ];
+		if( !object.parent && object.primaryType === TYPE_CLUSTER && object.id === cluster.id ) {
+			continue;
+		}
+		
+		if( Bounds.overlaps( cluster.bounds, object.bounds ) ) {
+			return cluster;
+		}
+	}
+	
+	return null;
+}
+
+
+function checkChildClusterCollision( object ) {
+	var cluster = null;
+	
+	for( cluster of _childClusters ) {
+		cluster = cluster[ 1 ];
+		if( !object.parent && object.primaryType === TYPE_CLUSTER && object.id === cluster.id ) {
+			continue;
+		}
+		
+		if( Bounds.overlaps( cluster.bounds, object.bounds ) ) {
+			return cluster;
+		}
+	}
+	
+	return null;
+}
+
+
+
+export function tryInsertToCluster( objectData ) {
+	var object = null;
+	var objects = [ ];
+	var cluster = null;
+	
+	switch( objectData.primaryType ) {	
+		
+		case TYPE_NODE:
+			object = _nodes.get( objectData.id );
+			break;
+
+		case TYPE_CLUSTER:
+			object = _clusters.get( objectData.id );
+			if( object.parent ) {
+				_dirtyChildClusters.add( object.id );
+				_dirtyParentClusters.add( object.parent );
+			} else {
+				_dirtyParentClusters.add( object.id );
+			}
+			updateHulls();
+
+		default:
+			break;
+	}
+
+	if( object ) {
+		if( object.primaryType === TYPE_CLUSTER ) {
+			cluster = checkParentClusterCollision( object );
+			if( !cluster.children ) {
+				cluster.children = { };
+			}
+			
+			cluster.children[ object.id ] = object.id;
+			object.parent = cluster.id;
+			_dirtyChildClusters.add( object.id );
+			_dirtyParentClusters.add( cluster.id );
+		}
+		// TYPE_NODE
+		else {
+			// TODO first check parents then its children only...
+			// also use only single function in the future...
+			cluster = checkChildClusterCollision( object );
+			if( !cluster ) {
+				cluster = checkParentClusterCollision( object );
+			}
+			object.clusterId = cluster.id;
+			cluster.vertices.set( object.id, object.body.vertices );
+		}
+	}
+	return cluster;
+}
+
 export function moveObject( objectData, lastDelta ) {
 	var object = null;
 	
@@ -61,6 +155,9 @@ export function moveObject( objectData, lastDelta ) {
 	switch( objectData.primaryType ) {	
 		case TYPE_PIN:
 			object = _pins.get( objectData.id );
+			if( !object ) {
+				return objects;
+			}
 			object.anchor.x += dx;
 			object.anchor.y += dy;
 			object.x -= dx;
@@ -70,6 +167,9 @@ export function moveObject( objectData, lastDelta ) {
 		
 		case TYPE_NODE:
 			object = _nodes.get( objectData.id );
+			if( !object ) {
+				return objects;
+			}
 			object.anchor.x -= dx;
 			object.anchor.y -= dy;
 			object.x -= dx;
@@ -80,6 +180,10 @@ export function moveObject( objectData, lastDelta ) {
 		case TYPE_CLUSTER:
 			object = _clusters.get( objectData.id );
 			
+			if( !object ) {
+				return objects;
+			}
+			
 			for( var iter of object.vertices ) {
 				var node = _nodes.get( iter[ 0 ] );
 				node.anchor.x -= dx;
@@ -89,6 +193,10 @@ export function moveObject( objectData, lastDelta ) {
 				objects.push( node );
 			}
 			
+			object.x -= dx;
+			object.y -= dy;
+			
+			objects.push( object );
 			break;
 			
 		default:
@@ -145,9 +253,16 @@ export function setEngine( engine ) {
 }
 
 export function drawClusters( ctx, camera ) {
-	for( var cluster of _rootClusters ) {
+	var cluster;
+	
+	for( cluster of _parentClusters ) {
 		cluster = cluster[ 1 ];
-		drawClusterHelper( cluster, ctx, camera );;
+		drawCluster( cluster, ctx, camera );;
+	}
+	
+	for( cluster of _childClusters ) {
+		cluster = cluster[ 1 ];
+		drawCluster( cluster, ctx, camera );;
 	}
 }
 
@@ -263,10 +378,17 @@ export function drawPins( ctx, camera ) {
 export function updateHulls() {
 	updateLinePaths( );
 
-	_dirtyClusters.forEach(cluster => {
+	_dirtyChildClusters.forEach(cluster => {
 		updateHull( _clusters.get( cluster ) );
 	});
-	_dirtyClusters.clear();
+	
+	_dirtyChildClusters.clear();
+	
+	_dirtyParentClusters.forEach(cluster => {
+		updateHull( _clusters.get( cluster ) );
+	});
+	
+	_dirtyParentClusters.clear();
 }
 
 function updateHull( cluster ) {
@@ -328,7 +450,11 @@ function setToCluster( node ) {
 	
 	//updateHull( cluster );
 
-	_dirtyClusters.add( cluster );
+	if( cluster.parent ) {
+		_dirtyChildClusters.add( cluster );
+	} else {
+		_dirtyParentClusters.add( cluster );
+	}
 }
 
 function delFromCluster( node ) {
@@ -426,19 +552,49 @@ export function delLine( line ) {
 }
 
 export function updateCluster( cluster ) {
+	
+	// Haetaan mahdollinen edeltävä versio:
 	var oldCluster = _clusters.get( cluster.id );
-	if( oldCluster && !oldCluster.parent && cluster.parent ) {
-		_rootClusters.delete( cluster.id );
+	
+	
+	// Jos edeltävä versio oli lapsi, mutta uusi versio ei ole lapsi,
+	// pitää edeltävä versio poistaa lapsista ja merkitä ex-vanhempi likaiseksi, jotta
+	// hull päivittyy...
+	if( oldCluster && oldCluster.parent && !cluster.parent ) {
+		_childClusters.delete( cluster.id );
+		_dirtyParentClusters.add( oldCluster.parent );
 	}
 
-	if( !cluster.parent ) {
-		_rootClusters.set( cluster.id, cluster );
+	// Jos edeltävä versio oli vanhempi, mutta uusi versio ei ole vanhempi,
+	// pitää edeltävä versio poistaa vanhemmista ja lisäksi lapset pitää päivittää vanhemmiksi...
+	if( oldCluster && !oldCluster.parent && cluster.parent ) {
+		_parentClusters.delete( cluster.id );
+		
+		if( oldCluster.children ) {
+			for( var childId in oldCluster.children ) {
+				var child = _childClusters.get( childId );
+				if( child ) {
+					_childClusters.delete( childId );
+					_child.parent = null;
+					_parentClusters.set( childId, child );
+				}
+			}
+		}
+		// Varmuuden vuoksi poistetaan lapset....
+		if( cluster.children ) {
+			oldCluster.children = null;
+			cluster.children = null;
+		}
 	}
 	
+	// Vanhempi versio on käsitelty, joten voidaan päivittää vanhan tieto uudeksi:
 	if( oldCluster ) {
 		_clusters.set( cluster.id, Object.assign( oldCluster, cluster ) );
-		_dirtyClusters.add( cluster.id );
+		oldCluster.children = cluster.children;
+		oldCluster.lines = cluster.lines;
 	}
+	
+	// Vanhempaa versiota ei ollut, joten luodaan uusi versio
 	else {
 		cluster.cellVertices = [ 
 			Vector.create(cluster.x + MINDMAP_NODE_RADIUS * 1.5, cluster.y),
@@ -447,7 +603,21 @@ export function updateCluster( cluster ) {
 		];
 		cluster.vertices = new Map( );
 		_clusters.set( cluster.id, cluster );
-		_dirtyClusters.add( cluster.id );
+	}
+	
+	
+	// Asetetaan likaiseksi tarvittavat klusterit ja asetetaan uusi klusteri oikeaan lokeroon...
+	if( cluster.parent ) {
+		_childClusters.set( cluster.id, cluster );
+		
+		_dirtyParentClusters.add( cluster.parent );
+		
+		_dirtyChildClusters.add( cluster.id );
+	}
+	else {
+		_parentClusters.set( cluster.id, cluster );
+		
+		_dirtyParentClusters.add( cluster.id );
 	}
 }
 
@@ -460,6 +630,24 @@ export function delCluster( cluster ) {
 			node = _nodes.get( iter[ 0 ] );
 			if( node && node.clusterId && node.clusterId === cluster.id ) {
 				node.clusterId = null;
+			}
+		}
+	}
+	
+	if( oldCluster.parent ) {
+		_childClusters.delete( oldCluster.id );
+	}
+	else {
+		_parentClusters.delete( oldCluster.id );
+	}
+	
+	if( oldCluster.children ) {
+		for( var childId in oldCluster.children ) {
+			var child = _childClusters.get( childId );
+			if( child ) {
+				_childClusters.delete( childId );
+				_child.parent = null;
+				_parentClusters.set( childId, child );
 			}
 		}
 	}

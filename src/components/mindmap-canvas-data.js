@@ -10,7 +10,14 @@ import {
 import firebase from "firebase";
 
 
+
+
+
 export function Presenter( currentBoardId ) {
+	function FirebaseListener() {
+	
+		
+	}
 
 	var	_currentBoardId = currentBoardId,
 		_selectedObject = null,
@@ -53,8 +60,11 @@ export function Presenter( currentBoardId ) {
 		}
 	}
 	
+	
+	// UserInput is the module for local input to change or select data...
 	function UserInput( ) {
 		
+		// This function is called whenever input starts...
 		function trySelectObject( point ) {
 			var object = trySelectNode( point );
 			if( !object ) {
@@ -109,30 +119,39 @@ export function Presenter( currentBoardId ) {
 			return null;
 		}
 
-		function tryMoveObject( object, delta ) {
-			const id = object.id;
-			switch( object.primaryType ) {
-				case TYPE_CLUSTER :
-						object = _parentClusters.get( id );
-						if( !object ) {
-							object = _childClusters.get( id );
-						}
-						if( object ) {
-							object = tryMoveCluster( object, delta );
-						}
-						break;
-				case TYPE_NODE :
-						object = _nodes.get( id );
-						if( object ) {
-							object = tryMoveNode( object, delta );
-						}
-						break;
-				default:
-						object = null;
-						break;
-			};
+		
+		// This function is called if the input start had object assigned for the input...
+		function tryMoveObject( delta ) {
 			
-			return object;
+			if( _selectedObject ) {
+				switch( _selectedObject.primaryType ) {
+					case TYPE_CLUSTER :
+							// object = _parentClusters.get( id );
+							// if( !object ) {
+								// object = _childClusters.get( id );
+							// }
+							// if( object ) {
+								// object = tryMoveCluster( object, delta );
+							// }
+							
+							tryMoveCluster( _selectedObject, delta );
+							break;
+					case TYPE_NODE :
+							// object = _nodes.get( id );
+							// if( object ) {
+								// object = tryMoveNode( object, delta );
+							// }
+							
+							tryMoveNode( node, delta );
+							break;
+					default:
+						return false;
+				};
+				
+				return true;
+			}
+			
+			return false;
 		}
 		
 		function tryMoveNode( node, delta ) {
@@ -540,6 +559,9 @@ export function Presenter( currentBoardId ) {
 		mergeImmutableClusters,
 		mergeImmutableNodes,
 		UserInput
+		
+		
+		// Firebase can be hooked below:
 		// addNode,
 		// updateNode,
 		// deleteNode,
