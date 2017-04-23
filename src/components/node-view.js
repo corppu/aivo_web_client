@@ -32,8 +32,6 @@ const NodeView = createClass({
         const { goToParentBoard } = this.props;
         const { node } = this.state;
 
-        return null; // this component is fucked atm
-
         return (
             <div
                 style={{
@@ -80,7 +78,7 @@ const NodeView = createClass({
                 className="node-title">
                 <input
                     className="node-title-input"
-                    value={node.get("title")}
+                    value={node.get("title") || ""}
                     placeholder="Click to edit title..."
                     onChange={(e) => {
                         const { value } = e.target;
@@ -150,9 +148,7 @@ const NodeView = createClass({
     },
 
     setNodeType: function(type) {
-        const { node, updateNode } = this.state;
-
-        updateNode(node.set("type", type));
+        // no-op, old code
     },
 });
 
