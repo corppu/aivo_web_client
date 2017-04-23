@@ -26,7 +26,6 @@ import {
     MINDMAP_MODE_LINE_EDIT
 } from "../constants/config";
 
-
 export default function() {
     let _context = {
         engine: Engine.create(),
@@ -132,8 +131,6 @@ export default function() {
 				color: propsCluster.get("color") || null,
 				parent: propsNodes.get("parent") || null
 			};
-			
-		
 			
 			_context.clusters.set( cluster.id, cluster );
 			updateCluster( cluster );
@@ -538,6 +535,10 @@ export default function() {
         */
     }
 
+    function getCamera() {
+        return Object.assign({}, _camera);
+    }
+
     return {
         updateProps,
         onInputStart,
@@ -545,7 +546,8 @@ export default function() {
         onInputMove,
         onLongPress,
         update,
-        render
+        render,
+        getCamera
     };
 }
 
