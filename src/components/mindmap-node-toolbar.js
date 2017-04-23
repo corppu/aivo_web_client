@@ -23,7 +23,7 @@ const MindMapNodeToolbar = createClass({
     },
 
     render: function() {
-        const { id, data, canvasCamera, update, remove } = this.props;
+        const { id, data, canvasCamera, remove } = this.props;
         const type = data.type || "Type";
 
         const pos = translateToCamera(
@@ -117,9 +117,9 @@ const MindMapNodeToolbar = createClass({
     },
 
     handleTypeSelect: function(type) {
-    
-        // TODO: implement node type selection
+        const { update } = this.props;
 
+        update({ type });
     }
 });
 
