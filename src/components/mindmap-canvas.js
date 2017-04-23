@@ -427,7 +427,7 @@ export default function() {
 	}
 
     function updateSelection(node) {
-        let nextSelection =  node ? node.id : null;
+        let nextSelection = node ? node.id : null;
         
         if (nextSelection && nextSelection == _selectedNodeId) {
             if (_actions.openNode) {
@@ -438,9 +438,9 @@ export default function() {
         _selectedNodeId = nextSelection;
         
         if (_actions.updateSelection) {
-            const selection = node
+            const selection = _selectedNodeId
                 ? {
-                    id: node.id,
+                    id: _selectedNodeId,
                     primaryType: TYPE_NODE
                 }
                 : null;
