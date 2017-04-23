@@ -154,6 +154,7 @@ function TypeSelect({ handleSelect }) {
 function TypeSelectItem({ iconClass, labelText, onClick }) {
     return (
         <div
+            className="pointer"
             onClick={onClick}>
             <div
                 style={{
