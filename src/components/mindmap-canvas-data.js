@@ -55,6 +55,15 @@ export function Presenter( currentBoardId ) {
 	
 	function UserInput( ) {
 		
+		function trySelectObject( point ) {
+			var object = trySelectNode( point );
+			if( !object ) {
+				object = trySelectCluster( point );
+			}
+			
+			return object;
+		}
+		
 		function trySelectNode( point ) {
 			for( var node of _nodes ) {
 				node = node[ 1 ];
@@ -100,6 +109,32 @@ export function Presenter( currentBoardId ) {
 			return null;
 		}
 
+		function tryMoveObject( object, delta ) {
+			const id = object.id;
+			switch( object.primaryType ) {
+				case TYPE_CLUSTER :
+						object = _parentClusters.get( id );
+						if( !object ) {
+							object = _childClusters.get( id );
+						}
+						if( object ) {
+							object = tryMoveCluster( object, delta );
+						}
+						break;
+				case TYPE_NODE :
+						object = _nodes.get( id );
+						if( object ) {
+							object = tryMoveNode( object, delta );
+						}
+						break;
+				default:
+						object = null;
+						break;
+			};
+			
+			return object;
+		}
+		
 		function tryMoveNode( node, delta ) {
 			Body.translate( node.body, delta );
 		}
@@ -120,6 +155,12 @@ export function Presenter( currentBoardId ) {
 
 			Vertices.translate( cluster.hull, delta );
 		}
+		
+		
+		return {
+			trySelectObject,
+			tryMoveObject
+		};
 	};
 		
 	// Jos luodaan puuhun uusi lehti, viimeinen lehti merkataan likaiseksi...
@@ -174,6 +215,7 @@ export function Presenter( currentBoardId ) {
 			parent = null;
 		
 		for( parent of _childClusters ) {
+			parent = parent[ 1 ];
 			
 			if( Bounds.overlaps( parent.bounds, node.bounds ) ) {
 				insertNodeToCluster( parent, node );
@@ -184,6 +226,8 @@ export function Presenter( currentBoardId ) {
 		
 		if( !inserted ) {
 			for( parent of _parentClusters ) {
+				parent = parent[ 1 ];
+				
 				if( Bounds.overlaps( parent.bounds, node.bounds ) ) {
 					insertNodeToCluster( parent, node );
 					inserted = true;
@@ -237,6 +281,8 @@ export function Presenter( currentBoardId ) {
 		
 		if( !inserted ) {
 			for( parent of _parentClusters ) {
+				parent = parent[ 1 ];
+				
 				if( child.id !== parent.id ) {
 					if( Bounds.overlaps( parent.bounds, child.bounds ) ) {
 						insertClusterToCluster( parent, child );
@@ -460,7 +506,10 @@ export function Presenter( currentBoardId ) {
 	
 	function updateCluster( oldCluster, newCluster ) {
 		if( oldCluster.x !== newCluster.x || oldCluster.y !== newCluster.y ) {
-			
+			var delta = {
+				x: oldCluster.x - newCluster.x,
+				y: oldCluster.y - newCluster.y
+			};
 			translateCluster( oldCluster, delta );
 		}
 		Object.assign( oldCluster, newCluster );
@@ -489,8 +538,8 @@ export function Presenter( currentBoardId ) {
 	
 	return {
 		mergeImmutableClusters,
-		mergeImmutableNodes//,
-		
+		mergeImmutableNodes,
+		UserInput
 		// addNode,
 		// updateNode,
 		// deleteNode,
