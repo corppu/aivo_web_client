@@ -175,7 +175,7 @@ const NodeView = createClass({
                                 }}>
                                 <div
                                     style={{
-                                        padding: "72px 100px",
+                                        padding: "72px 0",
                                         border: "dashed",
                                         borderWidth: 2,
                                         borderColor: "#e4e4e4"
