@@ -52,6 +52,7 @@ const NodeView = createClass({
                         onClick={ (e) => e.stopPropagation() }>
 
                         { this.renderNodeHeader() }
+                        { this.renderNodeTitle() }
                         <div
                             style={{
                                 height: "60vh"
@@ -90,21 +91,21 @@ const NodeView = createClass({
 
     renderNodeTitle: function() {
         const { updateNode } = this.props;
-        const { node } = this.state;
+        const { node, title } = this.state;
 
         return (
              <div>
                 <input
                     className="node-title-input"
-                    value={node.get("title") || ""}
+                    value={title || ""}
                     placeholder="Click to edit title..."
                     onChange={(e) => {
-                        // This won't work in the current system
-
-                        /*
                         const { value } = e.target;
+                        
+                        this.setState({
+                            title: value
+                        });
                         updateNode(node.set("title", value));
-                        */
                     }}/>
             </div>
         );

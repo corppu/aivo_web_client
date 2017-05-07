@@ -3,29 +3,29 @@
     outline: none;
     border: none;
     background-color: inherit;
-    color: #fff;
+    color: #787c96;
     font-family: inherit;
     font-size: inherit;
     font-weight: bold;         
 }
 .node-title-input::placeholder {
-    color: #ccc;
+    color: #787c96;
 }
 .node-title-input::-webkit-input-placeholder {
-    color: #ccc;
+    color: #787c96;
 }
 .node-title-input::-moz-placeholder {
-    color: #ccc;
+    color: #787c96;
 }
 .node-title-input::-ms-input-placeholder {
-    color: #ccc;
+    color: #787c96;
 }
 .node-title-input::-moz-placeholder {
-    color: #ccc;
+    color: #787c96;
 }
 .node-title-input::selection {
-    background: #ddd;
+    background: #787c96;
 }
 .node-title-input::-moz-selection {
-    background: #ddd;
+    background: #787c96;
 }
