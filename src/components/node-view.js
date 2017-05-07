@@ -117,7 +117,7 @@ const NodeView = createClass({
         const { updateNode } = this.props;
         const { node } = this.state;
 
-        switch (node.get("type")) {
+        switch (node.get("type") || null) {
         case NODE_TYPE_TEXT:
         {
             const { text } = this.state;
@@ -175,24 +175,16 @@ const NodeView = createClass({
         }
         default:
             return (
-                <div>
-                    <div>Select node type</div>
-                    <button
-                        onClick={ () => this.setNodeType(NODE_TYPE_TEXT) }>
-                        Text
-                    </button>
-                    <button
-                        onClick={ () => this.setNodeType(NODE_TYPE_IMAGE) }>
-                        Image
-                    </button>
+                <div
+                    style={{
+                        fontSize: 14,
+                        fontWeight: "bold"
+                    }}>
+                    NODE TYPE NOT DEFINED
                 </div>
             );
         }
-    },
-
-    setNodeType: function(type) {
-        // no-op, old code
-    },
+    }
 });
 
 export default NodeView;
