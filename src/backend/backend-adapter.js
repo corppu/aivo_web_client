@@ -737,7 +737,8 @@ function validateObject(object) {
 			(
 				(	
 					object.primaryType === TYPE_NODE ||
-					object.primaryType === TYPE_PIN
+					object.primaryType === TYPE_PIN ||
+					object.primaryType === TYPE_CLUSTER
 				) &&
 				typeof object.x === "number" &&
 				typeof object.y === "number"

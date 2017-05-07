@@ -424,6 +424,10 @@ export default function() {
             }
             updateSelection(null);
 		}
+		
+		else if( action.data ) {
+			console.log( action.data );
+		}
 	}
 
     function updateSelection(node) {
@@ -461,6 +465,7 @@ export default function() {
             if ( _actions.updateObjects && action.data.primaryType  && action.data.id ) {
 				
 				var objects = moveObject( action.data, action.lastDelta );
+				
 				_actions.updateObjects( objects );
 			}
          }
