@@ -146,7 +146,9 @@ function TypeSelect({ handleSelect }) {
 
             <TypeSelectItem
                 iconClass="fa-share-alt"
-                labelText="Group"/>
+                labelText="Group"
+				onClick={() => { handleSelect(TYPE_CLUSTER) }}/>
+
         </div>
     );
 }
