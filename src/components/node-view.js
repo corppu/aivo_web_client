@@ -4,7 +4,7 @@ import { fromJS } from "immutable";
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_TEXT,
-    NODE_TYPE_IMAGE
+    NODE_TYPE_FILE
 } from "../constants/types";
 
 const NodeView = createClass({
@@ -150,7 +150,7 @@ const NodeView = createClass({
                     }}/>
             );
         }
-        case NODE_TYPE_IMAGE:
+        case NODE_TYPE_FILE:
         {
             const imgURL = node.get("imgURL");
 
