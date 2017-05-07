@@ -22,7 +22,7 @@ function mapStateToProps(state, ownProps) {
 
 function mergeProps(stateProps, dispatchProps) {
     const { boardID, nodeID, node } = stateProps;
-    const { tryUpdateNode, push } = dispatchProps;
+    const { tryUpdateObject, push } = dispatchProps;
 
     return {
         nodeID,
