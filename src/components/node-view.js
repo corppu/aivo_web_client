@@ -9,26 +9,14 @@ import {
 
 const NodeView = createClass({
     getInitialState: function() {
-        const { nodeID, node } = this.props;
-        
-        return {
-            nodeID,
-            node,
-
-            text: node ? node.get("text") : null
-        };
+        return propsToState(this.props);
     },
 
     componentWillReceiveProps: function(nextProps) {
         const { nodeID, node } = nextProps;
 
         if (nodeID !== this.state.nodeID || !this.state.node) {
-            this.setState({
-                nodeID,
-                node,
-
-                text: node ? node.get("text") : null
-            });
+            this.setState(propsToState(nextProps));
         }
     },
 
@@ -54,10 +42,10 @@ const NodeView = createClass({
                 { node ? 
                     <div
                         style={{
-                            borderTopLeftRadius: 8,
-                            borderTopRightRadius: 8,
+                            borderTopLeftRadius: 13,
+                            borderTopRightRadius: 13,
                             backgroundColor: "#fff",
-                            width: 600,
+                            width: 568,
                             overflow: "hidden",
                             boxShadow: "0 20px 70px 0 rgba(0, 0, 0, 0.2)"
                         }}
@@ -77,9 +65,25 @@ const NodeView = createClass({
     },
 
     renderNodeHeader: function() {
+        const { goToParentBoard } = this.props;
+        
         return (
             <div>
-                asd
+                <div
+                    style={{
+                        padding: "7px 14px",
+                        fontSize: 26,
+                        color: "#aaaaaa"
+                    }}>
+                    <i
+                        className="fa fa-times pointer"
+                        onClick={ goToParentBoard }/>
+                </div>
+                <div
+                    style={{
+                        height: 1,
+                        backgroundColor: "#d8d8d8"
+                    }}/>
             </div>
         );
     },
@@ -89,15 +93,18 @@ const NodeView = createClass({
         const { node } = this.state;
 
         return (
-             <div
-                className="node-title">
+             <div>
                 <input
                     className="node-title-input"
                     value={node.get("title") || ""}
                     placeholder="Click to edit title..."
                     onChange={(e) => {
+                        // This won't work in the current system
+
+                        /*
                         const { value } = e.target;
                         updateNode(node.set("title", value));
+                        */
                     }}/>
             </div>
         );
@@ -173,3 +180,15 @@ const NodeView = createClass({
 });
 
 export default NodeView;
+
+function propsToState(props) {
+  const { nodeID, node } = props;
+        
+    return {
+        nodeID,
+        node,
+
+        title: node ? node.get("title") : null,
+        text: node ? node.get("text") : null
+    };
+}
