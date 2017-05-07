@@ -5,8 +5,9 @@
     background-color: inherit;
     color: #787c96;
     font-family: inherit;
-    font-size: inherit;
     font-weight: bold;         
+    font-size: 28px;
+    margin: 16px 0;
 }
 .node-title-input::placeholder {
     color: #787c96;
@@ -23,9 +24,11 @@
 .node-title-input::-moz-placeholder {
     color: #787c96;
 }
+/*
 .node-title-input::selection {
-    background: #787c96;
+    background: #d8d8d8;
 }
 .node-title-input::-moz-selection {
-    background: #787c96;
+    background: #d8d8d8;
 }
+*/

@@ -52,11 +52,13 @@ const NodeView = createClass({
                         onClick={ (e) => e.stopPropagation() }>
 
                         { this.renderNodeHeader() }
-                        { this.renderNodeTitle() }
                         <div
                             style={{
-                                height: "60vh"
+                                padding: "0 48px",
+                                height: "60vh",
+                                minHeight: 632
                             }}>
+                            { this.renderNodeTitle() }
                             { this.renderNodeContent() }
                         </div>
                     </div>
@@ -122,8 +124,20 @@ const NodeView = createClass({
 
             return (
                 <textarea
-                    rows="12"
-                    cols="60"
+                    style={{
+                        border: "none",
+                        overflow: "auto",
+                        outline: "none",
+                        resize: "none",
+
+                        WebkitBoxShadow: "none",
+                        MozBoxShadow: "none",
+                        boxShadow: "none",
+
+                        width: "100%",
+                        height: "100%",
+                    }}
+                    placeholder="Click to edit text..."
                     value={ text || "" }
                     onChange={(e) => {
                         const { value } = e.target;
