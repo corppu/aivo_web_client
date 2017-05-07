@@ -29,7 +29,7 @@ function mergeProps(stateProps, dispatchProps) {
         node,
 
         updateNode: (newNode) => {
-            if (newNode !== node) {
+            if (newNode === node) {
                 return;
             }
             tryUpdateObject(newNode);
