@@ -186,7 +186,7 @@ const NodeView = createClass({
                         }
                     </center>
                     <input
-                        className="node-input"
+                        className="node-input input width-full"
                         value={ imgURL || "" }
                         placeholder="Insert file URL here..."
                         onChange={(e) => {

@@ -9,6 +9,7 @@
     font-size: 28px;
     margin: 16px 0;
 }
+
 .node-input::placeholder {
     color:  #d8d8d8;
 }
@@ -24,11 +25,3 @@
 .node-input::-moz-placeholder {
     color:  #d8d8d8;
 }
-/*
-.node-title-input::selection {
-    background: #d8d8d8;
-}
-.node-title-input::-moz-selection {
-    background: #d8d8d8;
-}
-*/
