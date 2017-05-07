@@ -188,31 +188,28 @@ export function tryUpdateObjects( data ) {
 
         const boardID = mindmap.get( "boardID" );
         
-		if ( !boardID  || !data || !data.length ) {
+		if ( !boardID || !data || !data.length ) {
             return;
         }
 		
 		var dataCopies = [ ];
 		for( var i = 0; i < data.length; ++i ) {
-			var dataCopy = { };
-			Object.assign(
-				dataCopy,
-				{
-					id : data[ i ].id,
-					primaryType : data[ i ].primaryType,
-					x : data[ i ].x || (data[ i ].x === 0 ? 0 : null),
-					y : data[ i ].y || (data[ i ].y === 0 ? 0 : null),
-					lines : data[ i ].lines || null,
-					title : data[ i ].title || null,
-					imgURL : data[ i ].imgURL || null,
-					customColor : data[ i ].customColor || null,
-					type : data[ i ].type || null,
-					parentType : data[ i ].parentType || null,
-					parentId : data[ i ].parentId || null,
-					childType : data[ i ].childType || null,
-					childId : data[ i ].childId || null,
-				}
-			);
+			var dataCopy = Object.assign({}, {
+				id : data[ i ].id,
+				primaryType : data[ i ].primaryType,
+				x : data[ i ].x || (data[ i ].x === 0 ? 0 : null),
+				y : data[ i ].y || (data[ i ].y === 0 ? 0 : null),
+				lines : data[ i ].lines || null,
+				title : data[ i ].title || null,
+				text: data[ i ].text || null,
+				imgURL : data[ i ].imgURL || null,
+				customColor : data[ i ].customColor || null,
+				type : data[ i ].type || null,
+				parentType : data[ i ].parentType || null,
+				parentId : data[ i ].parentId || null,
+				childType : data[ i ].childType || null,
+				childId : data[ i ].childId || null,
+			});
 			dataCopies.push( dataCopy );
 		}
 		dispatch( updateObjects( dataCopies ) );
@@ -251,8 +248,7 @@ export function removeObject( data ) {
     return { type: REMOVE_OBJECT, data };
 }
 
-function calcSize( obj )
-{
+function calcSize( obj ) {
 	var size = 0, key;
 	for (key in obj) {
 		if (obj.hasOwnProperty(key)) size++;

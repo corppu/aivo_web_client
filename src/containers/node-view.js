@@ -22,14 +22,14 @@ function mapStateToProps(state, ownProps) {
 
 function mergeProps(stateProps, dispatchProps) {
     const { boardID, nodeID, node } = stateProps;
-    const { tryUpdateNode, push } = dispatchProps;
+    const { tryUpdateObject, push } = dispatchProps;
 
     return {
         nodeID,
         node,
 
         updateNode: (newNode) => {
-            if (newNode !== node) {
+            if (newNode === node) {
                 return;
             }
             tryUpdateObject(newNode);
