@@ -98,7 +98,7 @@ const NodeView = createClass({
         return (
              <div>
                 <input
-                    className="node-title-input"
+                    className="node-title-input node-input"
                     value={title || ""}
                     placeholder="Click to edit title..."
                     onChange={(e) => {
@@ -124,6 +124,7 @@ const NodeView = createClass({
 
             return (
                 <textarea
+                    className="node-input"
                     style={{
                         border: "none",
                         overflow: "auto",

@@ -9,20 +9,20 @@
     font-size: 28px;
     margin: 16px 0;
 }
-.node-title-input::placeholder {
-    color: #787c96;
+.node-input::placeholder {
+    color:  #d8d8d8;
 }
-.node-title-input::-webkit-input-placeholder {
-    color: #787c96;
+.node-input::-webkit-input-placeholder {
+    color:  #d8d8d8;
 }
-.node-title-input::-moz-placeholder {
-    color: #787c96;
+.node-input::-moz-placeholder {
+    color:  #d8d8d8;
 }
-.node-title-input::-ms-input-placeholder {
-    color: #787c96;
+.node-input::-ms-input-placeholder {
+    color:  #d8d8d8;
 }
-.node-title-input::-moz-placeholder {
-    color: #787c96;
+.node-input::-moz-placeholder {
+    color:  #d8d8d8;
 }
 /*
 .node-title-input::selection {
