@@ -158,7 +158,7 @@ export default function() {
                 World.remove( _context.engine.world, body );
 
 				if( _selectedNodeId === id ) {
-					setSelectedNode(null);
+					updateSelection(null);
 				}
 				
 				delNode( node );
