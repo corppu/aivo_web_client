@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 
 import MindMapNodeToolbar from "../components/mindmap-node-toolbar";
 
-import { tryUpdateObject, tryRemoveObject } from "../actions/mindmap";
+import { tryUpdateObject, tryCreateObject, tryRemoveObject } from "../actions/mindmap";
 
 import {
     TYPE_NODE,
@@ -33,7 +33,7 @@ function mapStateToProps(state, ownProps) {
 
 function mergeProps(stateProps, dispatchProps) {
     const { id, primaryType, data, canvasCamera } = stateProps;
-    const { tryUpdateObject, tryRemoveObject } = dispatchProps;
+    const { tryUpdateObject, tryCreateObject, tryRemoveObject } = dispatchProps;
 
     return {
         id,
@@ -44,7 +44,20 @@ function mergeProps(stateProps, dispatchProps) {
 
         update: function(changes) {
             const next = Object.assign({}, data, changes);
-            tryUpdateObject(next);
+			console.log(next);
+			if(next.type === TYPE_CLUSTER) {
+				
+				tryRemoveObject(next.primaryType, next.id);
+				
+				
+				tryCreateObject( {
+					primaryType : TYPE_CLUSTER,
+					x: next.x,
+					y: next.y
+				} );
+			} else {
+				tryUpdateObject(next);
+			}
         },
         remove: function() {
             tryRemoveObject(primaryType, id);
@@ -53,4 +66,4 @@ function mergeProps(stateProps, dispatchProps) {
 }
 
 export default connect(mapStateToProps,
-    { tryUpdateObject, tryRemoveObject }, mergeProps)(MindMapNodeToolbar);
+    { tryUpdateObject, tryCreateObject, tryRemoveObject }, mergeProps)(MindMapNodeToolbar);
