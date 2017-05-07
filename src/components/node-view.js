@@ -4,27 +4,19 @@ import { fromJS } from "immutable";
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_TEXT,
-    NODE_TYPE_IMAGE
+    NODE_TYPE_FILE
 } from "../constants/types";
 
 const NodeView = createClass({
     getInitialState: function() {
-        const { nodeID, node } = this.props;
-        
-        return {
-            nodeID,
-            node
-        };
+        return propsToState(this.props);
     },
 
     componentWillReceiveProps: function(nextProps) {
         const { nodeID, node } = nextProps;
 
         if (nodeID !== this.state.nodeID || !this.state.node) {
-            this.setState({
-                nodeID,
-                node
-            });
+            this.setState(propsToState(nextProps));
         }
     },
 
@@ -50,10 +42,10 @@ const NodeView = createClass({
                 { node ? 
                     <div
                         style={{
-                            borderTopLeftRadius: 8,
-                            borderTopRightRadius: 8,
+                            borderTopLeftRadius: 13,
+                            borderTopRightRadius: 13,
                             backgroundColor: "#fff",
-                            width: 600,
+                            width: 568,
                             overflow: "hidden",
                             boxShadow: "0 20px 70px 0 rgba(0, 0, 0, 0.2)"
                         }}
@@ -62,8 +54,11 @@ const NodeView = createClass({
                         { this.renderNodeHeader() }
                         <div
                             style={{
-                                height: "60vh"
+                                padding: "0 48px",
+                                height: "60vh",
+                                minHeight: 632
                             }}>
+                            { this.renderNodeTitle() }
                             { this.renderNodeContent() }
                         </div>
                     </div>
@@ -73,26 +68,45 @@ const NodeView = createClass({
     },
 
     renderNodeHeader: function() {
+        const { goToParentBoard } = this.props;
+        
         return (
             <div>
-                asd
+                <div
+                    style={{
+                        padding: "7px 14px",
+                        fontSize: 26,
+                        color: "#aaaaaa"
+                    }}>
+                    <i
+                        className="fa fa-times pointer"
+                        onClick={ goToParentBoard }/>
+                </div>
+                <div
+                    style={{
+                        height: 1,
+                        backgroundColor: "#d8d8d8"
+                    }}/>
             </div>
         );
     },
 
     renderNodeTitle: function() {
         const { updateNode } = this.props;
-        const { node } = this.state;
+        const { node, title } = this.state;
 
         return (
-             <div
-                className="node-title">
+             <div>
                 <input
-                    className="node-title-input"
-                    value={node.get("title") || ""}
+                    className="node-title-input node-input"
+                    value={title || ""}
                     placeholder="Click to edit title..."
                     onChange={(e) => {
                         const { value } = e.target;
+                        
+                        this.setState({
+                            title: value
+                        });
                         updateNode(node.set("title", value));
                     }}/>
             </div>
@@ -103,40 +117,84 @@ const NodeView = createClass({
         const { updateNode } = this.props;
         const { node } = this.state;
 
-        switch (node.get("type")) {
+        switch (node.get("type") || null) {
         case NODE_TYPE_TEXT:
         {
-            const text = node.get("text");
+            const { text } = this.state;
 
             return (
                 <textarea
-                    rows="12"
-                    cols="60"
+                    className="node-input"
+                    style={{
+                        border: "none",
+                        overflow: "auto",
+                        outline: "none",
+                        resize: "none",
+
+                        WebkitBoxShadow: "none",
+                        MozBoxShadow: "none",
+                        boxShadow: "none",
+
+                        width: "100%",
+                        height: "100%",
+                    }}
+                    placeholder="Click to edit text..."
                     value={ text || "" }
                     onChange={(e) => {
                         const { value } = e.target;
+                        
+                        this.setState({
+                            text: value
+                        });
                         updateNode(node.set("text", value));
                     }}/>
             );
         }
-        case NODE_TYPE_IMAGE:
+        case NODE_TYPE_FILE:
         {
-            const imgURL = node.get("imgURL");
+            const { imgURL } = this.state;
+
+            // TODO: Handle excessively tall media properly
 
             return (
                 <div>
-                    <img
+                    <center
                         style={{
-                            display: "block",
-                            maxWidth: "75vw",
-                            maxHeight: "75vh",
-                        }}
-                        src={imgURL}/>
+                            marginBottom: 24
+                        }}>
+                        { imgURL && imgURL.length > 0
+                            ? <img
+                                style={{
+                                    display: "block",
+                                    maxWidth: "100%"
+                                }}
+                                src={imgURL}/>
+                            : <div
+                                style={{
+                                    color: "#e4e4e4"
+                                }}>
+                                <div
+                                    style={{
+                                        padding: "72px 0",
+                                        border: "dashed",
+                                        borderWidth: 2,
+                                        borderColor: "#e4e4e4"
+                                    }}>
+                                    <i className="fa fa-picture-o fa-5x"/>
+                                </div>
+                            </div>
+                        }
+                    </center>
                     <input
+                        className="node-input input width-full"
                         value={ imgURL || "" }
-                        placeholder="input image URL"
+                        placeholder="Insert file URL here..."
                         onChange={(e) => {
                             const { value } = e.target;
+                            
+                            this.setState({
+                                imgURL: value
+                            });
                             updateNode(node.set("imgURL", value));
                         }}/>
                 </div>
@@ -144,24 +202,29 @@ const NodeView = createClass({
         }
         default:
             return (
-                <div>
-                    <div>Select node type</div>
-                    <button
-                        onClick={ () => this.setNodeType(NODE_TYPE_TEXT) }>
-                        Text
-                    </button>
-                    <button
-                        onClick={ () => this.setNodeType(NODE_TYPE_IMAGE) }>
-                        Image
-                    </button>
+                <div
+                    style={{
+                        fontSize: 14,
+                        fontWeight: "bold"
+                    }}>
+                    NODE TYPE NOT DEFINED
                 </div>
             );
         }
-    },
-
-    setNodeType: function(type) {
-        // no-op, old code
-    },
+    }
 });
 
 export default NodeView;
+
+function propsToState(props) {
+  const { nodeID, node } = props;
+        
+    return {
+        nodeID,
+        node,
+
+        title: node ? node.get("title") : null,
+        text: node ? node.get("text") : null,
+        imgURL: node ? node.get("imgURL") : null
+    };
+}

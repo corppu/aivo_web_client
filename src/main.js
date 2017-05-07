@@ -14,6 +14,7 @@ import App from "./containers/app";
 import MainMenu from "./containers/main-menu";
 import MindMap from "./containers/mindmap";
 import NodeView from "./containers/node-view";
+import Settings from "./containers/settings";
 
 import createStoreAdapter from "./backend/store-adapter";
 import { init } from "./backend/backend-adapter";
@@ -52,6 +53,7 @@ render(
                 <Route path="/board/:boardID" component={MindMap}>
                     <Route path="/board/:boardID/:nodeID" component={NodeView}/>
                 </Route>
+                <Route path="/settings" component={Settings}/>
             </Route>
         </Router>
     </Provider>
