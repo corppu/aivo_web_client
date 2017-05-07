@@ -13,7 +13,9 @@ const NodeView = createClass({
         
         return {
             nodeID,
-            node
+            node,
+
+            text: node ? node.get("text") : null
         };
     },
 
@@ -23,7 +25,9 @@ const NodeView = createClass({
         if (nodeID !== this.state.nodeID || !this.state.node) {
             this.setState({
                 nodeID,
-                node
+                node,
+
+                text: node ? node.get("text") : null
             });
         }
     },
@@ -106,7 +110,7 @@ const NodeView = createClass({
         switch (node.get("type")) {
         case NODE_TYPE_TEXT:
         {
-            const text = node.get("text");
+            const { text } = this.state;
 
             return (
                 <textarea
@@ -115,6 +119,10 @@ const NodeView = createClass({
                     value={ text || "" }
                     onChange={(e) => {
                         const { value } = e.target;
+                        
+                        this.setState({
+                            text: value
+                        });
                         updateNode(node.set("text", value));
                     }}/>
             );
