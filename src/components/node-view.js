@@ -154,24 +154,41 @@ const NodeView = createClass({
         {
             const { imgURL } = this.state;
 
+            // TODO: Handle excessively tall media properly
+
             return (
                 <div>
-                    { imgURL && imgURL.length > 0
-                        ? <img
-                            style={{
-                                display: "block",
-                                maxWidth: "75vw",
-                                maxHeight: "75vh",
-                            }}
-                            src={imgURL}/>
-                        : <div>
-                            PLACEHOLDER
-                        </div>
-                    }
+                    <center
+                        style={{
+                            marginBottom: 24
+                        }}>
+                        { imgURL && imgURL.length > 0
+                            ? <img
+                                style={{
+                                    display: "block",
+                                    maxWidth: "100%"
+                                }}
+                                src={imgURL}/>
+                            : <div
+                                style={{
+                                    color: "#e4e4e4"
+                                }}>
+                                <div
+                                    style={{
+                                        padding: "72px 100px",
+                                        border: "dashed",
+                                        borderWidth: 2,
+                                        borderColor: "#e4e4e4"
+                                    }}>
+                                    <i className="fa fa-picture-o fa-5x"/>
+                                </div>
+                            </div>
+                        }
+                    </center>
                     <input
                         className="node-input"
                         value={ imgURL || "" }
-                        placeholder="input image URL"
+                        placeholder="Insert file URL here..."
                         onChange={(e) => {
                             const { value } = e.target;
                             
