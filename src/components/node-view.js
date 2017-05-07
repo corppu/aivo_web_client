@@ -152,22 +152,32 @@ const NodeView = createClass({
         }
         case NODE_TYPE_FILE:
         {
-            const imgURL = node.get("imgURL");
+            const { imgURL } = this.state;
 
             return (
                 <div>
-                    <img
-                        style={{
-                            display: "block",
-                            maxWidth: "75vw",
-                            maxHeight: "75vh",
-                        }}
-                        src={imgURL}/>
+                    { imgURL && imgURL.length > 0
+                        ? <img
+                            style={{
+                                display: "block",
+                                maxWidth: "75vw",
+                                maxHeight: "75vh",
+                            }}
+                            src={imgURL}/>
+                        : <div>
+                            PLACEHOLDER
+                        </div>
+                    }
                     <input
+                        className="node-input"
                         value={ imgURL || "" }
                         placeholder="input image URL"
                         onChange={(e) => {
                             const { value } = e.target;
+                            
+                            this.setState({
+                                imgURL: value
+                            });
                             updateNode(node.set("imgURL", value));
                         }}/>
                 </div>
@@ -197,6 +207,7 @@ function propsToState(props) {
         node,
 
         title: node ? node.get("title") : null,
-        text: node ? node.get("text") : null
+        text: node ? node.get("text") : null,
+        imgURL: node ? node.get("imgURL") : null
     };
 }
