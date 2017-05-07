@@ -50,13 +50,16 @@ const NodeView = createClass({
                 { node ? 
                     <div
                         style={{
+                            borderTopLeftRadius: 8,
+                            borderTopRightRadius: 8,
                             backgroundColor: "#fff",
                             width: 600,
+                            overflow: "hidden",
                             boxShadow: "0 20px 70px 0 rgba(0, 0, 0, 0.2)"
                         }}
                         onClick={ (e) => e.stopPropagation() }>
 
-                        { this.renderNodeTitle() }
+                        { this.renderNodeHeader() }
                         <div
                             style={{
                                 height: "60vh"
@@ -69,7 +72,16 @@ const NodeView = createClass({
         );
     },
 
+    renderNodeHeader: function() {
+        return (
+            <div>
+                asd
+            </div>
+        );
+    },
+
     renderNodeTitle: function() {
+        const { updateNode } = this.props;
         const { node } = this.state;
 
         return (
@@ -88,6 +100,7 @@ const NodeView = createClass({
     },
 
     renderNodeContent: function() {
+        const { updateNode } = this.props;
         const { node } = this.state;
 
         switch (node.get("type")) {
