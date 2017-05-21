@@ -63,7 +63,9 @@ const Settings = createClass({
                                     marginTop: 8,
                                     width: 200,
                                     height: 200,
-                                    overflow: "hidden"
+                                    overflow: "hidden",
+                                    borderRadius: 2,
+                                    border: "solid 1px #c5c5c5"
                                 }}>
                                 <img
                                     style={{
