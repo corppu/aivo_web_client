@@ -3,8 +3,8 @@ import React, { createClass } from "react";
 const NodeViewFile = createClass({
     getInitialState: function() {
         return {
-            isImageLoading: false,
-            imageError: null
+            isLoading: false,
+            error: null
         }
     },
 
@@ -19,31 +19,7 @@ const NodeViewFile = createClass({
                     style={{
                         marginBottom: 24
                     }}>
-                    { imgURL && imgURL.length > 0
-                        ? <img
-                            style={{
-                                display: "block",
-                                maxWidth: "100%"
-                            }}
-                            src={imgURL}
-                            onLoad={this.onImageLoad}
-                            onError={this.onImageError}
-                            />
-                        : <div
-                            style={{
-                                color: "#e4e4e4"
-                            }}>
-                            <div
-                                style={{
-                                    padding: "72px 0",
-                                    border: "dashed",
-                                    borderWidth: 2,
-                                    borderColor: "#e4e4e4"
-                                }}>
-                                <i className="fa fa-picture-o fa-5x"/>
-                            </div>
-                        </div>
-                    }
+                    { this.renderImage() }
                 </center>
                 <input
                     className="node-input input width-full"
@@ -57,8 +33,8 @@ const NodeViewFile = createClass({
 
                         if (value !== imgURL) {
                             this.setState({
-                                isImageLoading: true,
-                                imageError: null
+                                isLoading: true,
+                                error: null
                             });
                         }
                     }}/>
@@ -66,17 +42,59 @@ const NodeViewFile = createClass({
         );
     },
 
-    onImageLoad: function(e) {
+    renderImage: function() {
+        const { imgURL, updateState } = this.props;
+        const { isLoading, error } = this.state;
+
+        const hasImage = imgURL && imgURL.length > 0 && !error && !isLoading
+        const img = (
+            <img
+                style={{
+                    height: hasImage ? null : 0,
+                    visibility: hasImage ? null : "hidden",
+                    display: "block",
+                    maxWidth: "100%"
+                }}
+                src={imgURL}
+                onLoad={this.onLoad}
+                onError={this.onError}
+            />
+        );
+        return (
+            <div>
+                { img }
+                { hasImage
+                    ? null
+                    : <div
+                        style={{
+                            color: "#e4e4e4"
+                        }}>
+                        <div
+                            style={{
+                                padding: "72px 0",
+                                border: "dashed",
+                                borderWidth: 2,
+                                borderColor: "#e4e4e4"
+                            }}>
+                            <i className="fa fa-picture-o fa-5x"/>
+                        </div>
+                    </div>
+                }
+            </div>
+        );
+    },
+
+    onLoad: function(e) {
          this.setState({
-            isImageLoading: false,
-            imageError: null
+            isLoading: false,
+            error: null
         });
     },
 
-    onImageError: function(e) {
+    onError: function(e) {
          this.setState({
-            isImageLoading: false,
-            imageError: e
+            isLoading: false,
+            error: e
         });
     }
 });
