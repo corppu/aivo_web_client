@@ -104,10 +104,9 @@ const NodeView = createClass({
                     onChange={(e) => {
                         const { value } = e.target;
                         
-                        this.setState({
+                        this.updateState({
                             title: value
-                        });
-                        updateNode(node.set("title", value));
+                        })
                     }}/>
             </div>
         );
@@ -143,10 +142,7 @@ const NodeView = createClass({
                     onChange={(e) => {
                         const { value } = e.target;
                         
-                        this.setState({
-                            text: value
-                        });
-                        updateNode(node.set("text", value));
+                        this.updateState({ text: value });
                     }}/>
             );
         }
@@ -168,7 +164,10 @@ const NodeView = createClass({
                                     display: "block",
                                     maxWidth: "100%"
                                 }}
-                                src={imgURL}/>
+                                src={imgURL}
+                                //onLoad={e => { console.log(e); }}
+                                //onError={e => { console.log(e); }}
+                                />
                             : <div
                                 style={{
                                     color: "#e4e4e4"
@@ -192,10 +191,8 @@ const NodeView = createClass({
                         onChange={(e) => {
                             const { value } = e.target;
                             
-                            this.setState({
-                                imgURL: value
-                            });
-                            updateNode(node.set("imgURL", value));
+    
+                            this.updateState({ imgURL: value });
                         }}/>
                 </div>
             );
@@ -211,6 +208,20 @@ const NodeView = createClass({
                 </div>
             );
         }
+    },
+
+    updateState: function(update) {
+        const { updateNode } = this.props;
+        const { node } = this.state;
+
+        let nextNode = node;
+        Object.keys(update).forEach(k => {
+            nextNode = nextNode.set(k, update[k]);
+        });
+        if (nextNode !== node) {
+            updateNode(nextNode);
+        }
+        this.setState(update);
     }
 });
 
