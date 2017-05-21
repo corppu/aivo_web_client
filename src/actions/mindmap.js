@@ -194,6 +194,7 @@ export function tryUpdateObjects( data ) {
 		
 		var dataCopies = [ ];
 		for( var i = 0; i < data.length; ++i ) {
+			console.log(data[i]);
 			var dataCopy = Object.assign({}, {
 				id : data[ i ].id,
 				primaryType : data[ i ].primaryType,
@@ -209,7 +210,12 @@ export function tryUpdateObjects( data ) {
 				parentId : data[ i ].parentId || null,
 				childType : data[ i ].childType || null,
 				childId : data[ i ].childId || null,
+				
+				children: data[ i ].children || null,
+				parent: data[ i ].parent || null,
+				clusterId : data[ i ].clusterId || null
 			});
+			console.log(dataCopy);
 			dataCopies.push( dataCopy );
 		}
 		dispatch( updateObjects( dataCopies ) );

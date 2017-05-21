@@ -26,7 +26,6 @@ var _childClusters = new Map( );
 
 var _nodes = new Map( );
 var _pins = new Map( );
-var _clusters = new Map( );
 var _lines = new Map( );
 var _bodies = null;
 var _engine = null;
@@ -194,7 +193,12 @@ export function moveObject( objectData, lastDelta ) {
 			break;
 
 		case TYPE_CLUSTER:
-			object = _clusters.get( objectData.id );
+
+			if(objectData.parent) {
+				object = _childClusters.get( objectData.id );
+			} else {
+				object = _parentClusters.get( objectData.id );
+			}
 			
 			if( !object ) {
 				return objects;
@@ -276,7 +280,18 @@ export function trySelectObject( point ) {
 		}
 	}
 	
-	for( iter of _clusters ) {
+	for( iter of _childClusters ) {
+		object = iter[ 1 ];
+		if( Vertices.contains( object.hull, point ) ) {
+			return {
+				primaryType: object.primaryType,
+				id: object.id
+			}
+		}
+	}
+
+		
+	for( iter of _parentClusters ) {
 		object = iter[ 1 ];
 		if( Vertices.contains( object.hull, point ) ) {
 			return {
@@ -423,13 +438,13 @@ export function updateHulls() {
 	updateLinePaths( );
 
 	_dirtyChildClusters.forEach(cluster => {
-		updateHull( _clusters.get( cluster ) );
+		updateHull( _childClusters.get( cluster ) );
 	});
 	
 	_dirtyChildClusters.clear();
 	
 	_dirtyParentClusters.forEach(cluster => {
-		updateHull( _clusters.get( cluster ) );
+		updateHull( _parentClusters.get( cluster ) );
 	});
 	
 	_dirtyParentClusters.clear();
@@ -477,7 +492,6 @@ function updateHull( cluster ) {
 		cluster.y = center.y;
 		
 		cluster.bounds = Bounds.create( cluster.hull );
-		console.log(cluster.bounds );
 	} else {
 		console.warn( "hull is empty for " + cluster.id );
 		cluster.hull = [];
@@ -485,30 +499,38 @@ function updateHull( cluster ) {
 	}
 }
 
+var _nodeIdsMappedByClusterId = new Map(); 
+
+// Jos uuden noden node.clusterId arvo on validi ja vanhan version clusterId ei ole sama,
+// setToCluster funktio triggeröidään:
 function setToCluster( node ) {
-	var cluster = _clusters.get( node.clusterId );
-
-	if( !cluster ) {
-		cluster = {
-			primaryType: TYPE_CLUSTER,
-			id: node.clusterId,
-			vertices: new Map( )
-		};
-		_rootClusters.set( node.clusterId, cluster );
-		_clusters.set( node.clusterId, cluster );
-	}
-
-	cluster.vertices.set( node.id, node.body.vertices );
+	console.log("setToCluster(" + node.id +")");
+	var cluster = _parentClusters.get( node.clusterId ) || _childClusters.get( node.clusterId );
 	
-	//updateHull( cluster );
+	// Stupid hack... :D lol:
+	if( !cluster ) {
+		var nodesArray = _nodeIdsMappedByClusterId.get( node.clusterId );
+		
+		if( !nodesArray ) {
+			nodesArray = [ ];
+			_nodeIdsMappedByClusterId.set( node.clusterId, nodesArray );
+		}
 
-	if( cluster.parent ) {
-		_dirtyChildClusters.add( cluster );
-	} else {
-		_dirtyParentClusters.add( cluster );
+		nodesArray.push( node.id );
+	}
+	else {
+		cluster.vertices.set( node.id, node.body.vertices );
+		if( cluster.parent ) {
+			_dirtyChildClusters.add( cluster.id );
+			_dirtyParentClusters.add( cluster.parent );
+		} else {
+			_dirtyParentClusters.add( cluster.id );
+		}
 	}
 }
 
+// Jos uuden noden clusterId on null, mutta vanhalla versiolla on clusterID,
+// delFromCluster triggeröidään:
 function delFromCluster( object ) {
 	var cluster = null;
 	if( object.primaryType === TYPE_NODE ) {
@@ -517,7 +539,6 @@ function delFromCluster( object ) {
 		if( cluster && cluster.vertices ) {
 			cluster.vertices.delete( object.id );
 			object.clusterId = null;
-			//updateHull( cluster );
 
 			if( cluster.parent ) {
 				_dirtyParentClusters.add( cluster.parent );
@@ -579,8 +600,7 @@ export function updateNode( node ) {
 		delFromCluster( oldNode );
 	}
 	
-	if( node.clusterId ) {
-		console.log(node.clusterId);
+	if( ( oldNode && !oldNode.clusterId || !oldNode ) && node.clusterId ) {
 		setToCluster( node );
 	}
 
@@ -627,9 +647,11 @@ export function delLine( line ) {
 }
 
 export function updateCluster( cluster ) {
+	
+	console.log("updateCluster")
 	console.log(cluster);
 	// Haetaan mahdollinen edeltävä versio:
-	var oldCluster = _clusters.get( cluster.id );
+	var oldCluster = _parentClusters.get( cluster.id ) || _childClusters.get( cluster.id );
 	
 	var changed = false;
 	// Jos edeltävä versio oli lapsi, mutta uusi versio ei ole lapsi,
@@ -668,7 +690,11 @@ export function updateCluster( cluster ) {
 	
 	// Vanhempi versio on käsitelty, joten voidaan päivittää vanhan tieto uudeksi:
 	if( oldCluster ) {
-		_clusters.set( cluster.id, Object.assign( oldCluster, cluster ) );
+		if( cluster.parent ) {
+			_childClusters.set( cluster.id, Object.assign( oldCluster, cluster ) );
+		} else {
+			_parentClusters.set( cluster.id, Object.assign( oldCluster, cluster ) );
+		}
 		oldCluster.children = cluster.children;
 		oldCluster.lines = cluster.lines;
 		
@@ -683,8 +709,18 @@ export function updateCluster( cluster ) {
 			Vector.create( cluster.x - MINDMAP_NODE_RADIUS * 1.5, cluster.y - MINDMAP_NODE_RADIUS * 1.5 ) 
 		];
 		cluster.vertices = new Map( );
-		_clusters.set( cluster.id, cluster );
+		_parentClusters.set( cluster.id, cluster );
 		
+		var nodesArray = _nodeIdsMappedByClusterId.get( cluster.id );
+		if( nodesArray ) {
+			for( var i = 0; i < nodesArray.length; ++i ) {
+				var node = _nodes.get( nodesArray[ i ] );
+				if( node && node.clusterId === cluster.id ) {
+					cluster.vertices.set( node.id, node.body.vertices );
+				}
+			}
+		}
+
 		changed = true;
 	}
 	
@@ -706,8 +742,13 @@ export function updateCluster( cluster ) {
 }
 
 export function delCluster( cluster ) {
-	var oldCluster = _clusters.get( node.id );
-	_clusters.delete( cluster.id );
+	var oldCluster = _parentClusters.get( cluster.id );
+	if( oldCluster) {
+		_parentClusters.delete( cluster.id );
+	} else {
+		oldCluster = _childClusters.get( cluster.id );
+		_childClusters.delete( cluster.id );
+	}
 	var node = null;
 	if( _cluster.vertices ) {
 		for( var iter of _cluster.vertices ) {
@@ -746,9 +787,6 @@ export function pins( ) {
 	return _pins;
 }
 
-export function clusters( ) {
-	return _clusters;
-}
 
 export function lines( ) {
 	return _lines;
