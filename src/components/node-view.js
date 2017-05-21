@@ -1,6 +1,9 @@
 import React, { createClass } from "react";
 import { fromJS } from "immutable";
 
+import NodeViewText from "./node-view-text";
+import NodeViewFile from "./node-view-file";
+
 import {
     NODE_TYPE_UNDEFINED,
     NODE_TYPE_TEXT,
@@ -118,85 +121,15 @@ const NodeView = createClass({
 
         switch (node.get("type") || null) {
         case NODE_TYPE_TEXT:
-        {
-            const { text } = this.state;
+            return <NodeViewText
+                {...this.state}
+                updateState={this.updateState}/>
 
-            return (
-                <textarea
-                    className="node-input"
-                    style={{
-                        border: "none",
-                        overflow: "auto",
-                        outline: "none",
-                        resize: "none",
-
-                        WebkitBoxShadow: "none",
-                        MozBoxShadow: "none",
-                        boxShadow: "none",
-
-                        width: "100%",
-                        height: "100%",
-                    }}
-                    placeholder="Click to edit text..."
-                    value={ text || "" }
-                    onChange={(e) => {
-                        const { value } = e.target;
-                        
-                        this.updateState({ text: value });
-                    }}/>
-            );
-        }
         case NODE_TYPE_FILE:
-        {
-            const { imgURL } = this.state;
+            return <NodeViewFile
+                {...this.state}
+                updateState={this.updateState}/>
 
-            // TODO: Handle excessively tall media properly
-
-            return (
-                <div>
-                    <center
-                        style={{
-                            marginBottom: 24
-                        }}>
-                        { imgURL && imgURL.length > 0
-                            ? <img
-                                style={{
-                                    display: "block",
-                                    maxWidth: "100%"
-                                }}
-                                src={imgURL}
-                                //onLoad={e => { console.log(e); }}
-                                //onError={e => { console.log(e); }}
-                                />
-                            : <div
-                                style={{
-                                    color: "#e4e4e4"
-                                }}>
-                                <div
-                                    style={{
-                                        padding: "72px 0",
-                                        border: "dashed",
-                                        borderWidth: 2,
-                                        borderColor: "#e4e4e4"
-                                    }}>
-                                    <i className="fa fa-picture-o fa-5x"/>
-                                </div>
-                            </div>
-                        }
-                    </center>
-                    <input
-                        className="node-input input width-full"
-                        value={ imgURL || "" }
-                        placeholder="Insert file URL here..."
-                        onChange={(e) => {
-                            const { value } = e.target;
-                            
-    
-                            this.updateState({ imgURL: value });
-                        }}/>
-                </div>
-            );
-        }
         default:
             return (
                 <div
