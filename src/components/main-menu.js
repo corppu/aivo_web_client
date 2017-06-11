@@ -26,7 +26,15 @@ const MainMenu = createClass({
         return (
             <div>
                 <div className="main-menu-nav">
-                    <img src="/image/nav-aivo-logo.png"/>
+                    <img
+                        style={{
+                            width: 116,
+                            height: 51.4,
+                            marginLeft: 71,
+                            objectFit: "contain"
+                        }}
+                        src="/image/nav-aivo-logo.png"
+                    />
                     <button
                         className="main-menu-nav-create-button"
                         onClick={this.handleCreateBoard}>
