@@ -26,6 +26,7 @@ const MainMenu = createClass({
         return (
             <div>
                 <div className="main-menu-nav">
+                    <img src="/image/nav-aivo-logo.png"/>
                     <button
                         className="main-menu-nav-create-button"
                         onClick={this.handleCreateBoard}>
