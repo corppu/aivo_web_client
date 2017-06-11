@@ -4,9 +4,13 @@ import { openBoardList, closeBoardList } from "../backend/backend-adapter";
 
 import MainMenuGridItem from "./main-menu-grid-item";
 
+const MODE_GRID = "MODE_GRID";
+const MODE_LIST = "MODE_LIST";
+
 const MainMenu = createClass({
     getInitialState: function() {
         return {
+            mode: MODE_GRID,
             selections: new Set()
         };
     },
@@ -21,7 +25,7 @@ const MainMenu = createClass({
 
     render: function() {
         const { boards } = this.props;
-        const { selections } = this.state;
+        const { mode, selections } = this.state;
 
         return (
             <div>
@@ -40,6 +44,20 @@ const MainMenu = createClass({
                         onClick={this.handleCreateBoard}>
                         +
                     </button>
+                    <Spacer width={152}/>
+                    <ModeSelect
+                        mode={MODE_GRID}
+                        currentMode={mode}
+                        icon="th-large"
+                        onSelect={(mode) => this.setState({ mode }) }
+                    />
+                    <Spacer width={28}/>
+                    <ModeSelect
+                        mode={MODE_LIST}
+                        currentMode={mode}
+                        icon="th-list"
+                        onSelect={(mode) => this.setState({ mode }) }
+                    />
                 </div>
                 <div className="main-menu-header">
                     <div
@@ -80,11 +98,18 @@ const MainMenu = createClass({
                         </button>
                     </div>
                 </div>
-                <BoardGrid
-                    boards={boards}
-                    selections={selections}
-                    onSelect={this.handleSelect}
-                />
+                { mode === MODE_GRID 
+                    ? <BoardGrid
+                        boards={boards}
+                        selections={selections}
+                        onSelect={this.handleSelect}
+                    />
+                    : <BoardList
+                        boards={boards}
+                        selections={selections}
+                        onSelect={this.handleSelect}
+                    />
+                }
             </div>
         );
     },
@@ -142,6 +167,29 @@ const MainMenu = createClass({
         });
     }
 });
+
+function Spacer({ width }) {
+    return (
+        <span style={{ width }}/>
+    );
+}
+
+function ModeSelect({ mode, icon, currentMode, onSelect }) {
+    return (
+        <i
+            className={`fa fa-${icon} fa-lg`}
+            style={{
+                color: "#ffffff",
+                opacity: mode === currentMode ? 1.0 : 0.5
+            }}
+            onClick={() => {
+                if (onSelect) {
+                    onSelect(mode);
+                }
+            }}
+        />
+    );
+}
 
 function BoardGrid({ boards, selections, onSelect }) {
     return (
