@@ -30,16 +30,7 @@ const Settings = createClass({
                         padding: 24,
                         paddingTop: 11
                     }}>
-                    <div
-                        style={{
-                            width: "100%",
-                            fontSize: 24,
-                            fontWeight: "bold",
-                            color: "#787c96",
-                            alignContent: "left"
-                        }}>
-                        Personal details
-                    </div>
+                    <Title text="Personal details"/>
                     <div
                         style={{
                             display: "flex"
@@ -48,7 +39,9 @@ const Settings = createClass({
                             style={{
                                 flexGrow: 1000
                             }}>
-                            PLACEHOLDER
+                            <Field title="Full name"/>
+                            <Field title="Username"/>
+                            <Field title="Tell about yourself"/>
                         </div>
                         <div
                             style={{
@@ -80,5 +73,38 @@ const Settings = createClass({
         );
     }
 });
+
+function Title({ text }) {
+    return (
+         <div
+            style={{
+                width: "100%",
+                fontSize: 24,
+                fontWeight: "bold",
+                color: "#787c96",
+                alignContent: "left"
+            }}>
+            { text }
+        </div>
+    );
+}
+
+function Field({ title }) {
+    return (
+        <div>
+            <div
+                style={{
+
+                }}>
+                { title }
+            </div>
+            <input
+                style={{
+
+                }}
+            />
+        </div>
+    );
+}
 
 export default Settings;
