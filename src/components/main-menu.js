@@ -65,20 +65,17 @@ const MainMenu = createClass({
                                 className="fa fa-trash-o"
                                 style={{
                                     marginRight: 8
-                                }}/>
+                                }}
+                            />
                             Remove
                         </button>
                     </div>
                 </div>
-                <div className="main-menu-board-container">
-                    {boards.map((data, id) =>
-                        <MainMenuGridItem
-                            div key={id}
-                            isSelected={selections.has(id)}
-                            onSelect={this.handleSelect}
-                            {...data}/>
-                    ).toList()}
-                </div>
+                <BoardGrid
+                    boards={boards}
+                    selections={selections}
+                    onSelect={this.handleSelect}
+                />
             </div>
         );
     },
@@ -136,5 +133,19 @@ const MainMenu = createClass({
         });
     }
 });
+
+function BoardGrid({ boards, selections, onSelect }) {
+    return (
+        <div className="main-menu-board-container">
+            {boards.map((data, id) =>
+                <MainMenuGridItem
+                    div key={id}
+                    isSelected={selections.has(id)}
+                    onSelect={onSelect}
+                    {...data}/>
+            ).toList()}
+        </div>
+    );
+}
 
 export default MainMenu;
