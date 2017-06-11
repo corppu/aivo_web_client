@@ -30,7 +30,6 @@ const Settings = createClass({
                         padding: 24,
                         paddingTop: 11
                     }}>
-                    <Title text="Personal details"/>
                     <div
                         style={{
                             display: "flex"
@@ -39,9 +38,15 @@ const Settings = createClass({
                             style={{
                                 flexGrow: 1000
                             }}>
+                            <Title text="Personal details"/>
                             <Field title="Full name"/>
                             <Field title="Username"/>
                             <Field title="Tell about yourself"/>
+
+                            <Title text="Account basics"/>
+
+
+                            
                         </div>
                         <div
                             style={{
@@ -94,13 +99,20 @@ function Field({ title }) {
         <div>
             <div
                 style={{
-
+                    width: 142,
+                    height: 28,
+                    fontSize: 20,
+                    color: "#787c96"
                 }}>
                 { title }
             </div>
             <input
                 style={{
-
+                    width: 270,
+                    height: 48,
+                    borderRadius: 2,
+                    backgroundColor: "#ffffff",
+                    border: "solid 1px #c5c5c5"
                 }}
             />
         </div>
