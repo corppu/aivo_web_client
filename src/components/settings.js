@@ -30,7 +30,6 @@ const Settings = createClass({
                         padding: 24,
                         paddingTop: 11
                     }}>
-                    <Title text="Personal details"/>
                     <div
                         style={{
                             display: "flex"
@@ -39,9 +38,15 @@ const Settings = createClass({
                             style={{
                                 flexGrow: 1000
                             }}>
+                            <Title text="Personal details"/>
                             <Field title="Full name"/>
                             <Field title="Username"/>
                             <Field title="Tell about yourself"/>
+
+                            <Title text="Account basics"/>
+
+
+                            
                         </div>
                         <div
                             style={{
