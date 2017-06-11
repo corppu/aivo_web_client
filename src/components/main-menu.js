@@ -148,4 +148,12 @@ function BoardGrid({ boards, selections, onSelect }) {
     );
 }
 
+function BoardList({ boards, selections, onSelect }) {
+    return (
+        <div className="main-menu-board-container">
+            BOARD LIST PLACEHOLDER!
+        </div>
+    );
+}
+
 export default MainMenu;
