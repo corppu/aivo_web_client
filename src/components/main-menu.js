@@ -3,6 +3,7 @@ import React, { createClass } from "react";
 import { openBoardList, closeBoardList } from "../backend/backend-adapter";
 
 import MainMenuGridItem from "./main-menu-grid-item";
+import MainMenuListItem from "./main-menu-list-item";
 
 const MODE_GRID = "MODE_GRID";
 const MODE_LIST = "MODE_LIST";
@@ -10,7 +11,7 @@ const MODE_LIST = "MODE_LIST";
 const MainMenu = createClass({
     getInitialState: function() {
         return {
-            mode: MODE_GRID,
+            mode: MODE_LIST,
             selections: new Set()
         };
     },
@@ -193,13 +194,14 @@ function ModeSelect({ mode, icon, currentMode, onSelect }) {
 
 function BoardGrid({ boards, selections, onSelect }) {
     return (
-        <div className="main-menu-board-container">
+        <div className="main-menu-board-grid-container">
             {boards.map((data, id) =>
                 <MainMenuGridItem
                     div key={id}
                     isSelected={selections.has(id)}
                     onSelect={onSelect}
-                    {...data}/>
+                    {...data}
+                />
             ).toList()}
         </div>
     );
@@ -207,8 +209,15 @@ function BoardGrid({ boards, selections, onSelect }) {
 
 function BoardList({ boards, selections, onSelect }) {
     return (
-        <div className="main-menu-board-container">
-            BOARD LIST PLACEHOLDER!
+        <div className="main-menu-board-list-container">
+            {boards.map((data, id) =>
+                <MainMenuListItem
+                    div key={id}
+                    isSelected={selections.has(id)}
+                    onSelect={onSelect}
+                    {...data}
+                />
+            ).toList()}
         </div>
     );
 }

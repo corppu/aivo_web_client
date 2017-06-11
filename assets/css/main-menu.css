@@ -1,7 +1,14 @@
 
-.main-menu-board-container {
+.main-menu-board-grid-container {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
+    margin: 11px 72px 144px 72px;
+}
+
+.main-menu-board-list-container {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     margin: 11px 72px 144px 72px;
 }
