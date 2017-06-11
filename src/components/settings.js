@@ -94,13 +94,20 @@ function Field({ title }) {
         <div>
             <div
                 style={{
-
+                    width: 142,
+                    height: 28,
+                    fontSize: 20,
+                    color: "#787c96"
                 }}>
                 { title }
             </div>
             <input
                 style={{
-
+                    width: 270,
+                    height: 48,
+                    borderRadius: 2,
+                    backgroundColor: "#ffffff",
+                    border: "solid 1px #c5c5c5"
                 }}
             />
         </div>
